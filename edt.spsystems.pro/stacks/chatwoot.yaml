@@ -1,0 +1,122 @@
+x-variaveis:
+  &variaveis
+    INSTALLATION_NAME: "Sp Systems" # Atualize
+    ENABLE_ACCOUNT_SIGNUP: "false"
+    INSTALLATION_ENV: "docker"
+    FORCE_SSL: "false"
+    DEFAULT_LOCALE: "pt_BR"
+    SECRET_KEY_BASE: "ce8dff9d8511530ba2c7dd0b37c2932edad30d0250bbdbce0d8427c1db66220850e43f861ff0fcf2029e5d0cdce5b2eaf6bf6a1a46899e5781a2479c7a733585"
+    FRONTEND_URL: "https://chat.spsystems.pro" # Atualize
+    NODE_ENV: "production"
+    RAILS_ENV: "production"
+
+    # Banco de dados (conectar ao container do Postgres via Portainer e rodar os comandos "postgres psql -U postgres" e depois "create database chatwoot;")
+    POSTGRES_HOST: "postgres"
+    POSTGRES_USERNAME: "postgres"
+    POSTGRES_DATABASE: "chatwoot"
+    POSTGRES_PASSWORD: "Sps2025pos" # Atualize
+
+    # Configurações do Redis
+    REDIS_URL: "redis://redis:6379"
+
+    # Armazenamento Minio ou Amazon S3
+    # ACTIVE_STORAGE_SERVICE: "s3_compatible"
+    # STORAGE_BUCKET_NAME: "chatwoot"
+    # STORAGE_ACCESS_KEY_ID: ""
+    # STORAGE_SECRET_ACCESS_KEY: ""
+    # STORAGE_REGION: "us-east-1"
+    # STORAGE_ENDPOINT: "https://s3.seusite.com.br"
+    # STORAGE_FORCE_PATH_STYLE: "true"
+
+    # Configurações do SMTP
+    #SMTP_AUTHENTICATION: login
+    #SMTP_ENABLE_STARTTLS_AUTO: ""
+    #SMTP_ADDRESS: "smtp-relay.brevo.com" # Para outro Host, atualize
+    #SMTP_DOMAIN: "seu-dominio" # Atualize
+    #SMTP_PORT: 587
+    #SMTP_USERNAME: "example@smtp.com" # Atualize
+    #SMTP_PASSWORD: "senha_smtp" # Atualize
+    #SMTP_SSL: "false" # Se a porta for 465 = true | Se a porta for 587 = false
+    #SMTP_OPENSSL_VERIFY_MODE: "peer"
+    #MAILER_INBOUND_EMAIL_DOMAIN: "example@example.com" # Atualize
+    #MAILER_SENDER_EMAIL: "Nome-de-Exibição <example@example.com>" # Atualize
+    
+    # ChatGPT 
+    # OPENAI_API_KEY: ""
+
+    # Botão AUTH Google na tela de login
+    #GOOGLE_OAUTH_CLIENT_ID: client_id # Atualize
+    #GOOGLE_OAUTH_CLIENT_SECRET: client_secret # Atualize
+    #GOOGLE_OAUTH_CALLBACK_URL: https://chat.seu-dominio.com/omniauth/google_oauth2/callback # Atualize
+
+    # Continuidade de emails (Recomendo usar o mandrill)
+    # RAILS_INBOUND_EMAIL_SERVICE: mandrill
+    # MAILER_INBOUND_EMAIL_DOMAIN: seudominio.com.br
+    # RAILS_INBOUND_EMAIL_PASSWORD: your-mandrill-p@ssw0rd
+
+# Backend
+services: 
+  chatwoot: 
+    command: >
+       sh -c "bundle exec rails db:chatwoot_prepare
+       && bundle exec rails s -p 3000 -b 0.0.0.0"
+       && bundle exec rails db:migrate
+    environment:
+      <<: *variaveis
+    image: sendingtk/chatwoot:v3.13.6
+    entrypoint: docker/entrypoints/rails.sh
+    # Após deploy trocar os comandos comentando, o prepare cria as tabelas do banco de dados e segundo expõe e executa o frontend na porta 3000 do container
+    deploy: 
+      mode: replicated
+      replicas: 1
+      placement: 
+        constraints: 
+          - node.role == manager
+      labels: 
+        - traefik.enable=true
+        - traefik.http.routers.chatwoot.service=chatwoot
+        - traefik.http.routers.chatwoot.rule=Host(`chat.spsystems.pro`) # Atualize
+        - traefik.http.services.chatwoot.loadbalancer.server.port=3000
+        - traefik.http.routers.chatwoot.entrypoints=websecure
+        - traefik.http.routers.chatwoot.tls.certresolver=le
+        # resolver problema de websocket
+        - traefik.http.services.chatwoot.loadbalancer.passhostheader=true
+        - traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
+        - traefik.http.routers.chatwoot.middlewares=sslheader@docker
+    volumes:
+      - chatwoot_data:/app/storage
+      # Pasta com os arquivos do frontend (favicon, logo e outras)
+      # - /root/apps/chatwoot/public:/app/public
+    networks:
+      - traefik
+      - interna
+
+  # Backend
+  chatwoot_worker: 
+    environment: 
+      <<: *variaveis
+    image: sendingtk/chatwoot:v3.13.6
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    volumes: 
+      - chatwoot_data:/app/storage
+      # Pasta com os arquivos do frontend (favicon, logo e outras)
+      # - /root/apps/chatwoot/public:/app/public
+    deploy: 
+      mode: replicated
+      replicas: 1
+      placement: 
+        constraints: 
+          - node.role == manager
+    networks: 
+      - interna
+
+volumes: 
+  chatwoot_data:
+
+networks: 
+  traefik: 
+    external: true
+    name: externa
+  interna: 
+    external: true
+    name: interna
