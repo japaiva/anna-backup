@@ -1,0 +1,52 @@
+services: 
+  minio: 
+    # Usa a imagem do MinIO no Quay.io
+    # https://quay.io/repository/minio/minio
+    image: quay.io/minio/minio
+    command: server /data --console-address ":9001"
+    volumes: 
+      - minio_data:/data
+    networks: 
+      - interna
+      - externa
+    environment: 
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=Sps2025min # Atualize
+      - MINIO_BROWSER_REDIRECT_URL=https://mno.spsystems.pro # Atualize
+      - MINIO_SERVER_URL=https://s3.spsystems.pro # Atualize
+    deploy: 
+      mode: replicated
+      replicas: 1
+      placement: 
+        constraints: 
+          - node.role == manager # Rodar serviço no Manager
+      resources: 
+        limits: 
+          cpus: "2"
+          memory: 2048M
+      labels: 
+        - traefik.enable=true
+        - traefik.http.routers.s3.rule=Host(`s3.spsystems.pro`) # Atualize
+        - traefik.http.routers.s3.entrypoints=websecure
+        - traefik.http.routers.s3.tls.certresolver=le
+        - traefik.http.services.s3.loadbalancer.server.port=9000
+        - traefik.http.services.s3.loadbalancer.passHostHeader=true
+        - traefik.http.routers.s3.service=s3
+        # Define o endereço do console do Minio
+        - traefik.http.routers.minio.entrypoints=websecure
+        - traefik.http.routers.minio.tls.certresolver=le
+        - traefik.http.services.minio.loadbalancer.server.port=9001
+        - traefik.http.services.minio.loadbalancer.passHostHeader=true
+        - traefik.http.routers.minio.service=minio
+        - traefik.http.routers.minio.rule=Host(`mno.spsystems.pro`) # Atualize
+
+volumes: 
+  minio_data: 
+    external: true
+    name: minio_data
+
+networks: 
+  interna: 
+    external: true
+  externa: 
+    external: true
