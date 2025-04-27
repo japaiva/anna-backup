@@ -1,0 +1,25 @@
+services:
+  oauth2:
+    image: diogobarcelos/oauth2.0-integration-system:1.0
+    networks:
+      - externa
+      - interna
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      labels:
+        traefik.enable: "true"
+        traefik.http.routers.oauth2.rule: "Host(`oauth.spsystems.pro`)"
+        traefik.http.routers.oauth2.service: "oauth2"
+        traefik.http.routers.oauth2.entrypoints: "websecure"
+        traefik.http.services.oauth2.loadbalancer.server.port: "5500"
+        traefik.http.routers.oauth2.tls.certresolver: "le"
+networks:
+  interna:
+    external: true
+  externa:
+    external: true
