@@ -1,0 +1,1330 @@
+{
+  "createdAt": "2025-03-05T01:21:06.477Z",
+  "updatedAt": "2025-04-12T23:57:41.851Z",
+  "id": "tougjfavSC2ieAN4",
+  "name": "jobber_visits_sync  v8",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        -20
+      ],
+      "id": "eabc3fac-b9f4-4b84-bb8f-05715abfca5c",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "try {\n    const responseData = item.json || item;\n    const result = Array.isArray(responseData) ? responseData[0] : responseData;\n    \n    if (!result?.data?.visits) {\n        throw new Error('Invalid response structure');\n    }\n    \n    const { nodes, pageInfo } = result.data.visits;\n    const existingData = Array.isArray(item?.json?.allData) ? item.json.allData : [];\n    const allData = [...existingData, ...nodes];\n\n    return {\n        json: {\n            allData,\n            data: nodes,\n            variables: {\n                first: 5,\n                after: pageInfo.endCursor\n            },\n            continuePagination: pageInfo.hasNextPage,\n            completed: !pageInfo.hasNextPage\n        }\n    };\n} catch (error) {\n    console.log('Error:', error.message);\n    return {\n        json: {\n            error: error.message,\n            continuePagination: false,\n            completed: true,\n            allData: item.json.allData || []\n        }\n    };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        380,
+        -20
+      ],
+      "id": "8420c559-a2fa-4f2a-acb2-dfe74b09ab14",
+      "name": "pagination"
+    },
+    {
+      "parameters": {
+        "operation": "incr",
+        "key": "counter"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        260,
+        240
+      ],
+      "id": "b1102054-d951-4659-8258-973c0f71c2fe",
+      "name": "counter_2",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($first: Int!, $after: String) {\n  visits(first: $first, after: $after) {\n    nodes {\n      id\n      client {\n        id\n      }\n      property {\n        id\n      }\n      job {\n        id\n      }\n      invoice {\n        id\n      }\n      title              \n      isDefaultTitle     \n      instructions       \n      allDay             \n      arrivalWindow {    \n        id \n        duration\n      }\n      startAt            \n      endAt              \n      duration           \n      visitStatus        \n      completedAt        \n      assignedUsers {    \n        edges {\n          node {\n            name {\n              first \n              last\n            }\n          }\n        }\n      }\n      isComplete         \n      isLastScheduledVisit \n      timeSheetEntries {   \n        edges {\n          node {\n            id          \n            startAt\n            endAt\n          }\n        }\n      }\n      lineItems {        \n        edges {\n          node {\n            id\n            name\n            quantity\n            totalPrice                      \n          }\n        }\n      }\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 5, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        200,
+        -20
+      ],
+      "id": "b4d106ad-d270-4b2d-8608-debe31200f4f",
+      "name": "jobber query",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Pztii0f4FvnCkBNB",
+          "name": "Jobber_HeaderAuth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2b3e8ec4-ba57-4716-b420-44b81136d6f1",
+              "leftValue": "={{ $('counter_2').item.json.counter }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "da7dcbb5-9ca9-4926-8e09-286907986e21",
+              "leftValue": "={{ $('pagination').item.json.continuePagination }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        620,
+        240
+      ],
+      "id": "5198f99f-5035-45d2-9dd1-f46244c7d5c5",
+      "name": "batch loop"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1NLMxrZUsc7SPTRLh2BzuRe-CaCo5LUkXDDT9nvJf2xo",
+          "mode": "list",
+          "cachedResultName": "jobber_data_sync",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NLMxrZUsc7SPTRLh2BzuRe-CaCo5LUkXDDT9nvJf2xo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 65013384,
+          "mode": "list",
+          "cachedResultName": "visits",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NLMxrZUsc7SPTRLh2BzuRe-CaCo5LUkXDDT9nvJf2xo/edit#gid=65013384"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.title }}",
+            "isDefaultTitle": "={{ $json.isDefaultTitle }}",
+            "instructions": "={{ $json.instructions }}",
+            "allDay": "={{ $json.allDay }}",
+            "arrivalWindow": "={{ $json.arrivalWindow }}",
+            "duration": "={{ $json.duration }}",
+            "visitStatus": "={{ $json.visitStatus }}",
+            "completedAt": "={{ $json.completedAt }}",
+            "assignedUsers": "={{ $json.assignedUsers }}",
+            "isComplete": "={{ $json.isComplete }}",
+            "isLastScheduledVisit": "={{ $json.isLastScheduledVisit }}",
+            "id": "={{ $json.id }}",
+            "client": "={{ $json.client.id }}",
+            "property": "={{ $json.property.id }}",
+            "job": "={{ $json.job.id }}",
+            "invoice": "={{ $json.invoice }}",
+            "startAt": "={{ $json.startAt }}",
+            "endAt": "={{ $json.endAt }}",
+            "timeSheetEntries": "={{ $json.timeSheetEntries.edges }}",
+            "lineItems": "={{ $json.lineItems.edges }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "client",
+              "displayName": "client",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "property",
+              "displayName": "property",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "job",
+              "displayName": "job",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "invoice",
+              "displayName": "invoice",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "isDefaultTitle",
+              "displayName": "isDefaultTitle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "instructions",
+              "displayName": "instructions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "allDay",
+              "displayName": "allDay",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "arrivalWindow",
+              "displayName": "arrivalWindow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "startAt",
+              "displayName": "startAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "endAt",
+              "displayName": "endAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "duration",
+              "displayName": "duration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "visitStatus",
+              "displayName": "visitStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "completedAt",
+              "displayName": "completedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assignedUsers",
+              "displayName": "assignedUsers",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "isComplete",
+              "displayName": "isComplete",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "isLastScheduledVisit",
+              "displayName": "isLastScheduledVisit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timeSheetEntries",
+              "displayName": "timeSheetEntries",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lineItems",
+              "displayName": "lineItems",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        960,
+        -20
+      ],
+      "id": "a8e444f6-9907-491d-afc4-73da6d7a2309",
+      "name": "posting data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "McEu2DZdx8KDjIrj",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eff9cc2d-c364-4859-902e-3ceb34481092",
+              "name": "variables.first",
+              "value": "={{ $('pagination').item.json.variables.first }}",
+              "type": "number"
+            },
+            {
+              "id": "499c7162-3df3-484c-85c2-d5f72b7bd3ec",
+              "name": "variables.after",
+              "value": "={{ $('pagination').item.json.variables.after }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        440,
+        240
+      ],
+      "id": "8bf652ee-ba1d-40ca-8fd1-8d2bf3149832",
+      "name": "set loop"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst allData = inputData[0]?.json?.allData || [];\nreturn allData.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        580,
+        -20
+      ],
+      "id": "7dd6789f-f61e-4b41-8e86-af3818707c2d",
+      "name": "Set Array"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        -20
+      ],
+      "id": "05e71eb8-948d-4c1d-83bb-ec126ee7d579",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "data",
+        "key": "aux_buffer",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        820,
+        220
+      ],
+      "id": "0a8b20ab-8ec9-47a5-98ef-6d1c7c6db586",
+      "name": "Retrieve aux_buffer",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "aux_buffer"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        2460,
+        420
+      ],
+      "id": "143f50ec-974b-4b45-b1fb-365e1bc5c8d6",
+      "name": "Delete aux_buffer",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "aux_buffer",
+        "messageData": "={{ JSON.stringify($json) }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        780,
+        -20
+      ],
+      "id": "03f9974c-f711-49f1-9bf8-bc32d6a620a8",
+      "name": "Push aux_buffer",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "counter",
+        "value": "0"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -20
+      ],
+      "id": "a1b3eff8-4713-4da1-9992-52ba9136338a",
+      "name": "Init counter",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1320,
+        220
+      ],
+      "id": "96df2c1c-c94e-4d0a-b634-ad7af43477ed",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\nconst data = input[0].json.data;\n\nconst result = data.map(item => ({\n  json: JSON.parse(item)\n}));\n\nreturn result;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        980,
+        220
+      ],
+      "id": "947d7f7d-80d0-4334-a04b-7cc027cae78a",
+      "name": "Set Array1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "17Q8JR3gkVs6yd_RYbLcuVfZCLV7OalSjlREqtZUJBPc",
+          "mode": "list",
+          "cachedResultName": "jobber_visits_1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17Q8JR3gkVs6yd_RYbLcuVfZCLV7OalSjlREqtZUJBPc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17Q8JR3gkVs6yd_RYbLcuVfZCLV7OalSjlREqtZUJBPc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "visit_id": "={{ $json.visit_id }}",
+            "firstname": "={{ $('Set Array3').item.json.firstname }}",
+            "lastname": "={{ $('Set Array3').item.json.lastname }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "visit_id",
+              "displayName": "visit_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "firstname",
+              "displayName": "firstname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lastname",
+              "displayName": "lastname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2040,
+        380
+      ],
+      "id": "5c9af058-dbd6-44f1-bc23-6e9a09af2ac2",
+      "name": "upsert visits_users",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "McEu2DZdx8KDjIrj",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1G1-0Bfs_02F0W26LbRIDwdxUUOlj2ghveCrlzSPEXVg",
+          "mode": "list",
+          "cachedResultName": "jobber_visits_2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1G1-0Bfs_02F0W26LbRIDwdxUUOlj2ghveCrlzSPEXVg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1G1-0Bfs_02F0W26LbRIDwdxUUOlj2ghveCrlzSPEXVg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "visit_id": "={{ $json.visit_id }}",
+            "name": "={{ $json.name }}",
+            "quantity": "={{ $json.quantity }}",
+            "totalPrice": "={{ $json.totalPrice }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "visit_id",
+              "displayName": "visit_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "totalPrice",
+              "displayName": "totalPrice",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2040,
+        820
+      ],
+      "id": "990b31dc-7480-4e34-a51f-3335d1e20611",
+      "name": "upsert visits_itens",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "McEu2DZdx8KDjIrj",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "708d40af-63b6-4b7b-835f-d860e074b34c",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1780,
+        320
+      ],
+      "id": "0895840c-28d0-4992-be9f-e04d8e72f8e2",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "708d40af-63b6-4b7b-835f-d860e074b34c",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        740
+      ],
+      "id": "65a12a73-efa2-477d-a941-a66e3ef0e977",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1320,
+        660
+      ],
+      "id": "80e25ed3-3e9f-4109-8abb-15a801848f99",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst data = inputData[0]?.json || {};\n\nfunction generateUUID() {\n    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {\n        const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);\n        return v.toString(16);\n    });\n}\n\n\nreturn data.assignedUsers.edges.map(user => ({\n    json: {\n        id: `${generateUUID()}`, \n        visit_id: data.id, // \n        firstname: user.node.name.first,\n        lastname: user.node.name.last\n    }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        320
+      ],
+      "id": "92b42921-151c-4dd4-88bc-6742d74e4760",
+      "name": "Set Array3",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst data = inputData[0]?.json || {};\nreturn (data.lineItems?.edges || []).map(edge => ({ \n  json: { \n    visit_id: data.id, \n    id: edge.node.id, \n    name: edge.node.name, \n    quantity: edge.node.quantity, \n    totalPrice: edge.node.totalPrice \n  } \n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1580,
+        740
+      ],
+      "id": "6f607e01-fa3a-4e28-ad54-56806aad63e8",
+      "name": "Set Array2",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "aux_buffer"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        20,
+        640
+      ],
+      "id": "0768b79f-bae8-42b1-93e5-85006a897f22",
+      "name": "Delete aux_buffer1",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "data",
+        "key": "aux_buffer",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        20,
+        840
+      ],
+      "id": "656d3ecc-f5f3-45c3-adbb-f23c629a4091",
+      "name": "Retrieve aux_buffer1",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        2280,
+        420
+      ],
+      "id": "3e137c45-4e76-4657-85ff-61aaccad28b8",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "value": "17Q8JR3gkVs6yd_RYbLcuVfZCLV7OalSjlREqtZUJBPc",
+          "mode": "list",
+          "cachedResultName": "jobber_visits_1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17Q8JR3gkVs6yd_RYbLcuVfZCLV7OalSjlREqtZUJBPc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17Q8JR3gkVs6yd_RYbLcuVfZCLV7OalSjlREqtZUJBPc/edit#gid=0"
+        },
+        "keepFirstRow": true
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        360,
+        640
+      ],
+      "id": "50097d5b-ce4e-45b3-968b-d0a52b3d4d85",
+      "name": "Zap Visits1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "McEu2DZdx8KDjIrj",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "value": "1G1-0Bfs_02F0W26LbRIDwdxUUOlj2ghveCrlzSPEXVg",
+          "mode": "list",
+          "cachedResultName": "jobber_visits_2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1G1-0Bfs_02F0W26LbRIDwdxUUOlj2ghveCrlzSPEXVg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1G1-0Bfs_02F0W26LbRIDwdxUUOlj2ghveCrlzSPEXVg/edit#gid=0"
+        },
+        "keepFirstRow": true
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        360,
+        840
+      ],
+      "id": "4330a393-78fd-4546-976b-704b682a7050",
+      "name": "Zap Visits2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "McEu2DZdx8KDjIrj",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2040,
+        640
+      ],
+      "id": "1ae6960e-9326-4efc-807f-bddce839e9bb",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2040,
+        200
+      ],
+      "id": "2158e45d-d00f-45cc-a36a-f050495fb3ed",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -140
+      ],
+      "id": "d48cacfc-99fe-490b-9af0-50f16253dd80",
+      "name": "Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Init counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pagination": {
+      "main": [
+        [
+          {
+            "node": "Set Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "counter_2": {
+      "main": [
+        [
+          {
+            "node": "set loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber query": {
+      "main": [
+        [
+          {
+            "node": "pagination",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "batch loop": {
+      "main": [
+        [
+          {
+            "node": "Retrieve aux_buffer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "jobber query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "posting data": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set loop": {
+      "main": [
+        [
+          {
+            "node": "batch loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array": {
+      "main": [
+        [
+          {
+            "node": "Push aux_buffer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "counter_2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push aux_buffer": {
+      "main": [
+        [
+          {
+            "node": "posting data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init counter": {
+      "main": [
+        [
+          {
+            "node": "jobber query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve aux_buffer": {
+      "main": [
+        [
+          {
+            "node": "Set Array1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Array3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "upsert visits_users": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "upsert visits_itens": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "upsert visits_users",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "upsert visits_itens",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Array2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array3": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array2": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete aux_buffer": {
+      "main": [
+        []
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Delete aux_buffer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "29b058f9-36c1-441f-941f-a46540b581b5",
+  "triggerCount": 0,
+  "tags": []
+}
