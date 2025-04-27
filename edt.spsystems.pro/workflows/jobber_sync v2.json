@@ -1,0 +1,3895 @@
+{
+  "createdAt": "2025-03-14T12:03:45.636Z",
+  "updatedAt": "2025-04-12T23:56:53.937Z",
+  "id": "Rtt4hmRsTow63VQA",
+  "name": "jobber_sync v2",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        3220
+      ],
+      "id": "afe03568-f5d9-43c4-9570-f0eb41a17279",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "incr",
+        "key": "counter"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        -20
+      ],
+      "id": "fa8e5c31-0a1d-4e68-b967-45448e8bd46a",
+      "name": "counter_2",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2b3e8ec4-ba57-4716-b420-44b81136d6f1",
+              "leftValue": "={{ $('counter_2').item.json.counter }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "da7dcbb5-9ca9-4926-8e09-286907986e21",
+              "leftValue": "={{ $('Pagination').item.json.continuePagination }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1720,
+        -20
+      ],
+      "id": "bab3561d-c886-42fa-97ef-cba75d6b8695",
+      "name": "batch loop"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eff9cc2d-c364-4859-902e-3ceb34481092",
+              "name": "variables.first",
+              "value": "={{ $('Pagination').item.json.variables.first }}",
+              "type": "number"
+            },
+            {
+              "id": "499c7162-3df3-484c-85c2-d5f72b7bd3ec",
+              "name": "variables.after",
+              "value": "={{ $('Pagination').item.json.variables.after }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1500,
+        -20
+      ],
+      "id": "6fd2b1ff-e5bd-4c9c-8fb7-46fb6423f460",
+      "name": "set loop"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        -20
+      ],
+      "id": "89c9a457-dfdd-409d-9805-07cbd3cbd1dc",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "counter",
+        "value": "0"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        40,
+        -20
+      ],
+      "id": "0a537ede-d5b7-4519-a589-0102f8959408",
+      "name": "Init counter",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        -40
+      ],
+      "id": "a39a4c3e-1b67-404b-9ef0-65d8ad2d4f4f",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pegando o primeiro item do array 'items' no contexto do n8n\nconst result = items[0].json;\n\nif (!result?.data?.clients?.nodes) {\n    return [{\n        json: {\n            error: 'Invalid response structure',\n            continuePagination: false,\n            completed: true,\n            allData: items[0].json.allData || []\n        }\n    }];\n}\n\nconst { nodes, pageInfo } = result.data.clients;\nconst allData = [...(items[0].json.allData || []), ...nodes];\n\n// Função para processar emails e phones\nfunction processContactInfo(info) {\n    if (!Array.isArray(info) || info.length === 0) {\n        return [{\n            address: null,\n            number: null,\n            description: null,\n            primary: true\n        }];\n    }\n    return info.map(item => ({\n        address: item.address || null,\n        number: item.number || null,\n        description: item.description || null,\n        primary: item.primary || false\n    }));\n}\n\n// Função para processar o billingAddress\nfunction processBillingAddress(address) {\n    return {\n        street: address?.street || null,\n        city: address?.city || null,\n        postalCode: address?.postalCode || null,\n        country: address?.country || null\n    };\n}\n\n// Aplicando a transformação nos dados\nconst transformedNodes = nodes.map(item => ({\n    ...item,\n    emails: processContactInfo(item.emails),\n    phones: processContactInfo(item.phones),\n    billingAddress: processBillingAddress(item.billingAddress)\n}));\n\n// Aplicando a mesma transformação para allData\nconst transformedAllData = allData.map(item => ({\n    ...item,\n    emails: processContactInfo(item.emails),\n    phones: processContactInfo(item.phones),\n    billingAddress: processBillingAddress(item.billingAddress)\n}));\n\nreturn [{\n    json: {\n        allData: transformedAllData,\n        data: transformedNodes,\n        variables: {\n            first: 30,\n            after: pageInfo.endCursor\n        },\n        continuePagination: pageInfo.hasNextPage,\n        completed: !pageInfo.hasNextPage\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        -20
+      ],
+      "id": "8f460f7b-b038-4140-b69c-622aac8702dd",
+      "name": "Pagination"
+    },
+    {
+      "parameters": {
+        "content": "## Clients\n",
+        "height": 320,
+        "width": 2180,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -40,
+        -100
+      ],
+      "typeVersion": 1,
+      "id": "ea4e5802-4537-4924-9990-bda6a872353b",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Jobs\n",
+        "height": 320,
+        "width": 2180,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -40,
+        1600
+      ],
+      "typeVersion": 1,
+      "id": "3a4b4d03-69a9-412c-b6c4-50694fccefbb",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Users\n",
+        "height": 320,
+        "width": 2180,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -40,
+        580
+      ],
+      "typeVersion": 1,
+      "id": "b4cdf732-3ebb-4a5c-bf0c-6b070bea5897",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($first: Int!, $after: String) {\n  jobs(first: $first, after: $after) {\n    nodes {\n      id\n      title\n      jobNumber\n      jobStatus\n      jobType\n      \n      createdAt\n      updatedAt\n      startAt\n      endAt\n      completedAt\n      bookingConfirmationSentAt\n      \n      property {\n        id\n      }\n      quote {\n        id\n      }\n      request {\n        id\n      }\n      \n      instructions\n      total\n      invoicedTotal\n      uninvoicedTotal\n      \n      lineItems {\n        nodes {\n          id\n          name\n          quantity\n          unitPrice\n          totalPrice\n        }\n      }\n      \n      billingType\n      \n      jobBalanceTotals {\n        outstandingAmount\n        totalAmount\n      }\n      \n      quote {\n        id\n      }\n      \n      request {\n        id\n      }\n      \n      salesperson {\n        id\n        name {\n          full\n        }\n      }\n      \n      source\n      willClientBeAutomaticallyCharged\n      \n      \n      \n      defaultVisitTitle\n      allowReviewRequest\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 10, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        280,
+        1700
+      ],
+      "id": "8a2e8652-2a78-46e8-b67a-f1df89e15a71",
+      "name": "jobber query - jobs",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "incr",
+        "key": "counter"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        1700
+      ],
+      "id": "7c917f57-7ee9-42c5-a24c-c5d2cdd11978",
+      "name": "counter_4",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2b3e8ec4-ba57-4716-b420-44b81136d6f1",
+              "leftValue": "={{ $('counter_4').item.json.counter }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "da7dcbb5-9ca9-4926-8e09-286907986e21",
+              "leftValue": "={{ $('Pagination2').item.json.continuePagination }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1740,
+        1700
+      ],
+      "id": "074f0624-e86d-4eb7-bf57-b98930aa396a",
+      "name": "batch loop3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eff9cc2d-c364-4859-902e-3ceb34481092",
+              "name": "variables.first",
+              "value": "={{ $('Pagination2').item.json.variables.first }}",
+              "type": "number"
+            },
+            {
+              "id": "499c7162-3df3-484c-85c2-d5f72b7bd3ec",
+              "name": "variables.after",
+              "value": "={{ $('Pagination2').item.json.variables.after }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1520,
+        1700
+      ],
+      "id": "c7ddd88d-c7d5-4d22-9b82-637d3e942b75",
+      "name": "set loop3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        1700
+      ],
+      "id": "a49b807e-9d83-4f05-85c2-7864343d5d8b",
+      "name": "Limit3"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "counter",
+        "value": "0"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        60,
+        1700
+      ],
+      "id": "8c17cb8e-aa7f-42b9-bf11-a631677e12fa",
+      "name": "Init counter3",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1960,
+        1680
+      ],
+      "id": "0b97e6a6-55ef-4bfb-87c4-8ece9453ed96",
+      "name": "No Operation, do nothing3"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pegando o primeiro item do array 'items' no contexto do n8n\nconst result = items[0].json;\nif (!result?.data?.jobs?.nodes) {\n    return [{\n        json: {\n            error: 'Estrutura de resposta inválida',\n            continuePagination: false,\n            completed: true,\n            allData: items[0].json.allData || []\n        }\n    }];\n}\nconst { nodes, pageInfo } = result.data.jobs;\nconst allData = [...(items[0].json.allData || []), ...nodes];\n\n// Função para processar property, quote, request\nfunction processEntity(entity) {\n    if (!entity) return null;\n    return {\n        id: entity.id || null\n    };\n}\n\n// Função para processar salesperson\nfunction processSalesperson(salesperson) {\n    if (!salesperson) return null;\n    return {\n        id: salesperson.id || null,\n        name: salesperson.name ? {\n            full: salesperson.name.full || null\n        } : null\n    };\n}\n\n// Função para processar lineItems.nodes\nfunction processLineItems(lineItems) {\n    if (!lineItems || !lineItems.nodes) return null;\n    return {\n        nodes: lineItems.nodes.map(node => ({\n            id: node.id || null,\n            name: node.name || null,\n            quantity: node.quantity || null,\n            unitPrice: node.unitPrice || null,\n            totalPrice: node.totalPrice || null\n        }))\n    };\n}\n\n// Função para processar jobBalanceTotals\nfunction processJobBalanceTotals(jobBalanceTotals) {\n    if (!jobBalanceTotals) return null;\n    return {\n        outstandingAmount: jobBalanceTotals.outstandingAmount || null,\n        totalAmount: jobBalanceTotals.totalAmount || null\n    };\n}\n\n// Aplicando a transformação nos dados\nconst transformedNodes = nodes.map(item => ({\n    ...item,\n    property: processEntity(item.property),\n    quote: processEntity(item.quote),\n    request: processEntity(item.request),\n    salesperson: processSalesperson(item.salesperson),\n    lineItems: processLineItems(item.lineItems),\n    jobBalanceTotals: processJobBalanceTotals(item.jobBalanceTotals)\n}));\n\n// Aplicando a mesma transformação para allData\nconst transformedAllData = allData.map(item => ({\n    ...item,\n    property: processEntity(item.property),\n    quote: processEntity(item.quote),\n    request: processEntity(item.request),\n    salesperson: processSalesperson(item.salesperson),\n    lineItems: processLineItems(item.lineItems),\n    jobBalanceTotals: processJobBalanceTotals(item.jobBalanceTotals)\n}));\n\nreturn [{\n    json: {\n        allData: transformedAllData,\n        data: transformedNodes,\n        variables: {\n            first: 10,\n            after: pageInfo.endCursor\n        },\n        continuePagination: pageInfo.hasNextPage,\n        completed: !pageInfo.hasNextPage\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        1700
+      ],
+      "id": "8772f31f-84fb-411b-9160-2918a64ae428",
+      "name": "Pagination2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst allData = inputData[0]?.json?.allData || [];\nreturn allData.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        1700
+      ],
+      "id": "b259ad74-1bd9-4dfa-897e-2487182eca3b",
+      "name": "Set Array3"
+    },
+    {
+      "parameters": {
+        "content": "## Properties\n",
+        "height": 320,
+        "width": 2180,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -40,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "2e1b4980-446c-4d33-b570-ae90d50c32b6",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "query($first: Int!, $after: String) {\n  properties(first: $first, after: $after) {\n    nodes {\n      id\n      address {\n        street\n        city\n        postalCode\n        country\n      }\n      client {\n        id\n          \n     }\n      isBillingAddress\n      \n      customFields {\n        ... on CustomFieldDropdown {\n          id\n          valueDropdown\n        }\n        ... on CustomFieldText {\n          id\n          valueText\n        }\n      }\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 50, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        280,
+        320
+      ],
+      "id": "71911e9e-f853-4f35-ba44-fb98ce030603",
+      "name": "jobber query - properties",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "incr",
+        "key": "counter"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        320
+      ],
+      "id": "0724f3c0-f5ad-4c92-a1ce-0bbd9902eca2",
+      "name": "counter_7",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2b3e8ec4-ba57-4716-b420-44b81136d6f1",
+              "leftValue": "={{ $('counter_7').item.json.counter }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "da7dcbb5-9ca9-4926-8e09-286907986e21",
+              "leftValue": "={{ $('Pagination5').item.json.continuePagination }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1740,
+        320
+      ],
+      "id": "d88cccbe-e38f-4162-b619-0587f034aebc",
+      "name": "batch loop6"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eff9cc2d-c364-4859-902e-3ceb34481092",
+              "name": "variables.first",
+              "value": "={{ $('Pagination5').item.json.variables.first }}",
+              "type": "number"
+            },
+            {
+              "id": "499c7162-3df3-484c-85c2-d5f72b7bd3ec",
+              "name": "variables.after",
+              "value": "={{ $('Pagination5').item.json.variables.after }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1520,
+        320
+      ],
+      "id": "c1c2dd8c-8781-43a8-afb4-80347bf897fc",
+      "name": "set loop6"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        320
+      ],
+      "id": "ea48a55e-4a3c-45e1-a1cf-1f0661d87bb5",
+      "name": "Limit6"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "counter",
+        "value": "0"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        40,
+        320
+      ],
+      "id": "fff70bc1-7aca-4200-adb9-e38098351082",
+      "name": "Init counter6",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        300
+      ],
+      "id": "ca92a408-6ee7-4abf-960e-12b77471c882",
+      "name": "No Operation, do nothing6"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pegando o primeiro item do array 'items' no contexto do n8n\nconst result = items[0].json;\n\n// Verifica se a estrutura contém o array de properties (nós)\nif (!result?.data?.properties?.nodes) {\n  return [{\n    json: {\n      error: 'Invalid response structure',\n      continuePagination: false,\n      completed: true,\n      allData: items[0].json.allData || []\n    }\n  }];\n}\n\nconst { nodes, pageInfo } = result.data.properties;\nconst allData = [...(items[0].json.allData || []), ...nodes];\n\n// Função para processar o endereço\nfunction processAddress(address) {\n  if (!address) {\n    return {\n      street: null,\n      city: null,\n      postalCode: null,\n      country: null\n    };\n  }\n  return {\n    street: address.street || null,\n    city: address.city || null,\n    postalCode: address.postalCode || null,\n    country: address.country || null\n  };\n}\n\n// Função para processar o cliente\nfunction processClient(client) {\n  return client ? { id: client.id || null } : null;\n}\n\n// Função para processar apenas os customFields dos índices 0, 1 e 6\nfunction processCustomFields(fields) {\n  if (!Array.isArray(fields)) return [];\n  const indices = [0, 1, 6]; // Apenas os itens 0, 1 e 6\n  return indices.map(index => {\n    const field = fields[index] || {};\n    return {\n      id: field.id || null,\n      valueDropdown: field.valueDropdown || null,\n      valueText: field.valueText || null\n    };\n  });\n}\n\n// Transformação dos nodes (propriedades) para padronizar os dados\nconst transformedNodes = nodes.map(item => ({\n  ...item,\n  address: processAddress(item.address),\n  client: processClient(item.client),\n  customFields: processCustomFields(item.customFields)\n}));\n\n// Aplicando a mesma transformação para allData (caso haja paginação acumulada)\nconst transformedAllData = allData.map(item => ({\n  ...item,\n  address: processAddress(item.address),\n  client: processClient(item.client),\n  customFields: processCustomFields(item.customFields)\n}));\n\n// Retorna os dados transformados junto com as variáveis de paginação\nreturn [{\n  json: {\n    allData: transformedAllData,\n    data: transformedNodes,\n    variables: {\n      first: 50,           // Exemplo: quantidade de itens por página\n      after: pageInfo.endCursor\n    },\n    continuePagination: pageInfo.hasNextPage,\n    completed: !pageInfo.hasNextPage\n  }\n}];\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        320
+      ],
+      "id": "d8c9c298-43f0-4385-9fca-8020d0486adb",
+      "name": "Pagination5"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst allData = inputData[0]?.json?.allData || [];\nreturn allData.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        320
+      ],
+      "id": "b9ce3468-2500-4b4c-bf05-c4d1f60f7779",
+      "name": "Set Array6"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst allData = inputData[0]?.json?.allData || [];\nreturn allData.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        -20
+      ],
+      "id": "31f49c41-7c55-4480-9757-87d6eca3b522",
+      "name": "Set Array1"
+    },
+    {
+      "parameters": {
+        "content": "## Requests",
+        "height": 320,
+        "width": 2180,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -40,
+        920
+      ],
+      "typeVersion": 1,
+      "id": "002d56da-9231-4387-b64c-c4b7eb969cea",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "tableId": "clients",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "first_name",
+              "fieldValue": "={{ $json.firstName }}"
+            },
+            {
+              "fieldId": "last_name",
+              "fieldValue": "={{ $json.lastName }}"
+            },
+            {
+              "fieldId": "company_name",
+              "fieldValue": "={{ $json.companyName }}"
+            },
+            {
+              "fieldId": "phone",
+              "fieldValue": "={{ $json.phones[0].number }}"
+            },
+            {
+              "fieldId": "billing_address_street",
+              "fieldValue": "={{ $json.billingAddress.street }}"
+            },
+            {
+              "fieldId": "is_company",
+              "fieldValue": "={{ $json.isCompany }}"
+            },
+            {
+              "fieldId": "is_lead",
+              "fieldValue": "={{ $json.isLead }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.createdAt }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $json.updatedAt }}"
+            },
+            {
+              "fieldId": "billing_address_postcode",
+              "fieldValue": "={{ $json.billingAddress.postalCode }}"
+            },
+            {
+              "fieldId": "billing_address_city",
+              "fieldValue": "={{ $json.billingAddress.city }}"
+            },
+            {
+              "fieldId": "billing_address_country",
+              "fieldValue": "={{ $json.billingAddress.country }}"
+            },
+            {
+              "fieldId": "phone_is_primary",
+              "fieldValue": "={{ $json.phones[0].primary }}"
+            },
+            {
+              "fieldId": "phone_description",
+              "fieldValue": "={{ $json.phones[0].description }}"
+            },
+            {
+              "fieldId": "email_is_primary",
+              "fieldValue": "={{ $json.emails[0].primary }}"
+            },
+            {
+              "fieldId": "email_description",
+              "fieldValue": "={{ $json.emails[0].description }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $json.emails[0].address }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        880,
+        -20
+      ],
+      "id": "059e1f2b-cfec-4030-a55b-7459b93ef630",
+      "name": "Supabase_clients",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "jobs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $json.title }}"
+            },
+            {
+              "fieldId": "job_number",
+              "fieldValue": "={{ $json.jobNumber }}"
+            },
+            {
+              "fieldId": "job_status",
+              "fieldValue": "={{ $json.jobStatus }}"
+            },
+            {
+              "fieldId": "job_type",
+              "fieldValue": "={{ $json.jobType }}"
+            },
+            {
+              "fieldId": "property_jobber_id",
+              "fieldValue": "={{ $json.property.id }}"
+            },
+            {
+              "fieldId": "instructions",
+              "fieldValue": "={{ $json.instructions }}"
+            },
+            {
+              "fieldId": "booking_confirmation_sent_at",
+              "fieldValue": "={{ $json.bookingConfirmationSentAt }}"
+            },
+            {
+              "fieldId": "client_auto_charged",
+              "fieldValue": "={{ $json.willClientBeAutomaticallyCharged }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.createdAt }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $json.updatedAt }}"
+            },
+            {
+              "fieldId": "end_at",
+              "fieldValue": "={{ $json.endAt }}"
+            },
+            {
+              "fieldId": "start_at",
+              "fieldValue": "={{ $json.startAt }}"
+            },
+            {
+              "fieldId": "quote_jobber_id",
+              "fieldValue": "={{ $json.quote }}"
+            },
+            {
+              "fieldId": "request_jobber_id",
+              "fieldValue": "={{ $json.request }}"
+            },
+            {
+              "fieldId": "source",
+              "fieldValue": "={{ $json.source }}"
+            },
+            {
+              "fieldId": "source",
+              "fieldValue": "={{ $json.source }}"
+            },
+            {
+              "fieldId": "line_items",
+              "fieldValue": "={{ $json.lineItems.nodes }}"
+            },
+            {
+              "fieldId": "total",
+              "fieldValue": "={{ $json.total }}"
+            },
+            {
+              "fieldId": "invoiced_total",
+              "fieldValue": "={{ $json.invoicedTotal }}"
+            },
+            {
+              "fieldId": "uninvoiced_total",
+              "fieldValue": "={{ $json.uninvoicedTotal }}"
+            },
+            {
+              "fieldId": "balance_outstanding_amount",
+              "fieldValue": "={{ $json.jobBalanceTotals.outstandingAmount }}"
+            },
+            {
+              "fieldId": "balance_total_amount",
+              "fieldValue": "={{ $('Pagination2').item.json.allData[0].jobBalanceTotals.totalAmount }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        900,
+        1700
+      ],
+      "id": "a0ae1ea1-be9a-4bd8-ba36-475ecd2b22b4",
+      "name": "Supabase_jobs",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "properties",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "client_jobber_id",
+              "fieldValue": "={{ $json.client.id }}"
+            },
+            {
+              "fieldId": "is_billing_address",
+              "fieldValue": "={{ $json.isBillingAddress }}"
+            },
+            {
+              "fieldId": "service_street",
+              "fieldValue": "={{ $json.address.street }}"
+            },
+            {
+              "fieldId": "service_city",
+              "fieldValue": "={{ $json.address.city }}"
+            },
+            {
+              "fieldId": "service_postcode",
+              "fieldValue": "={{ $json.address.postalCode }}"
+            },
+            {
+              "fieldId": "service_country",
+              "fieldValue": "={{ $json.address.country }}"
+            },
+            {
+              "fieldId": "nb_of_bedrooms",
+              "fieldValue": "={{ $json.customFields[0].valueDropdown }}"
+            },
+            {
+              "fieldId": "nb_of_bathrooms",
+              "fieldValue": "={{ $json.customFields[1].valueDropdown }}"
+            },
+            {
+              "fieldId": "visit_slot",
+              "fieldValue": "={{ $json.customFields[6].valueDropdown }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        880,
+        320
+      ],
+      "id": "c434e729-c094-4b67-8a20-86bfcfdc0f6f",
+      "name": "Supabase_properties",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "query($first: Int!, $after: String) {\n  clients(first: $first, after: $after) {\n    nodes {\n      id\n      firstName\n      lastName\n      companyName\n      emails {\n        address\n        description\n        primary\n      }\n      phones {\n        number\n        description\n        primary        \n      }\n      billingAddress {\n        street\n        city\n        postalCode\n        country\n      }\n      \n      isCompany\n      isLead\n      createdAt\n      updatedAt\n      tags {\n        edges {\n          node {\n            id\n          }\n        }\n      }\n      customFields {\n        ... on CustomFieldDropdown {\n          id\n          valueDropdown\n        }\n        ... on CustomFieldText {\n          id\n          valueText\n        }        \n      }\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 30, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        260,
+        -20
+      ],
+      "id": "c3969785-6af6-46d8-b3e4-010e50593587",
+      "name": "jobber_query",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "incr",
+        "key": "counter"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1260,
+        660
+      ],
+      "id": "572b5cfe-3f56-487b-8aba-0422c2a4b549",
+      "name": "counter_6",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2b3e8ec4-ba57-4716-b420-44b81136d6f1",
+              "leftValue": "={{ $('counter_6').item.json.counter }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "da7dcbb5-9ca9-4926-8e09-286907986e21",
+              "leftValue": "={{ $('Pagination4').item.json.continuePagination }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1740,
+        660
+      ],
+      "id": "8ca6c0c0-66b8-4d5b-bfa8-f6cf1cbce7bd",
+      "name": "batch loop5"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eff9cc2d-c364-4859-902e-3ceb34481092",
+              "name": "variables.first",
+              "value": "={{ $('Pagination4').item.json.variables.first }}",
+              "type": "number"
+            },
+            {
+              "id": "499c7162-3df3-484c-85c2-d5f72b7bd3ec",
+              "name": "variables.after",
+              "value": "={{ $('Pagination4').item.json.variables.after }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1480,
+        660
+      ],
+      "id": "777e4683-d60b-4f91-9257-c92e2406a6af",
+      "name": "set loop5"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1060,
+        660
+      ],
+      "id": "b648ea0a-7f98-4686-a848-d5f92eb0a68d",
+      "name": "Limit5"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "counter",
+        "value": "0"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        0,
+        660
+      ],
+      "id": "5b7717d3-4ad5-48f6-bb61-393c5c27e943",
+      "name": "Init counter5",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        640
+      ],
+      "id": "c6b9c548-0dca-4e81-b91d-37f01a66cae1",
+      "name": "No Operation, do nothing5"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtendo o primeiro item do array 'items' no contexto do n8n\nconst result = items[0].json;\n\n// Verifica se a estrutura contém o array de usuários\nif (!result?.data?.users?.nodes) {\n  return [{\n    json: {\n      error: 'Invalid response structure',\n      continuePagination: false,\n      completed: true,\n      allData: items[0].json.allData || []\n    }\n  }];\n}\n\nconst { nodes, pageInfo } = result.data.users;\nconst allData = [...(items[0].json.allData || []), ...nodes];\n\n// Função para processar o campo de email\nfunction processEmail(email) {\n  return {\n    raw: email?.raw || null,\n    isValid: email?.isValid || false\n  };\n}\n\n// Função para processar o endereço\nfunction processAddress(address) {\n  if (!address) return {\n    street: null,\n    city: null,\n    province: null,\n    postalCode: null,\n    country: null\n  };\n  return {\n    street: address.street || null,\n    city: address.city || null,\n    province: address.province || null,\n    postalCode: address.postalCode || null,\n    country: address.country || null\n  };\n}\n\n// Função para processar o telefone\nfunction processPhone(phone) {\n  return {\n    areaCode: phone?.areaCode || null,\n    countryCode: phone?.countryCode || null,\n    friendly: phone?.friendly || null,\n    isValid: phone?.isValid || false,\n    raw: phone?.raw || null\n  };\n}\n\n// Transformação dos nós (usuários) para padronizar os dados\nconst transformedNodes = nodes.map(item => ({\n  ...item,\n  email: processEmail(item.email),\n  address: processAddress(item.address),\n  phone: processPhone(item.phone)\n}));\n\n// Transformação do allData para manter a consistência (caso venha de uma paginação anterior)\nconst transformedAllData = allData.map(item => ({\n  ...item,\n  email: processEmail(item.email),\n  address: processAddress(item.address),\n  phone: processPhone(item.phone)\n}));\n\n// Retorna os dados transformados junto com as variáveis de paginação\nreturn [{\n  json: {\n    allData: transformedAllData,\n    data: transformedNodes,\n    variables: {\n      first: 10,           // Exemplo: quantidade de itens por página\n      after: pageInfo.endCursor\n    },\n    continuePagination: pageInfo.hasNextPage,\n    completed: !pageInfo.hasNextPage\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        660
+      ],
+      "id": "271cb31f-e1a6-4a1f-b37b-04a2e6adf3ed",
+      "name": "Pagination4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst allData = inputData[0]?.json?.allData || [];\nreturn allData.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        620,
+        660
+      ],
+      "id": "cfd70fb4-a032-4e60-9c0d-50eb231f0dae",
+      "name": "Set Array5"
+    },
+    {
+      "parameters": {
+        "tableId": "users",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "first_name",
+              "fieldValue": "={{ $json.name.first }}"
+            },
+            {
+              "fieldId": "last_name",
+              "fieldValue": "={{ $json.name.last }}"
+            },
+            {
+              "fieldId": "full_name",
+              "fieldValue": "={{ $json.name.full }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $json.email.raw }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.status }}"
+            },
+            {
+              "fieldId": "is_account_admin",
+              "fieldValue": "={{ $json.isAccountAdmin }}"
+            },
+            {
+              "fieldId": "is_account_owner",
+              "fieldValue": "={{ $json.isAccountOwner }}"
+            },
+            {
+              "fieldId": "is_current_user",
+              "fieldValue": "={{ $json.isCurrentUser }}"
+            },
+            {
+              "fieldId": "available_for_scheduling",
+              "fieldValue": "={{ $json.availableForScheduling }}"
+            },
+            {
+              "fieldId": "first_day_of_the_week",
+              "fieldValue": "={{ $json.firstDayOfTheWeek }}"
+            },
+            {
+              "fieldId": "last_login_at",
+              "fieldValue": "={{ $json.lastLoginAt }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.createdAt }}"
+            },
+            {
+              "fieldId": "phone",
+              "fieldValue": "={{ $json.phone.raw }}"
+            },
+            {
+              "fieldId": "timezone",
+              "fieldValue": "={{ $json.timezone }}"
+            },
+            {
+              "fieldId": "address_street",
+              "fieldValue": "={{ $json.address.street }}"
+            },
+            {
+              "fieldId": "address_city",
+              "fieldValue": "={{ $json.address.city }}"
+            },
+            {
+              "fieldId": "address_postcode",
+              "fieldValue": "={{ $json.address.postalCode }}"
+            },
+            {
+              "fieldId": "address_country",
+              "fieldValue": "={{ $json.address.country }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        840,
+        660
+      ],
+      "id": "de9bfbb6-44a1-4955-8bc7-460d8a0256fa",
+      "name": "Supabase_users",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($first: Int!, $after: String) {\n  users(first: $first, after: $after) {\n    nodes {\n      id\n      name {\n        first\n        last\n        full\n      }\n      email {\n      raw\n      isValid\n      }\n      uuid\n      status\n      isAccountAdmin\n      isAccountOwner\n      isCurrentUser\n      availableForScheduling\n      firstDayOfTheWeek\n      franchiseTokenLastFour\n      lastLoginAt\n      createdAt\n      \n      account {\n        id\n      }\n      \n      address {\n        street\n        city\n        province\n        postalCode\n        country\n      }\n      \n      apps {\n        nodes {\n          id\n        }\n      }\n      \n      assignedVehicle {\n        id\n      }\n      \n      phone {\n        areaCode\n        countryCode\n        friendly\n        isValid\n        raw\n      }\n      timezone\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 10, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        220,
+        660
+      ],
+      "id": "d92ca280-ded7-451d-b652-2069ebb5deb7",
+      "name": "jobber query - users1",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "incr",
+        "key": "counter"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        980
+      ],
+      "id": "b5cc2994-3a19-4afb-bbf9-5ca8278d99f5",
+      "name": "counter_8",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2b3e8ec4-ba57-4716-b420-44b81136d6f1",
+              "leftValue": "={{ $('counter_8').item.json.counter }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "da7dcbb5-9ca9-4926-8e09-286907986e21",
+              "leftValue": "={{ $('Pagination6').item.json.continuePagination }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1740,
+        980
+      ],
+      "id": "fc7c4c25-a21e-4be1-a1d3-676094cc59e4",
+      "name": "batch loop7"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eff9cc2d-c364-4859-902e-3ceb34481092",
+              "name": "variables.first",
+              "value": "={{ $('Pagination6').item.json.variables.first }}",
+              "type": "number"
+            },
+            {
+              "id": "499c7162-3df3-484c-85c2-d5f72b7bd3ec",
+              "name": "variables.after",
+              "value": "={{ $('Pagination6').item.json.variables.after }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1520,
+        980
+      ],
+      "id": "50c262e5-1e01-4ad1-be24-fab0b8aaa484",
+      "name": "set loop7"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        980
+      ],
+      "id": "b7fb872b-5c61-4cf5-ab9c-072aeb2c54d0",
+      "name": "Limit7"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "counter",
+        "value": "0"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        40,
+        980
+      ],
+      "id": "5a0f20f5-713b-4853-b0eb-190a27deebd3",
+      "name": "Init counter7",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the input data from the GraphQL node\nconst inputData = $input.all();\nlet allData = [];\n\n// Process each input item (typically just one from GraphQL node)\nfor (const item of inputData) {\n  // Check if item has the expected structure\n  if (item.json.data && item.json.data.requests && item.json.data.requests.nodes) {\n    // Extract all request nodes and add them to our collection\n    const nodes = item.json.data.requests.nodes;\n    allData = allData.concat(nodes);\n  }\n}\n\n// Get pagination info\nconst pageInfo = inputData[0]?.json?.data?.requests?.pageInfo || null;\n\n// Prepare variables for next GraphQL call if there are more pages\nconst variables = {\n  first: 50,  // Explicitly set as a number\n  after: pageInfo?.endCursor || null\n};\n\n// Create a single output item with all the collected data\nconst output = {\n  json: {\n    allData: allData,\n    pageInfo: pageInfo,\n    variables: variables  // Include variables for next call\n  }\n};\n\nreturn [output];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        980
+      ],
+      "id": "f0cbe2f2-0f8a-4585-9a4a-10c7f07a5fed",
+      "name": "Pagination6"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst allData = inputData[0]?.json?.allData || [];\nreturn allData.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        980
+      ],
+      "id": "73ef2481-6972-4cb9-ad73-a447cd3324ad",
+      "name": "Set Array7"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "query($first: Int!, $after: String) {\n  requests(first: $first, after: $after) {\n    nodes {\n      id\n      title\n      client {\n        id\n      }\n      requestStatus\n      source\n      assessment {\n        id\n        title\n        allDay\n        startAt\n        endAt\n        assignedUsers {\n          nodes {\n            id\n          }\n        }\n      }\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}\n",
+        "variables": "={{ $json.variables || {\"first\": 50, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        280,
+        980
+      ],
+      "id": "4379e72a-285f-4fdd-bb2d-f7a10acd4e33",
+      "name": "jobber query - requests",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "requests",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "client_jobber_id",
+              "fieldValue": "={{ $json.client.id }}"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $json.title }}"
+            },
+            {
+              "fieldId": "request_stauts",
+              "fieldValue": "={{ $json.requestStatus }}"
+            },
+            {
+              "fieldId": "source",
+              "fieldValue": "={{ $json.source }}"
+            },
+            {
+              "fieldId": "assessment_json",
+              "fieldValue": "={{ $json.assessment }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        880,
+        980
+      ],
+      "id": "877ae99c-a432-46d6-96ef-e3e4acdb2ce7",
+      "name": "Supabase_requests",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1960,
+        960
+      ],
+      "id": "122f2771-ba8c-4179-980c-a86138f4e14b",
+      "name": "No Operation, do nothing7"
+    },
+    {
+      "parameters": {
+        "content": "## Visits\n",
+        "height": 1140,
+        "width": 2180,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -40,
+        1940
+      ],
+      "typeVersion": 1,
+      "id": "ae26677d-0c33-4495-939e-2cfff3623a93",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($first: Int!, $after: String) {\n  visits(first: $first, after: $after) {\n    nodes {\n      id\n      client {\n        id\n      }\n      property {\n        id\n      }\n      job {\n        id\n      }\n      invoice {\n        id\n      }\n      title              \n      isDefaultTitle     \n      instructions       \n      allDay             \n      arrivalWindow {    \n        id \n        duration\n      }\n      startAt            \n      endAt              \n      duration           \n      visitStatus        \n      completedAt        \n      assignedUsers {    \n        edges {\n          node {\n            name {\n              first \n              last\n            }\n          }\n        }\n      }\n      isComplete         \n      isLastScheduledVisit \n      timeSheetEntries {   \n        edges {\n          node {\n            id          \n            startAt\n            endAt\n          }\n        }\n      }\n      lineItems {        \n        edges {\n          node {\n            id\n            name\n            quantity\n            unitPrice\n            totalPrice                      \n          }\n        }\n      }\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 1, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        280,
+        2020
+      ],
+      "id": "7b4b8413-d134-43bc-989c-ddd28c8f7f59",
+      "name": "jobber query",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "data",
+        "key": "aux_buffer",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        520,
+        2260
+      ],
+      "id": "daeb764d-fde1-417b-b12a-1fdf9ab7be7d",
+      "name": "Retrieve aux_buffer",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "aux_buffer",
+        "messageData": "={{ JSON.stringify($json) }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        900,
+        2020
+      ],
+      "id": "3ab8c3c4-e1b0-424a-868c-437a4c16e551",
+      "name": "Push aux_buffer",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        960,
+        2260
+      ],
+      "id": "9a958338-f69b-47b5-8c2a-2e64713f1363",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "708d40af-63b6-4b7b-835f-d860e074b34c",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1320,
+        2340
+      ],
+      "id": "e8b36ff2-ca27-4534-b971-1c37fb749939",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "708d40af-63b6-4b7b-835f-d860e074b34c",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1360,
+        2760
+      ],
+      "id": "f3cd5335-4621-45df-979c-7b5defbfd218",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        980,
+        2680
+      ],
+      "id": "512064a7-c8a9-489e-9317-f143e5458338",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "data",
+        "key": "aux_buffer",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        80,
+        2900
+      ],
+      "id": "48130122-0229-41c7-a873-eb424325c373",
+      "name": "Retrieve aux_buffer1",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1880,
+        2500
+      ],
+      "id": "211891a0-2eea-4060-b365-f9c8a8086f1a",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "try {\n    const responseData = item.json || item;\n    const result = Array.isArray(responseData) ? responseData[0] : responseData;\n    \n    if (!result?.data?.visits) {\n        throw new Error('Invalid response structure');\n    }\n    \n    const { nodes, pageInfo } = result.data.visits;\n    const existingData = Array.isArray(item?.json?.allData) ? item.json.allData : [];\n    const allData = [...existingData, ...nodes];\n\n    return {\n        json: {\n            allData,\n            data: nodes,\n            variables: {\n                first: 1,\n                after: pageInfo.endCursor\n            },\n            continuePagination: pageInfo.hasNextPage,\n            completed: !pageInfo.hasNextPage\n        }\n    };\n} catch (error) {\n    console.log('Error:', error.message);\n    return {\n        json: {\n            error: error.message,\n            continuePagination: false,\n            completed: true,\n            allData: item.json.allData || []\n        }\n    };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        2020
+      ],
+      "id": "23141e54-53bd-4c0a-8b1a-d053f9835b06",
+      "name": "pagination1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "da7dcbb5-9ca9-4926-8e09-286907986e21",
+              "leftValue": "={{ $('pagination1').item.json.continuePagination }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        2260
+      ],
+      "id": "9a332ae6-ef17-4013-aeef-b0b1abf42ee1",
+      "name": "batch loop8"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eff9cc2d-c364-4859-902e-3ceb34481092",
+              "name": "variables.first",
+              "value": "={{ $('pagination1').item.json.variables.first }}",
+              "type": "number"
+            },
+            {
+              "id": "499c7162-3df3-484c-85c2-d5f72b7bd3ec",
+              "name": "variables.after",
+              "value": "={{ $('pagination1').item.json.variables.after }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1540,
+        2020
+      ],
+      "id": "2bec09cc-0709-47ed-8f80-f392fb9a0968",
+      "name": "set loop8"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst allData = inputData[0]?.json?.allData || [];\nreturn allData.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        2020
+      ],
+      "id": "0073f461-6feb-44c6-9f01-d4eccd66255b",
+      "name": "Set Array8"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        2020
+      ],
+      "id": "ebb8f9ba-5733-46a9-8a84-55a3548e0b00",
+      "name": "Limit8"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\nconst data = input[0].json.data;\n\nconst result = data.map(item => ({\n  json: JSON.parse(item)\n}));\n\nreturn result;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        2260
+      ],
+      "id": "64dda4ce-09f1-48d1-91b6-2783d063c14a",
+      "name": "Set Array9"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst data = inputData[0]?.json || {};\n\nreturn data.assignedUsers.edges.map(user => ({\n    json: {\n        visit_id: data.id, // \n        firstname: user.node.name.first,\n        lastname: user.node.name.last\n    }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1160,
+        2340
+      ],
+      "id": "5dc6aa83-ff6f-4fd7-be3d-70a9a3b2f904",
+      "name": "Set Array10",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst data = inputData[0]?.json || {};\nreturn (data.lineItems?.edges || []).map(edge => ({ \n  json: { \n    visit_id: data.id, \n    id: edge.node.id, \n    name: edge.node.name, \n    quantity: edge.node.quantity, \n    totalPrice: edge.node.totalPrice \n  } \n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1180,
+        2760
+      ],
+      "id": "1a050f3e-43ee-4dc7-85e8-e4e10728d361",
+      "name": "Set Array11",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        2660
+      ],
+      "id": "6b50ae4e-6945-46b6-9879-8486a213c402",
+      "name": "No Operation, do nothing8"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1660,
+        2240
+      ],
+      "id": "8cb1e45e-8969-4ffe-ac1c-6d8278940f79",
+      "name": "No Operation, do nothing9"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "aux_buffer"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        40,
+        2020
+      ],
+      "id": "344170c7-a0bb-4445-b788-2b7289ed1f90",
+      "name": "zap aux_buffer",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "visits",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "job_jobber_id",
+              "fieldValue": "={{ $json.job.id }}"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $json.title }}"
+            },
+            {
+              "fieldId": "is_default_title",
+              "fieldValue": "={{ $json.isDefaultTitle }}"
+            },
+            {
+              "fieldId": "all_day",
+              "fieldValue": "={{ $json.allDay }}"
+            },
+            {
+              "fieldId": "start_at",
+              "fieldValue": "={{ $json.startAt }}"
+            },
+            {
+              "fieldId": "end_at",
+              "fieldValue": "={{ $json.endAt }}"
+            },
+            {
+              "fieldId": "duration",
+              "fieldValue": "={{ $json.duration }}"
+            },
+            {
+              "fieldId": "visit_status",
+              "fieldValue": "={{ $json.visitStatus }}"
+            },
+            {
+              "fieldId": "completed_at",
+              "fieldValue": "={{ $json.completedAt }}"
+            },
+            {
+              "fieldId": "is_complete",
+              "fieldValue": "={{ $json.isComplete }}"
+            },
+            {
+              "fieldId": "is_last_scheduled_visit",
+              "fieldValue": "={{ $json.isLastScheduledVisit }}"
+            },
+            {
+              "fieldId": "property_jobber_id",
+              "fieldValue": "={{ $json.property.id }}"
+            },
+            {
+              "fieldId": "invoice_jobber_id",
+              "fieldValue": "={{ $('jobber query').item.json.data.visits.nodes[2].invoice.id }}"
+            },
+            {
+              "fieldId": "client_jobber_id",
+              "fieldValue": "={{ $('jobber query').item.json.data.visits.nodes[2].client.id }}"
+            },
+            {
+              "fieldId": "assigned_users",
+              "fieldValue": "={{ $json.assignedUsers.edges }}"
+            },
+            {
+              "fieldId": "line_items",
+              "fieldValue": "={{ $json.lineItems.edges }}"
+            },
+            {
+              "fieldId": "time_sheet_entries_json",
+              "fieldValue": "={{ $json.timeSheetEntries.edges }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        2020
+      ],
+      "id": "15616b3c-3909-42ec-a882-424e68c1ca96",
+      "name": "Supabase_visits1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "visits_users",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "visit_id",
+              "fieldValue": "={{ $json.visit_id }}"
+            },
+            {
+              "fieldId": "first_name",
+              "fieldValue": "={{ $json.firstname }}"
+            },
+            {
+              "fieldId": "last_name",
+              "fieldValue": "={{ $json.lastname }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        2400
+      ],
+      "id": "76ca99f5-a84b-4a50-b1c1-d983beacba98",
+      "name": "Supabase_visits2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "visits_items",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "visit_id",
+              "fieldValue": "={{ $json.visit_id }}"
+            },
+            {
+              "fieldId": "item_name",
+              "fieldValue": "={{ $json.name }}"
+            },
+            {
+              "fieldId": "quantity",
+              "fieldValue": "={{ $json.quantity }}"
+            },
+            {
+              "fieldId": "total_price",
+              "fieldValue": "={{ $json.totalPrice }}"
+            },
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1580,
+        2840
+      ],
+      "id": "7d71c2ca-a397-45cf-9290-306a12f14100",
+      "name": "Supabase_visits3",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Invoices\n",
+        "height": 320,
+        "width": 2180,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -40,
+        1260
+      ],
+      "typeVersion": 1,
+      "id": "519c8f37-6b2e-4d9a-92bc-b35dbed9da1f",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($first: Int!, $after: String) {\n  invoices(first: $first, after: $after) {\n    nodes {\n      id\n      invoiceNumber\n      invoiceStatus\n      invoiceNet\n      \n      createdAt\n      updatedAt\n      issuedDate\n      dueDate\n      receivedDate\n      dateViewedInClientHub\n      \n      subject\n      message\n      clientHubUri\n      \n      amounts {\n        depositAmount\n        discountAmount\n        invoiceBalance\n        legacyDiscountAmount\n        nonTaxAmount\n        paymentsTotal\n        subtotal\n        taxAmount\n        tipsTotal\n        total\n      }\n      \n      billingAddress {\n        street\n        city\n        province\n        postalCode\n        country\n      }\n      \n      billingIsSameAsPropertyAddress\n      \n      client {\n        id\n        name\n      }\n      \n      jobs {\n        nodes {\n          id\n          title\n        }\n      }\n      \n      lineItems {\n        nodes {\n          id\n          name\n          description\n          quantity\n          unitPrice\n          totalPrice\n          taxable\n          date\n          category\n          createdAt\n          updatedAt\n          linkedProductOrService {\n            id\n            name\n          }\n          \n        }\n      }\n      \n      paymentRecords {\n        nodes {\n          id\n          amount\n        }\n      }\n      \n      properties {\n        nodes {\n          id\n          address {\n            street\n            city\n          }\n        }\n      }\n      \n      salesperson {\n        id\n        name {\n          full\n        }\n      }\n      \n      taxCalculationMethod\n      \n      jobberWebUri\n      allowReviewRequest\n      nextDateToSendReviewSms\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 4, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        260,
+        1320
+      ],
+      "id": "907d0f19-9b26-4857-a960-8dae08e0ee1e",
+      "name": "jobber query - invoices",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "incr",
+        "key": "counter"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        1320
+      ],
+      "id": "d6dbc018-13bd-40d6-a62e-64cccb7e52f1",
+      "name": "counter_3",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2b3e8ec4-ba57-4716-b420-44b81136d6f1",
+              "leftValue": "={{ $('counter_3').item.json.counter }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "da7dcbb5-9ca9-4926-8e09-286907986e21",
+              "leftValue": "={{ $('Pagination1').item.json.continuePagination }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1720,
+        1320
+      ],
+      "id": "08ecf920-0305-4ad5-96b3-a95272c4c695",
+      "name": "batch loop2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eff9cc2d-c364-4859-902e-3ceb34481092",
+              "name": "variables.first",
+              "value": "={{ $('Pagination1').item.json.variables.first }}",
+              "type": "number"
+            },
+            {
+              "id": "499c7162-3df3-484c-85c2-d5f72b7bd3ec",
+              "name": "variables.after",
+              "value": "={{ $('Pagination1').item.json.variables.after }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1500,
+        1320
+      ],
+      "id": "6c48adb1-ac43-44db-ad19-0527f737b819",
+      "name": "set loop2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        1320
+      ],
+      "id": "ff6978ce-d126-4539-9dac-6ee1587c09ed",
+      "name": "Limit2"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "counter",
+        "value": "0"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        40,
+        1320
+      ],
+      "id": "d27216f9-631c-46a8-8e2b-5e65678cab7b",
+      "name": "Init counter2",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        1300
+      ],
+      "id": "bcaa2aad-01c9-4c15-a4bd-87b45d0becd8",
+      "name": "No Operation, do nothing2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pegando o primeiro item do array 'items' no contexto do n8n\nconst result = items[0].json;\n\nif (!result?.data?.invoices?.nodes) {\n    return [{\n        json: {\n            error: 'Estrutura de resposta inválida',\n            continuePagination: false,\n            completed: true,\n            allData: items[0].json.allData || []\n        }\n    }];\n}\n\nconst { nodes, pageInfo } = result.data.invoices;\nconst allData = [...(items[0].json.allData || []), ...nodes];\n\n// Função para processar amounts\nfunction processAmounts(amounts) {\n    if (!amounts) return null;\n    return {\n        depositAmount: amounts.depositAmount ?? null,\n        discountAmount: amounts.discountAmount ?? null,\n        invoiceBalance: amounts.invoiceBalance ?? null,\n        legacyDiscountAmount: amounts.legacyDiscountAmount ?? null,\n        nonTaxAmount: amounts.nonTaxAmount ?? null,\n        paymentsTotal: amounts.paymentsTotal ?? null,\n        subtotal: amounts.subtotal ?? null,\n        taxAmount: amounts.taxAmount ?? null,\n        tipsTotal: amounts.tipsTotal ?? null,\n        total: amounts.total ?? null\n    };\n}\n\n// Função para processar billingAddress\nfunction processBillingAddress(address) {\n    if (!address) return null;\n    return {\n        street: address.street || null,\n        city: address.city || null,\n        province: address.province || null,\n        postalCode: address.postalCode || null,\n        country: address.country || null\n    };\n}\n\n// Função para processar client\nfunction processClient(client) {\n    if (!client) return null;\n    return {\n        id: client.id || null,\n        name: client.name || null\n    };\n}\n\n// Função para processar jobs.nodes\nfunction processJobs(jobs) {\n    if (!jobs || !jobs.nodes) return null;\n    return {\n        nodes: jobs.nodes.map(job => ({\n            id: job.id || null,\n            title: job.title || null\n        }))\n    };\n}\n\n// Função para processar lineItems.nodes\nfunction processLineItems(lineItems) {\n    if (!lineItems || !lineItems.nodes) return null;\n    return {\n        nodes: lineItems.nodes.map(item => ({\n            id: item.id || null,\n            name: item.name || null,\n            description: item.description || null,\n            quantity: item.quantity ?? null,\n            unitPrice: item.unitPrice ?? null,\n            totalPrice: item.totalPrice ?? null,\n            taxable: item.taxable ?? null,\n            date: item.date || null,\n            category: item.category || null,\n            createdAt: item.createdAt || null,\n            updatedAt: item.updatedAt || null,\n            linkedProductOrService: item.linkedProductOrService ? {\n                id: item.linkedProductOrService.id || null,\n                name: item.linkedProductOrService.name || null\n            } : null\n        }))\n    };\n}\n\n// Função para processar paymentRecords.nodes\nfunction processPaymentRecords(paymentRecords) {\n    if (!paymentRecords || !paymentRecords.nodes) return null;\n    return {\n        nodes: paymentRecords.nodes.map(record => ({\n            id: record.id || null,\n            amount: record.amount ?? null\n        }))\n    };\n}\n\n// Função para processar properties.nodes\nfunction processProperties(properties) {\n    if (!properties || !properties.nodes) return null;\n    return {\n        nodes: properties.nodes.map(property => ({\n            id: property.id || null,\n            address: property.address ? {\n                street: property.address.street || null,\n                city: property.address.city || null\n            } : null\n        }))\n    };\n}\n\n// Aplicando a transformação nos dados\nconst transformedNodes = nodes.map(item => ({\n    ...item,\n    amounts: processAmounts(item.amounts),\n    billingAddress: processBillingAddress(item.billingAddress),\n    client: processClient(item.client),\n    jobs: processJobs(item.jobs),\n    lineItems: processLineItems(item.lineItems),\n    paymentRecords: processPaymentRecords(item.paymentRecords),\n    properties: processProperties(item.properties)\n}));\n\n// Aplicando a mesma transformação para allData\nconst transformedAllData = allData.map(item => ({\n    ...item,\n    amounts: processAmounts(item.amounts),\n    billingAddress: processBillingAddress(item.billingAddress),\n    client: processClient(item.client),\n    jobs: processJobs(item.jobs),\n    lineItems: processLineItems(item.lineItems),\n    paymentRecords: processPaymentRecords(item.paymentRecords),\n    properties: processProperties(item.properties)\n}));\n\nreturn [{\n    json: {\n        allData: transformedAllData,\n        data: transformedNodes,\n        variables: {\n            first: 4,\n            after: pageInfo.endCursor\n        },\n        continuePagination: pageInfo.hasNextPage,\n        completed: !pageInfo.hasNextPage\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        1320
+      ],
+      "id": "c95e89e4-b8c4-4ee0-a7eb-28425191694a",
+      "name": "Pagination1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst allData = inputData[0]?.json?.allData || [];\nreturn allData.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        1320
+      ],
+      "id": "3d3a2d69-1ccb-4d79-9cd6-0678f0d47cdc",
+      "name": "Set Array2"
+    },
+    {
+      "parameters": {
+        "tableId": "invoices",
+        "dataToSend": "autoMapInputData"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        880,
+        1320
+      ],
+      "id": "21df8394-c366-48bd-ac79-c3dcb3212c1a",
+      "name": "Supabase_invoices",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Quotes\n",
+        "height": 840,
+        "width": 2180,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -40,
+        3100
+      ],
+      "typeVersion": 1,
+      "id": "17883d4b-c142-4d15-825b-6772edabb33b",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($first: Int!, $after: String) {\n  quotes(first: $first, after: $after) {\n    nodes {\n      id\n      title\n      quoteNumber\n      quoteStatus\n      message\n      amounts {\n        subtotal\n        total\n      }\n      \n            \n      lineItems {\n        nodes {\n          id\n          name\n          quantity\n          unitPrice\n          totalPrice\n        }\n      }\n      \n      property {\n        id\n      }\n      \n      request {\n        id\n        title\n      }\n      \n      salesperson {\n        id\n      }\n      \n      taxDetails {\n        totalTaxAmount\n        totalTaxRate {\n          id\n          name\n          # Removed 'rate' field as it doesn't exist on TaxRateBase\n        }\n      }\n      \n      unallocatedDepositRecords {\n        nodes {\n          id\n        }\n      }\n      \n      createdAt\n      updatedAt\n      transitionedAt\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 5, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        320,
+        3220
+      ],
+      "id": "a1b27fe2-1cae-4461-b7ba-b578d6111e77",
+      "name": "jobber query - quotes",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "da7dcbb5-9ca9-4926-8e09-286907986e21",
+              "leftValue": "={{ $('Pagination3').item.json.continuePagination }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        340,
+        3460
+      ],
+      "id": "7edfef52-2772-4caf-a17f-f919dcb61c86",
+      "name": "batch loop4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eff9cc2d-c364-4859-902e-3ceb34481092",
+              "name": "variables.first",
+              "value": "={{ $('Pagination3').item.json.variables.first }}",
+              "type": "number"
+            },
+            {
+              "id": "499c7162-3df3-484c-85c2-d5f72b7bd3ec",
+              "name": "variables.after",
+              "value": "={{ $('Pagination3').item.json.variables.after }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1600,
+        3220
+      ],
+      "id": "2883d888-7264-4117-8908-2b2b41cee917",
+      "name": "set loop4"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pegando o primeiro item do array 'items' no contexto do n8n\nconst result = items[0].json;\nif (!result?.data?.quotes?.nodes) {\n    return [{\n        json: {\n            error: 'Estrutura de resposta inválida',\n            continuePagination: false,\n            completed: true,\n            allData: items[0].json.allData || []\n        }\n    }];\n}\nconst { nodes, pageInfo } = result.data.quotes;\n\n// Função para processar amounts\nfunction processAmounts(amounts) {\n    if (!amounts) return null;\n    return {\n        subtotal: amounts.subtotal || null,\n        total: amounts.total || null\n    };\n}\n\n// Função para processar lineItems.nodes\nfunction processLineItems(lineItems) {\n    if (!lineItems || !lineItems.nodes) return null;\n    return {\n        nodes: lineItems.nodes.map(node => ({\n            id: node.id || null,\n            name: node.name || null,\n            quantity: node.quantity || null,\n            unitPrice: node.unitPrice || null,\n            totalPrice: node.totalPrice || null\n        }))\n    };\n}\n\n// Função para processar property\nfunction processProperty(property) {\n    if (!property) return null;\n    return {\n        id: property.id || null\n    };\n}\n\n// Função ajustada para garantir request.id e request.title sempre presentes\nfunction processRequest(request) {\n    return {\n        id: request?.id ?? null,\n        title: request?.title ?? null\n    };\n}\n\n\nfunction processSalesperson(salesperson) {\n    return {\n        id: salesperson?.id ?? null\n    };\n}\n\n// Função para processar taxDetails\nfunction processTaxDetails(taxDetails) {\n    if (!taxDetails) return null;\n    return {\n        totalTaxAmount: taxDetails.totalTaxAmount || null,\n        totalTaxRate: taxDetails.totalTaxRate ? {\n            id: taxDetails.totalTaxRate.id || null,\n            name: taxDetails.totalTaxRate.name || null\n        } : null\n    };\n}\n\n// Função para processar unallocatedDepositRecords\nfunction processUnallocatedDepositRecords(records) {\n    if (!records || !records.nodes) return null;\n    return {\n        nodes: records.nodes.map(node => ({\n            id: node.id || null\n        }))\n    };\n}\n\n// Transform only new nodes\nconst transformedNodes = nodes.map(item => ({\n    id: item.id,\n    title: item.title,\n    quoteNumber: item.quoteNumber,\n    quoteStatus: item.quoteStatus,\n    message: item.message,\n    createdAt: item.createdAt,\n    updatedAt: item.updatedAt,\n    transitionedAt: item.transitionedAt,\n    amounts: processAmounts(item.amounts),\n    lineItems: processLineItems(item.lineItems),\n    property: processProperty(item.property),\n    request: processRequest(item.request),\n    salesperson: processSalesperson(item.salesperson),\n    taxDetails: processTaxDetails(item.taxDetails),\n    unallocatedDepositRecords: processUnallocatedDepositRecords(item.unallocatedDepositRecords)\n}));\n\n// Add transformed nodes to allData without re-transforming (improved clarity)\nconst allData = [...(items[0].json.allData || []), ...transformedNodes];\n\nreturn [{\n    json: {\n        allData: allData,\n        data: transformedNodes,\n        variables: {\n            first: 5,\n            after: pageInfo.endCursor\n        },\n        continuePagination: pageInfo.hasNextPage,\n        completed: !pageInfo.hasNextPage\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        3220
+      ],
+      "id": "f363aa55-9435-4ee4-8760-521eb09d2468",
+      "name": "Pagination3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst allData = inputData[0]?.json?.allData || [];\nreturn allData.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        3220
+      ],
+      "id": "131f756c-da2f-4f8a-8a04-2821bc28021c",
+      "name": "Set Array4",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "tableId": "quotes",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $json.title }}"
+            },
+            {
+              "fieldId": "quote_number",
+              "fieldValue": "={{ $json.quoteNumber }}"
+            },
+            {
+              "fieldId": "quote_status",
+              "fieldValue": "={{ $json.quoteStatus }}"
+            },
+            {
+              "fieldId": "message",
+              "fieldValue": "={{ $json.message ?? null }}\" }"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.createdAt }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $json.updatedAt }}"
+            },
+            {
+              "fieldId": "transitioned_at",
+              "fieldValue": "={{ $json.transitionedAt }}"
+            },
+            {
+              "fieldId": "subtotal_amount",
+              "fieldValue": "={{ $json.amounts.subtotal }}"
+            },
+            {
+              "fieldId": "total_amount",
+              "fieldValue": "={{ $json.amounts.total }}"
+            },
+            {
+              "fieldId": "line_items",
+              "fieldValue": "={{ JSON.stringify($json.lineItems?.nodes || []) }}"
+            },
+            {
+              "fieldId": "property_jobber_id",
+              "fieldValue": "={{ $json.property.id }}"
+            },
+            {
+              "fieldId": "salesperson_jobber_id",
+              "fieldValue": "={{ $json.salesperson.id }}"
+            },
+            {
+              "fieldId": "request_title",
+              "fieldValue": "={{ $json.request.title }}"
+            },
+            {
+              "fieldId": "request_jobber_id",
+              "fieldValue": "={{ $json.request.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        3220
+      ],
+      "id": "071a3bd1-bf1e-46aa-87f4-955cd347aef6",
+      "name": "Supabase1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "data",
+        "key": "aux_buffer",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        540,
+        3460
+      ],
+      "id": "14692198-b11c-4057-bb0d-0818516acaf0",
+      "name": "Retrieve aux_buffer2",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "aux_buffer",
+        "messageData": "={{ JSON.stringify($json) }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        920,
+        3220
+      ],
+      "id": "9aff59cd-6748-477f-b7d3-5337fa1d2119",
+      "name": "Push aux_buffer1",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        980,
+        3460
+      ],
+      "id": "d5881577-7123-4ee2-9055-12836ca3c5e1",
+      "name": "Loop Over Items2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "708d40af-63b6-4b7b-835f-d860e074b34c",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1340,
+        3540
+      ],
+      "id": "e7f95284-4a94-4495-9216-31a69a27c3ec",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "data",
+        "key": "aux_buffer",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        80,
+        3740
+      ],
+      "id": "aa3eaa8b-af86-4c31-8b29-0eaf7b838289",
+      "name": "Retrieve aux_buffer3",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        3220
+      ],
+      "id": "6a62d301-f924-4ee5-a6d7-d80da03f1db2",
+      "name": "Limit9"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\nconst data = input[0].json.data;\n\nconst result = data.map(item => ({\n  json: JSON.parse(item)\n}));\n\nreturn result;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        3460
+      ],
+      "id": "005955c5-0b0a-4a71-8e9c-1b0f47d426c5",
+      "name": "Set Array12"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Código n8n corrigido\nconst items = $input.all();\nconst data = items[0]?.json || {};\n\nif (!data.lineItems || !data.lineItems.nodes) {\n    throw new Error('Estrutura de dados inválida: lineItems ou nodes não encontrados');\n}\n\nreturn data.lineItems.nodes.map(item => ({\n    json: {\n        quotes_id: data.id,\n        id: item.id,\n        name: item.name,\n        quantity: item.quantity,\n        unitPrice: item.unitPrice,\n        totalPrice: item.totalPrice\n    }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1180,
+        3540
+      ],
+      "id": "cd197de8-46b2-40d7-83d0-96d28a61a27d",
+      "name": "Set Array13",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        3480
+      ],
+      "id": "9a33fbff-3758-4506-994f-790d6ba31c14",
+      "name": "No Operation, do nothing10"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "aux_buffer"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        60,
+        3220
+      ],
+      "id": "195eefb0-f6d2-4fe0-bb43-ab68cd1f8d74",
+      "name": "zap aux_buffer1",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "quotes_line_items",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "quotes_id",
+              "fieldValue": "={{ $json.quotes_id }}"
+            },
+            {
+              "fieldId": "=item_id",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $json.name }}"
+            },
+            {
+              "fieldId": "quantity",
+              "fieldValue": "={{ $json.quantity }}"
+            },
+            {
+              "fieldId": "unit_price",
+              "fieldValue": "={{ $json.unitPrice }}"
+            },
+            {
+              "fieldId": "total_price",
+              "fieldValue": "={{ $json.totalPrice }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        3600
+      ],
+      "id": "937dca12-cfa2-4a56-b896-4ea6f22eb1cc",
+      "name": "Supabase_visits4",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        3600
+      ],
+      "id": "44921852-a7c6-4e72-8cd8-149213b745ec",
+      "name": "Limit1"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "zap aux_buffer1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "counter_2": {
+      "main": [
+        [
+          {
+            "node": "set loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "batch loop": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "jobber_query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set loop": {
+      "main": [
+        [
+          {
+            "node": "batch loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "counter_2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init counter": {
+      "main": [
+        [
+          {
+            "node": "jobber_query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing1": {
+      "main": [
+        []
+      ]
+    },
+    "Pagination": {
+      "main": [
+        [
+          {
+            "node": "Set Array1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber query - jobs": {
+      "main": [
+        [
+          {
+            "node": "Pagination2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "counter_4": {
+      "main": [
+        [
+          {
+            "node": "set loop3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "batch loop3": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "jobber query - jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set loop3": {
+      "main": [
+        [
+          {
+            "node": "batch loop3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit3": {
+      "main": [
+        [
+          {
+            "node": "counter_4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init counter3": {
+      "main": [
+        [
+          {
+            "node": "jobber query - jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pagination2": {
+      "main": [
+        [
+          {
+            "node": "Set Array3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array3": {
+      "main": [
+        [
+          {
+            "node": "Supabase_jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber query - properties": {
+      "main": [
+        [
+          {
+            "node": "Pagination5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "counter_7": {
+      "main": [
+        [
+          {
+            "node": "set loop6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "batch loop6": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "jobber query - properties",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set loop6": {
+      "main": [
+        [
+          {
+            "node": "batch loop6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit6": {
+      "main": [
+        [
+          {
+            "node": "counter_7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init counter6": {
+      "main": [
+        [
+          {
+            "node": "jobber query - properties",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pagination5": {
+      "main": [
+        [
+          {
+            "node": "Set Array6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array6": {
+      "main": [
+        [
+          {
+            "node": "Supabase_properties",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array1": {
+      "main": [
+        [
+          {
+            "node": "Supabase_clients",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_clients": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_jobs": {
+      "main": [
+        [
+          {
+            "node": "Limit3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_properties": {
+      "main": [
+        [
+          {
+            "node": "Limit6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_query": {
+      "main": [
+        [
+          {
+            "node": "Pagination",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "counter_6": {
+      "main": [
+        [
+          {
+            "node": "set loop5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "batch loop5": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "jobber query - users1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set loop5": {
+      "main": [
+        [
+          {
+            "node": "batch loop5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit5": {
+      "main": [
+        [
+          {
+            "node": "counter_6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init counter5": {
+      "main": [
+        [
+          {
+            "node": "jobber query - users1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pagination4": {
+      "main": [
+        [
+          {
+            "node": "Set Array5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array5": {
+      "main": [
+        [
+          {
+            "node": "Supabase_users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_users": {
+      "main": [
+        [
+          {
+            "node": "Limit5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber query - users1": {
+      "main": [
+        [
+          {
+            "node": "Pagination4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "counter_8": {
+      "main": [
+        [
+          {
+            "node": "set loop7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "batch loop7": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing7",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "jobber query - requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set loop7": {
+      "main": [
+        [
+          {
+            "node": "batch loop7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit7": {
+      "main": [
+        [
+          {
+            "node": "counter_8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init counter7": {
+      "main": [
+        [
+          {
+            "node": "jobber query - requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pagination6": {
+      "main": [
+        [
+          {
+            "node": "Set Array7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array7": {
+      "main": [
+        [
+          {
+            "node": "Supabase_requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber query - requests": {
+      "main": [
+        [
+          {
+            "node": "Pagination6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_requests": {
+      "main": [
+        [
+          {
+            "node": "Limit7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber query": {
+      "main": [
+        [
+          {
+            "node": "pagination1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve aux_buffer": {
+      "main": [
+        [
+          {
+            "node": "Set Array9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push aux_buffer": {
+      "main": [
+        [
+          {
+            "node": "Supabase_visits1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing9",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Array10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Supabase_visits2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Supabase_visits3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing8",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Array11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        []
+      ]
+    },
+    "pagination1": {
+      "main": [
+        [
+          {
+            "node": "Set Array8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "batch loop8": {
+      "main": [
+        [
+          {
+            "node": "Retrieve aux_buffer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "jobber query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set loop8": {
+      "main": [
+        [
+          {
+            "node": "batch loop8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array8": {
+      "main": [
+        [
+          {
+            "node": "Push aux_buffer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit8": {
+      "main": [
+        [
+          {
+            "node": "set loop8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array9": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array10": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array11": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing8": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing9": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "zap aux_buffer": {
+      "main": [
+        [
+          {
+            "node": "jobber query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_visits1": {
+      "main": [
+        [
+          {
+            "node": "Limit8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_visits2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_visits3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber query - invoices": {
+      "main": [
+        [
+          {
+            "node": "Pagination1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "counter_3": {
+      "main": [
+        [
+          {
+            "node": "set loop2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "batch loop2": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "jobber query - invoices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set loop2": {
+      "main": [
+        [
+          {
+            "node": "batch loop2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit2": {
+      "main": [
+        [
+          {
+            "node": "counter_3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init counter2": {
+      "main": [
+        [
+          {
+            "node": "jobber query - invoices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pagination1": {
+      "main": [
+        [
+          {
+            "node": "Set Array2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array2": {
+      "main": [
+        [
+          {
+            "node": "Supabase_invoices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_invoices": {
+      "main": [
+        [
+          {
+            "node": "Limit2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber query - quotes": {
+      "main": [
+        [
+          {
+            "node": "Pagination3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "batch loop4": {
+      "main": [
+        [
+          {
+            "node": "Retrieve aux_buffer2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "jobber query - quotes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set loop4": {
+      "main": [
+        [
+          {
+            "node": "batch loop4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pagination3": {
+      "main": [
+        [
+          {
+            "node": "Set Array4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array4": {
+      "main": [
+        [
+          {
+            "node": "Push aux_buffer1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase1": {
+      "main": [
+        [
+          {
+            "node": "Limit9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve aux_buffer2": {
+      "main": [
+        [
+          {
+            "node": "Set Array12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push aux_buffer1": {
+      "main": [
+        [
+          {
+            "node": "Supabase1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items2": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing10",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Array13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Supabase_visits4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit9": {
+      "main": [
+        [
+          {
+            "node": "set loop4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array12": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array13": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing10": {
+      "main": [
+        []
+      ]
+    },
+    "zap aux_buffer1": {
+      "main": [
+        [
+          {
+            "node": "jobber query - quotes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_visits4": {
+      "main": [
+        [
+          {
+            "node": "Limit1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "a5732929-7834-4fbf-87d7-7dbb10257ebf",
+  "triggerCount": 0,
+  "tags": []
+}
