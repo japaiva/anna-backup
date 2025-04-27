@@ -1,0 +1,269 @@
+{
+  "createdAt": "2025-02-11T08:35:29.850Z",
+  "updatedAt": "2025-04-13T00:00:30.711Z",
+  "id": "VD7cqYTa3nJnEchl",
+  "name": "ANNA 1.1 Tratamento Erro",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "Envia Mensagem de Erro pro Chatwoot",
+        "height": 199.92100851423996,
+        "width": 180.90155202154455,
+        "color": 2
+      },
+      "id": "c9973230-3e86-4e5b-bb6c-07f87e6dfff5",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        460,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 300.0071009276654,
+        "width": 699.6984371589301,
+        "color": 6
+      },
+      "id": "8b02ee56-1f2d-4fb0-9338-5740460e17ec",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configuracoes').item.json.app.chatwoot.url }}/api/v1/accounts/{{ $json.app.chatwoot.id }}/conversations/{{ $json.app.chatwoot.conversationId }}/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_access_token",
+              "value": "={{ $('Configuracoes').item.json.app.chatwoot.token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "=**🚨 Erro detectado no Workflow n8n 🚨**\n\n🔹 **Workflow:** {{$('ErrorTrigger').item.json[\"workflow\"][\"name\"]}}  \n🔹 **Workflow ID:** `{{$('ErrorTrigger').item.json[\"workflow\"][\"id\"]}}`\n\n🔸 **Execução ID:** `{{$('ErrorTrigger').item.json[\"execution\"][\"id\"]}}`  \n🔸 **Modo:** {{$('ErrorTrigger').item.json[\"execution\"][\"mode\"]}}  \n🔸 **Último nó executado:** `{{$('ErrorTrigger').item.json[\"execution\"][\"lastNodeExecuted\"]}}`\n\n**⚠️ Descrição do Erro:**\n{{$('ErrorTrigger').item.json[\"execution\"][\"error\"][\"message\"]}}\n\n🔗 **Acesse a execução completa:**\n{{ $json.app.n8n.url }}/workflow/{{$('ErrorTrigger').item.json[\"workflow\"][\"id\"]}}/executions/{{$('ErrorTrigger').item.json[\"execution\"][\"id\"]}}\n\n**🛠️ Sugestão de Correção:**  \n{{$('ErrorTrigger').item.json[\"execution\"][\"error\"][\"description\"]}}\n\n**📍 Contexto:**\n- **Nó:** `{{$('ErrorTrigger').item.json[\"execution\"][\"error\"][\"node\"][\"name\"]}}`\n- **Tipo de nó:** `{{$('ErrorTrigger').item.json[\"execution\"][\"error\"][\"node\"][\"type\"]}}` (Versão {{$('ErrorTrigger').item.json[\"execution\"][\"error\"][\"node\"][\"typeVersion\"]}})\n- **Parâmetros:**\n  - `mode`: {{$('ErrorTrigger').item.json[\"execution\"][\"error\"][\"node\"][\"parameters\"][\"mode\"]}}\n  - `duplicateItem`: {{$('ErrorTrigger').item.json[\"execution\"][\"error\"][\"node\"][\"parameters\"][\"duplicateItem\"]}}\n  - `includeOtherFields`: {{$('ErrorTrigger').item.json[\"execution\"][\"error\"][\"node\"][\"parameters\"][\"includeOtherFields\"]}}\n\n**🗂️ Posição no Workflow:** `{{$('ErrorTrigger').item.json[\"execution\"][\"error\"][\"node\"][\"position\"]}}`\n\n**🔍 Detalhes Técnicos:**\n```\n{{$('ErrorTrigger').item.json[\"execution\"][\"error\"][\"stack\"]}}\n```"
+            },
+            {
+              "name": "message_type",
+              "value": "outgoing"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "887503fd-22b9-488c-9342-7a63e680475f",
+      "name": "SendMessage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        500,
+        100
+      ],
+      "notesInFlow": true
+    },
+    {
+      "parameters": {},
+      "id": "c1f857c8-08bd-4c5b-86a1-b0de49273c45",
+      "name": "ErrorTrigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8a4d6e4b-f1bb-4ded-821a-46fc4e910b1b",
+              "name": "app.chatwoot.url",
+              "value": "https://app.bitfy.ai",
+              "type": "string"
+            },
+            {
+              "id": "e969b6f5-2338-49e0-9d10-753e83950e47",
+              "name": "app.chatwoot.token",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "eec57026-e4d7-4ec9-ad01-8ad9fa3c9b30",
+              "name": "app.chatwoot.id",
+              "value": "1",
+              "type": "string"
+            },
+            {
+              "id": "937ae0e6-4896-440a-bb59-461e89caa4e2",
+              "name": "app.chatwoot.conversationId",
+              "value": "988",
+              "type": "string"
+            },
+            {
+              "id": "4d2aef2e-1fcc-44ba-8efa-fbb322b4e092",
+              "name": "app.n8n.url",
+              "value": "https://n8n.bitfy.ai",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0535e884-3f3a-48f8-9551-189874e25e97",
+      "name": "Configuracoes",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        280,
+        100
+      ],
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "content": "Recebe Entrada de Erro",
+        "height": 199.92100851423996,
+        "width": 180.90155202154455,
+        "color": 2
+      },
+      "id": "30ee2408-9288-42ca-8b13-9cd637ede8ff",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        60,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Tratamento Erro\nANNA",
+        "height": 80,
+        "width": 300,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        -100
+      ],
+      "typeVersion": 1,
+      "id": "6312b645-d5fb-4ef1-bace-8d2e6145a85b",
+      "name": "Sticky Note2"
+    }
+  ],
+  "connections": {
+    "ErrorTrigger": {
+      "main": [
+        [
+          {
+            "node": "Configuracoes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuracoes": {
+      "main": [
+        [
+          {
+            "node": "SendMessage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "ErrorTrigger": [
+      {
+        "json": {
+          "execution": {
+            "id": "149931",
+            "url": "https://webhook.bitfy.ai/workflow/0FDP4zZZpKt69UiY/executions/149931",
+            "error": {
+              "level": "error",
+              "tags": {},
+              "context": {
+                "itemIndex": 0
+              },
+              "functionality": "regular",
+              "name": "NodeOperationError",
+              "timestamp": 1731601060036,
+              "node": {
+                "parameters": {
+                  "mode": "manual",
+                  "duplicateItem": false,
+                  "assignments": {
+                    "assignments": [
+                      {
+                        "id": "30a2c8f6-ca70-4ccb-b620-7b196121a349",
+                        "name": "s",
+                        "value": "s",
+                        "type": "object"
+                      }
+                    ]
+                  },
+                  "includeOtherFields": false,
+                  "options": {}
+                },
+                "id": "109feb88-8772-4425-a286-41662b0a4b50",
+                "name": "Edit Fields",
+                "type": "n8n-nodes-base.set",
+                "typeVersion": 3.4,
+                "position": [
+                  2440,
+                  1020
+                ]
+              },
+              "messages": [],
+              "description": "To fix the error try to change the type for the field \"s\" or activate the option “Ignore Type Conversion Errors” to apply a less strict type validation",
+              "message": "'s' expects a object but we got 's' [item 0]",
+              "stack": "NodeOperationError: 's' expects a object but we got 's' [item 0]\n    at validateEntry (/usr/local/lib/node_modules/n8n/node_modules/n8n-nodes-base/dist/nodes/Set/v2/helpers/utils.js:158:19)\n    at /usr/local/lib/node_modules/n8n/node_modules/n8n-nodes-base/dist/nodes/Set/v2/manual.mode.js:188:63\n    at Array.map (<anonymous>)\n    at Object.execute (/usr/local/lib/node_modules/n8n/node_modules/n8n-nodes-base/dist/nodes/Set/v2/manual.mode.js:187:86)\n    at Object.execute (/usr/local/lib/node_modules/n8n/node_modules/n8n-nodes-base/dist/nodes/Set/v2/SetV2.node.js:341:57)\n    at Workflow.runNode (/usr/local/lib/node_modules/n8n/node_modules/n8n-workflow/dist/Workflow.js:722:42)\n    at /usr/local/lib/node_modules/n8n/node_modules/n8n-core/dist/WorkflowExecute.js:707:66\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at /usr/local/lib/node_modules/n8n/node_modules/n8n-core/dist/WorkflowExecute.js:1137:20"
+            },
+            "lastNodeExecuted": "Edit Fields",
+            "mode": "trigger"
+          },
+          "workflow": {
+            "id": "0FDP4zZZpKt69UiY",
+            "name": "[Anna-Error]"
+          }
+        }
+      }
+    ]
+  },
+  "versionId": "6087afe2-7e6a-4d60-bf1d-a1eb1eecf20d",
+  "triggerCount": 0,
+  "tags": [
+    {
+      "createdAt": "2025-02-11T08:34:07.900Z",
+      "updatedAt": "2025-02-11T08:34:07.900Z",
+      "id": "PDGdF7WZ9gSQmP0W",
+      "name": "Anna"
+    }
+  ]
+}
