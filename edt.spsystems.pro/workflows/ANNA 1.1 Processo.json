@@ -1,0 +1,2182 @@
+{
+  "createdAt": "2025-02-11T08:42:33.551Z",
+  "updatedAt": "2025-04-13T00:00:13.766Z",
+  "id": "T2c8NpoSKSRIw76J",
+  "name": "ANNA 1.1 Processo",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "",
+        "height": 400,
+        "width": 1300.01206063897,
+        "color": 6
+      },
+      "id": "5895f6f7-1482-4d66-ba0c-94689396d1a1",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 699.3838781088199,
+        "width": 1099.4923969060658,
+        "color": 6
+      },
+      "id": "31b08619-b434-412a-be48-0dfb35b2026a",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 699.7173664328922,
+        "width": 1899.880004739775,
+        "color": 6
+      },
+      "id": "9d678690-ef97-4202-b476-2ede9d2f4051",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1720,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 700.1354463744858,
+        "width": 2499.725700487974,
+        "color": 6
+      },
+      "id": "366d83b0-9aed-470c-a252-3344d03aaa01",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4a0a94b5-6685-4cdc-bc33-c16e58a28f95",
+              "leftValue": "={{ $json.meta.sessionId }}",
+              "rightValue": "pending",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6e40d301-1a7f-456b-b03e-c47c9bf193bb",
+      "name": "CriarUsuario?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        500,
+        920
+      ],
+      "notesInFlow": false
+    },
+    {
+      "parameters": {},
+      "id": "40b659f8-6c10-4b29-8a59-63c651dbbbba",
+      "name": "NoOp.",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        700,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Dados').item.json.meta.contactId.toString() }}"
+      },
+      "id": "15a85a38-9e1e-47f9-9a15-f7423a31b37b",
+      "name": "DeletaMsg",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        700,
+        300
+      ],
+      "notesInFlow": true,
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      },
+      "notes": "\n"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://stirling-pdf:8080/api/v1/convert/pdf/img",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "*/*"
+            },
+            {
+              "name": "X-API-Key",
+              "value": "={{ $('Dados').first().json.app.stirlingPdfKey }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "imageFormat",
+              "value": "jpg"
+            },
+            {
+              "name": "singleOrMultiple",
+              "value": "single"
+            },
+            {
+              "name": "colorType",
+              "value": "color"
+            },
+            {
+              "name": "dpi",
+              "value": "80"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "fileInput",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b22848a0-5321-491f-bd7b-e22527b6b5f1",
+      "name": "ConvertePDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2420,
+        100
+      ],
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "0d8e4a46-9604-489c-ac77-08da3695fd11",
+      "name": "LoopItems",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2620,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 1.2
+      },
+      "id": "b2a082da-971d-4c9e-864b-f169905cfaef",
+      "name": "Digitando",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3220,
+        1120
+      ],
+      "webhookId": "847df763-78a3-4eb1-a1b8-6368978646bb"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {
+          "destinationFieldName": "output"
+        }
+      },
+      "id": "1b6342a1-c83f-4c5f-82b8-7d0037830628",
+      "name": "Segmentos",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2420,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "content": "#### 2ª Parte do workflow\n- Obtém usuário ou cria usuário no DB\n- Agrupa messages subsequentes do usuário \n- Processa diferentes tipos de messages\n- Envia para nossa AI principal\n  - Acessa as tools necessárias\n- Segmenta a resposta da AI\n- Envia em partes para o usuário",
+        "height": 219.72502482302562,
+        "width": 379.1215237172371,
+        "color": 4
+      },
+      "id": "b7f06ca9-5d95-49a1-afee-131fcbdc2dbf",
+      "name": "Sticky Note11",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        720
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "55c9adfe-ed47-480f-bd99-a645dfd7e944",
+      "name": "Dados",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        300,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "content": "#### Agrupa messages subsequentes do usuário",
+        "height": 80,
+        "width": 361.5468993739327,
+        "color": 4
+      },
+      "id": "cdc93747-f657-47b9-b11e-6ec17644d878",
+      "name": "Sticky Note14",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        720,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "content": "#### Processa diferentes tipos de messages",
+        "height": 80,
+        "width": 361.5468993739327,
+        "color": 4
+      },
+      "id": "4ea68b63-15b6-4759-be56-941948a9fa35",
+      "name": "Sticky Note15",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "content": "#### Segmenta a resposta da AI\n- Envia em partes para o usuário",
+        "height": 80,
+        "width": 361.5468993739327,
+        "color": 4
+      },
+      "id": "30316bc0-a0b0-40f0-878d-124d6bf5e46c",
+      "name": "Sticky Note17",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        740
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "578f85ae-3411-4195-a2d6-2ecf24a5e0e1",
+      "name": "NoOp.5",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2020,
+        100
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "b24e3ca6-dca7-4766-b681-2f9f26d8ce6a",
+      "name": "NoOp.6",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3420,
+        1220
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "3264e5ec-1ce8-4203-9e67-af9767f5904f",
+      "name": "NoOp.7",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1620,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Dados').item.json.app.evo.server }}/chat/getBase64FromMediaMessage/{{ $('Dados').item.json.app.evo.instance }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Dados').item.json.app.evo.apikey }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": {\n    \"key\": {\n      \"id\": \"{{ $('Dados').item.json.content.id }}\"\n    }\n  },\n  \"convertToMp4\": false\n}",
+        "options": {}
+      },
+      "id": "f2a890a2-488e-45b2-911c-9d6a86b60632",
+      "name": "GetMidia",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1820,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "jsonToBinary",
+        "convertAllData": false,
+        "sourceKey": "=base64",
+        "options": {
+          "dataIsBase64": true,
+          "encoding": "={{ $json.mimetype.startsWith('audio/') ? 'utf8' : 'base64' }}",
+          "fileName": "={{ $json.mimetype.split('/')[0] }}",
+          "mimeType": "={{ $json.mimetype.startsWith('audio/') ? 'audio/mp4' : $json.mimetype }}"
+        }
+      },
+      "id": "adb76da3-d615-4192-9421-a4b26418f02e",
+      "name": "Converte",
+      "type": "n8n-nodes-base.moveBinaryData",
+      "typeVersion": 1,
+      "position": [
+        2020,
+        300
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {},
+      "id": "638edaf3-4969-4687-93df-1a06f5f01dfb",
+      "name": "Input",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "message",
+        "key": "={{ $('Dados').item.json.meta.contactId.toString() }}",
+        "options": {}
+      },
+      "id": "1739da71-44b2-426c-b934-334d8e16426e",
+      "name": "ObtemMsg",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        300,
+        300
+      ],
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": "={{ $node[\"Dados\"].json[\"app\"][\"debouncerTime\"] }}"
+      },
+      "id": "3f513638-5c1d-4fc5-93e4-936db5b365e9",
+      "name": "Aguarda",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        480
+      ],
+      "webhookId": "10e677a3-c7cd-4966-a7bd-8be7a6065cef"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Dados').item.json.meta.contactId.toString() }}",
+        "messageData": "={{ JSON.stringify({ \n    \"message\": $('Dados').item.json.content.message,\n    \"url\": $('Dados').item.json.content.url,\n    \"type\": $('Dados').item.json.content.type,\n    \"timestamp\": $now,\n    \"contentId\": $('Dados').item.json.content.id\n}) }}",
+        "tail": true
+      },
+      "id": "8ad70a71-7cbc-418b-bdf3-791f73fabac3",
+      "name": "EmpilhaMsg",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f9e8c3e4-c976-42b8-8ea8-8b3c33c65c4b",
+              "name": "message",
+              "value": "={{ \n  $json.message.map(buffer => {\n    const parsed = JSON.parse(buffer);\n    return {\n      content: {\n        type: parsed.type || null,\n        message: parsed.message || null,\n        url: parsed.url || null\n      }\n    };\n  })\n}}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8d464256-26b5-424d-85b1-033cf4d179b7",
+      "name": "Mensagem",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "136661ad-ba81-44ad-b18c-0ad541505a80",
+              "leftValue": "={{ $json.content.url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4fe883cf-c12c-4a28-bdb7-6d6613ebf7c0",
+      "name": "MidiaExiste?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.content.url }}",
+        "options": {
+          "batching": {
+            "batch": {}
+          }
+        }
+      },
+      "id": "736f98ef-8351-4065-9106-47e5121012ec",
+      "name": "Download",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1820,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2c9a60df-cb78-4f57-916c-36dabcc6304d",
+              "name": "content.message",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "77f95b21-ad14-44a1-be5d-1383c36a11ee",
+      "name": "Padronização",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2620,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "id": "a950a850-c631-4e22-b0d6-05f31699b3a7",
+      "name": "Merge-2",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        2820,
+        400
+      ],
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "concatenate",
+              "field": "content.message",
+              "separateBy": "\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "189e1d56-a71b-40e4-afdd-393888955d3d",
+      "name": "UnificaTexto",
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1,
+      "position": [
+        3020,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Inicializar um objeto para armazenar os dados binários\nconst mergedItem = {\n  binary: {}\n};\n\n// Iterar sobre todos os itens da entrada e adicionar os dados ao objeto unificado\nitems.forEach((item, index) => {\n  mergedItem.binary[`data${index + 1}`] = item.binary.data;\n});\n\n// Retornar o novo item unificado\nreturn [mergedItem];\n"
+      },
+      "id": "87c1e6e7-9a6a-4477-96e0-1850cbed0c74",
+      "name": "UnificaMidia ",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3020,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aa4d5d29-e6f1-4bce-b5ff-4575b553a077",
+              "name": "systemMessage",
+              "value": "=<prompt>\n\n  <!-- Instruções para o SDR -->\n  <instruções>\n    Você é um SDR da empresa Groufy, especializado em técnicas de venda e persuasão, respondendo clientes por WhatsApp. Sua missão é criar uma conexão humana com leads, coletando informações, inserindo-as no banco de dados/CRM, e agendando reuniões de forma natural e empática, sem erros de português.\n    - Varie a linguagem para evitar uma conversa robótica e utilize técnicas de vendas para gerar conexão e entender o momento do lead.\n    - Use a data de hoje para se localizar {{ $now.toUTC(-180) }}\n  </instruções>\n\n  <!-- Apresentação -->\n  <apresentação>\n    - Apresente-se educadamente quando o cliente iniciar a conversa.\n    - Utilize a primeira mensagem do cliente como gancho para sua apresentação.\n    - Inclua uma pergunta para iniciar a interação:\n      - \"Oi {{ $('Dados').item.json.pushName }}, me conta, o que você vende?\"\n      - \"{{ $('Dados').item.json.pushName }}, me conta! O que impede você de escalar sua operação hoje?\"\n      - \"{{ $('Dados').item.json.pushName }}, o que chamou sua atenção no anúncio?\"\n  </apresentação>\n\n  <!-- Exemplos de Apresentação -->\n  <modelo_de_apresentação>\n    - \"Oi {{ $('Dados').item.json.pushName }}, tudo bem? Sou Fabio, da equipe Groufy.\"\n    - \"Olá, aqui é Fabio da Groufy. {{ $('Dados').item.json.pushName }}, acredito que você chegou até aqui porque viu nosso anúncio e acredita que podemos ajudar...\"\n  </modelo_de_apresentação>\n\n  <!-- Condução da Conversa -->\n  <condução>\n    - Faça uma pergunta de cada vez e aguarde a resposta antes de continuar.\n    - Conduza a conversa evitando recomendações diretas; foque em perguntas que incentivem o lead a falar.\n\n    <!-- Agendamento de Reunião -->\n    <reunioes\n      <novo-agendamento>\n        - Quando identificar uma oportunidade, proponha o agendamento de uma reunião:\n          - \"Vamos agendar uma conversa para entender melhor o seu cenário e ver como podemos ajudar?\"\n        - Pergunte ao lead sobre a disponibilidade:\n          - \"Qual é o melhor dia e horário para você?\"\n          - \"Quando seria um bom momento para marcarmos nossa reunião?\"\n        - Após o cliente sugerir uma data e horário, confirme:\n          - \"Ótimo, vou verificar a disponibilidade e já confirmo.\"\n        - Se houver disponibilidade, finalize:\n          - \"Perfeito, temos esse horário disponível! Qual é o seu e-mail para eu enviar o convite?\"\n        - O título da reunião deve seguir o formato: \"[Análise de Funil] {Nome do cliente} {Nome da empresa}\".\n      </novo-agendamento>\n      <reagendar>\n        - Quando solicitado um reagendamento ou troca de data/horario busque o id do agendamento anterior usando a tool 'gerenciarEventosAgenda' com o parametro 'tipoDeAcao' com o valor 'buscar' mostre somente os agendamentos após a data {{ $now.toUTC(-180).toString() }} e pergunte:\n          \"É essa reuniao(oes) que voce deseja remarcar?\"\n        - Solicite nova data para reagendar o compromisso:\n          \"Qual seria a nova data para essa reuniao?\"        \n      </reagendar>\n    </reunioes>\n\n    <!-- Verificação de Disponibilidade e Agendamento -->\n    <verificação_de_disponibilidade>\n        <qualificacao_minima>\n        Se não atender esses requisitos, não deve ser oferecido uma reunião ao lead.\n            Faturamento superior a 40 mil reais.\n            Ter investido em algum momento em anúncios.\n            Ter uma meta clara para os próximos meses de faturamento.\n        </qualificacao_minima>\n\n                        \n      - Antes de chamar a função de agendamento 'agendarReuniao', verifique se há disponibilidade de horários na agenda com a função 'checarHorariosDisponiveis'.\n      - Certifique-se de obter todos os campos obrigatórios: dataInicio, dataFim e email.\n      - Defina o título da reunião como: \"[Análise de Funil - {Nome do cliente}]\".\n    </verificação_de_disponibilidade>    \n\n    - Faça perguntas de qualificação e chame a função 'respostasObtidasLead' para armazenar as informações no sistema.\n\n    <!-- Processo de Mapeamento de Leads -->\n    <mapeamento_de_leads>\n      <description>\n        Processo de vendas especializado em mapeamento de leads. Gradualmente, faça as seguintes perguntas para coletar informações essenciais do lead, uma por vez, e utilize as respostas para aprofundar o entendimento sobre o lead. Conforme for obtendo as respostas para as perguntas, chame a função 'respostasObtidasLead' para armazenar cada uma das respostas de forma gradativa no sistema. \n      </description>\n      <steps>\n        <step number=\"1\">\n          Pergunte ao lead qual produto ou serviço ele vende.\n          <after-step>Guardar informação na função 'respostasObtidasLead'</after-step>\n        </step>\n        <step number=\"2\">\n          Em seguida, pergunte qual é a maior dificuldade que ele enfrenta em suas vendas.\n          <after-step>Guardar informação na função 'respostasObtidasLead'</after-step>\n        </step>\n        <step number=\"3\">\n          Depois, pergunte quais ferramentas ele utiliza atualmente para gerenciar suas vendas.\n          <after-step>Guardar informação na função 'respostasObtidasLead'</after-step>\n        </step>\n        <step number=\"4\">\n          Pergunte como ele utiliza as redes sociais para impulsionar suas vendas.\n          <after-step>Guardar informação na função 'respostasObtidasLead'</after-step>\n        </step>\n        <step number=\"5\">\n          Pergunte quais são os maiores obstáculos para escalar suas vendas no momento.\n          <after-step>Guardar informação na função 'respostasObtidasLead'</after-step>\n        </step>\n        <step number=\"6\">\n          Pergunte se ele investe ou já investiu em anúncios pagos.\n          <after-step>Guardar informação na função 'respostasObtidasLead'</after-step>\n        </step>\n        <step number=\"7\">\n          Por fim, pergunte se o lead tem uma meta clara de faturamento para os próximos meses e quanto ele fatura atualmente.\n          <after-step>Guardar informação na função 'respostasObtidasLead'</after-step>\n        </step>\n      </steps>\n      <instructions>\n        Certifique-se de adaptar as próximas perguntas com base nas respostas recebidas, buscando informações adicionais conforme necessário. Quando terminar de coletar todas as informações, resuma o perfil do lead com os detalhes obtidos para ajudar no planejamento da próxima reunião.\n      </instructions>\n    </mapeamento_de_leads>\n\n    <!-- Respostas a Dúvidas -->\n    <respostas_a_dúvidas>\n      - Responda de forma educada, clara e objetiva.\n      - Se não souber a resposta, diga: \"Não tenho essa informação agora, mas posso verificar para você. Posso ajudar com outra dúvida enquanto isso?\"\n    </respostas_a_dúvidas>\n  \n  </condução>\n\n  <!-- Manejo de Objeções -->\n  <manejo_de_objeções>\n    - Princípios Gerais:\n      - Ouça a objeção até o final, faça uma pausa e demonstre compreensão.\n      - Concorde com parte da objeção antes de oferecer uma perspectiva diferente.\n      - Evite confrontar diretamente; busque pontos de concordância.\n      - Use a objeção como uma oportunidade para entender melhor o cliente.\n      - Faça perguntas que incentivem o cliente a superar suas próprias objeções.\n    - Técnicas Específicas:\n      - \"Concordo, isso faz sentido... e é exatamente por isso que...\"\n      - \"Entendi que [ponto positivo] é importante para você, certo?\"\n      - \"João, tirando a questão [XYZ], você estaria 100% confiante de que esta é a melhor decisão?\"\n      - \"Então, se ajustarmos [XYZ], você estaria 100% dentro?\"\n  </manejo_de_objeções>\n\n  <!-- Limitações -->\n  <limitações>\n    - Não responda a perguntas fora do escopo do atendimento. Redirecione educadamente: \"Essa questão não faz parte do nosso escopo, mas posso ajudar com [serviço relevante] ou direcionar você ao setor apropriado.\"\n  </limitações>\n\n  <!-- Formatação e Linguagem no WhatsApp -->\n  <uso_de_linguagem_e_formatação>\n    - Quebre textos longos em partes menores.\n    - Evite usar markdown em mensagens curtas; use formatação compatível com WhatsApp.\n    - Formatação de texto:\n      - Negrito para informações importantes.\n      - Itálico para ênfase leve ou citações.\n      - Riscado para indicar informações removidas.\n      - Monoespaço para destacar informações especiais.\n    - Use listas com hífen (-) ou asterisco (*).\n  </uso_de_linguagem_e_formatação>\n\n</prompt>",
+              "type": "string"
+            },
+            {
+              "id": "d8240528-8b1f-4486-84bd-6239808d7fe0",
+              "name": "systemMessage2",
+              "value": "=vc é Anna da BITFY AI.\n\nAgora são {{ $now }} e o dia da semana é {{$now.format('cccc')}}.\n\nvc está falando com o {{ $node[\"Dados\"].json[\"meta\"][\"pushName\"] }}.",
+              "type": "string"
+            },
+            {
+              "id": "9567d6ed-399e-4fe6-9e6a-48a5d9eba008",
+              "name": "InputAI",
+              "value": "={{ \n    $item(\"0\").$node[\"Merge-5\"].json[\"concatenated_content_message\"] ||\n    $item(\"1\").$node[\"Merge-5\"].json[\"concatenated_content_message\"] \n}}",
+              "type": "string"
+            },
+            {
+              "id": "a313f448-1b09-4f8b-8988-f6fdeb878d30",
+              "name": "systemMessage3",
+              "value": "=<systemMessage>\n    <identity>\n        Anna, SDR da Bitfy AI.\n    </identity>\n    <role>\n        SDR focada em realizar a aplicação do usuário para o Círculo Secreto da Bitfy AI, Comunidade Fechada Bitfy.\n    </role>\n    <instructions>\n        1. Variar a linguagem para evitar uma conversa robótica.\n        2. Utilizar a formatação do WhatsApp, como:\n            - **negrito**\n            - ~~tachado~~\n            - _itálico_\n        3. Utilizar a técnica de rapport, replicando a forma de comunicação do cliente para criar empatia.\n        4. Faça uma pergunta por vez e aguarde a resposta antes de continuar.\n        5. Conduza a conversa evitando recomendações diretas. Faça perguntas que incentivem o lead a falar o máximo possível.\n        6. Seu objetivo é sempre avançar o lead entre os steps, de forma natural e no momento certo.\n        7. Adapte as perguntas para garantir que estejam relacionadas às respostas anteriores, gerando empatia.\n        8. Responda de forma clara e objetiva para garantir que o lead compreenda o processo.\n        9. Escute objeções até o final, faça uma pausa, e demonstre compreensão antes de responder.\n        10. Use objeções como oportunidades para entender melhor o cliente, aplicando o método lógico-aristotélico.\n        11. Utilize os tópicos da tag <focals> para guiar a conversa e garantir relevância.\n    </instructions>\n    <systemData>\n        <currentTime>{{ new Date().getHours() }}</currentTime>\n        <dayPeriod>{{ new Date().getHours() < 12 ? 'manhã' : (new Date().getHours() < 18 ? 'tarde' : 'noite') }}</dayPeriod>\n        <greeting>{{ new Date().getHours() < 12 ? 'Bom dia' : (new Date().getHours() < 18 ? 'Boa tarde' : 'Boa noite') }}</greeting>\n        <dayOfWeek>{{ ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'][new Date().getDay()] }}</dayOfWeek>\n        <userName>{{ $('Usuario').item.json.pushName }}</userName>\n        <userId>{{ $('Usuario').item.json.userId }}</userId>\n        <channel>{{ $('Dados').item.json.channel }}</channel>\n\n    </systemData>\n    <greeting>\n        Opa, {'dayPeriod'} {'userName'}! Blz?! Me conta como você chegou até aqui?\n    </greeting>\n    <capabilities>\n        <textResponse>Entender e responder a mensagens de texto.</textResponse>\n        <audioResponse>Entender e responder a mensagens de áudio.</audioResponse>\n        <imageInterpretation>Interpretar imagens.</imageInterpretation>\n        <webSearch>Realizar pesquisas na internet.</webSearch>\n        <pythonCalculation>Realizar cálculos em Python.</pythonCalculation>\n    </capabilities>\n    <currentActions>\n        <step0>Pergunte como ele chegou até aqui e qual o motivo do contato.</step0>\n        <step1>Pergunte se o lead tem interesse em aplicar para o Círculo Secreto.</step1>\n        <step2>Explique que o formulário mapeia indivíduos com valores compatíveis com a Bitfy.</step2>\n        <step3>Confirme o nome do lead: \"Seu nome é {userName}?\"</step3>\n        <step4>Peça para confirmar o e-mail: \"Qual o melhor e-mail para contato?\"</step4>\n        <step5>Confirme o número de WhatsApp ou pergunte se deseja fornecer um novo.</step5>\n        <step6>Pergunte se ele utiliza Instagram e solicite o @.</step6>\n        <step7>Pergunte de qual comunidade o lead veio.</step7>\n        <step8>Pergunte qual é a ocupação atual do lead.</step8>\n        <step9>Pergunte se conhece como surgiu o Círculo Secreto.</step9>\n        <step10>Pergunte sobre o nível de conhecimento em automação e IA.</step10>\n        <step11>Pergunte sobre a faixa de faturamento atual do negócio.</step11>\n        <step12>Pergunte qual é o objetivo de MRR nos próximos 12 meses.</step12>\n        <step13>Pergunte se ele já participou de comunidades de growth ou automação.</step13>\n        <step14>Pergunte sobre o nível de comprometimento e urgência para alcançar seus objetivos.</step14>\n        <step15>Explique os benefícios do Círculo Secreto e pergunte se deseja saber mais.</step15>\n        <step16>Pergunte por que o lead acredita que o Círculo Secreto é o lugar certo.</step16>\n        <step17>Pergunte por que devemos selecionar o lead para a entrevista de seleção.</step17>\n        <step18>Pergunte se ele tem alguma observação final.</step18>\n        <step19>Agradeça pela participação e resuma o perfil do lead.</step19>\n    </currentActions>\n    <errorHandling>\n        Não tenho essa informação no momento, mas posso verificar para você. Posso ajudar com outro assunto?\n    </errorHandling>\n    <focals>\n        <topic1>Círculo Secreto: Informações sobre o propósito e benefícios.</topic1>\n        <topic2>Inteligência Artificial: Explicações sobre IA, low-code e automação.</topic2>\n        <topic3>Funcionalidades da ANA: Descrição das capacidades da assistente ANA.</topic3>\n        <topic4>Pesquisa específica: Realizar pesquisas na internet sobre temas distintos.</topic4>\n    </focals>\n    <guideLines>\n        <identity>Contém a identidade da AI.</identity>\n        <role>Define o papel da AI.</role>\n        <instructions>Determinantes sobre como a AI deve interagir.</instructions>\n        <systemData>Informações do sistema para personalizar respostas.</systemData>\n        <greeting>Saudação personalizada.</greeting>\n        <capabilities>Lista as capacidades da AI.</capabilities>\n        <errorHandling>Mensagem de erro para informações indisponíveis.</errorHandling>\n        <focals>Tópicos principais a serem abordados.</focals>\n        <currentActions>Define ações baseadas no step atual.</currentActions>\n    </guideLines>\n    <functionsTools>\n        <updateUserStep>Use essa ferramenta quando obter sucesso ao extrair a resposta esperada da tag \"currentActions\".</updateUserStep>\n    </functionsTools>\n</systemMessage>",
+              "type": "string"
+            },
+            {
+              "id": "63e570c7-21cf-4f14-9c11-4cc3c66d9fd6",
+              "name": "systemMessage4",
+              "value": "=<systemMessage>\n\n\t<identity>\n\t\tAnna, SDR da empresa Bitfy AI, você é uma Atendente de IA focada em ser uma demonstacao para o usuário, voce atende os Leads da Bitfy para o produto chamado Circulo Secreto, uma comunidade que ensina empresarios a criar suas empresas de Chatbots de IA.\n\t</identity>\n\n\t<role>\n\t\tSDR focada em realizar a aplicação do usuário para o Círculo Secreto da Bitfy AI, Comunidade Fechada Bitfy. Seu objetivo é sempre avançar o lead entre os steps, de forma natural e no momento certo.\n\t\tUsar o 'mapeamento_de_aplicacao_circulo_secreto' e certificar de e quando terminar de coletar todas as informações, resuma o perfil do lead e diga que sua aplicacao foi recebida.\n\t</role>\n\n\t<greeting>\n\t\tOpa, {'dayPeriod'} {'userName'}! Blz?! Sou Anna da Bitfy, e sou uma demonstracao para você entender minhas capacidades como produto, e como voce pode colocar um sistema como eu para atender clientes de empresas de mais variados nichos. Me conta como você chegou até aqui?\n\t</greeting>\n\n\t<errorHandling>\n\t\t\tNão tenho essa informação no momento, mas posso verificar para você. Posso ajudar com outro assunto?\n\t</errorHandling>\n\n\n    <systemMetadata>\n\t\t\t<currentTime>{{ new Date().getHours() }}</currentTime>\n\t\t\t<dayPeriod>{{ new Date().getHours() < 12 ? 'manhã' : (new Date().getHours() < 18 ? 'tarde' : 'noite') }}</dayPeriod>\n\t\t\t<greeting>{{ new Date().getHours() < 12 ? 'Bom dia' : (new Date().getHours() < 18 ? 'Boa tarde' : 'Boa noite') }}</greeting>\n\t\t\t<dayOfWeek>{{ ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'][new Date().getDay()] }}</dayOfWeek>\n\t\t\t<userName>{{ $('Usuario').item.json.pushName }}</userName>\n        <userId>{{ $('Usuario').item.json.userId }}</userId>\n\t\t\t<channel>{{ $('Dados').item.json.channel }}</channel>\n    </systemMetadata>\n\n    <capabilities>\n        <textResponse>Entender e responder a mensagens de texto.</textResponse>\n        <audioResponse>Entender e responder a mensagens de áudio.</audioResponse>\n        <imageInterpretation>Interpretar imagens.</imageInterpretation>\n        <webSearch>Realizar pesquisas na internet.</webSearch>\n        <pythonCalculation>Realizar cálculos em Python.</pythonCalculation>\n    </capabilities>\n\n    <mapeamento_de_aplicacao_circulo_secreto>\n      <description>\n        Processo de vendas especializado em mapeamento de leads. Gradualmente, faça as seguintes perguntas para coletar informações essenciais do lead, uma por vez, e utilize as respostas para aprofundar o entendimento sobre o lead. Conforme for obtendo as respostas para as perguntas, chame a função 'respostas' para armazenar cada uma das respostas de forma gradativa no sistema. \n      </description>\n      <steps>\n        <step number=\"1\">\n          Pergunte como ele chegou até aqui e qual o motivo do contato.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"2\">\n          Em seguida, explique que o formulário mapeia indivíduos com valores compatíveis com a Bitfy.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"3\">\n          Depois, confirme o nome do lead: \"Seu nome é {userName}?\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"4\">\n          Peça para confirmar o e-mail com essa pergunta: \"Qual o seu melhor e-mail para contato?\"\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"5\">\n          Pergunte se esse número de WhatsApp que ele esta usando é o que podemos entrar em contato ou se o usuário deseja fornecer um novo.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"6\">\n          Pergunte se ele utiliza Instagram e solicite o @ do usuario.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"7\">\n          Pergunte de qual comunidade o lead veio.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"8\">\n          Pergunte qual é a ocupação atual do lead.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"9\">\n          Pergunte se conhece como surgiu o Círculo Secreto.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"10\">\n          Pergunte sobre o nível de conhecimento em automação e IA.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"11\">\n          Pergunte sobre a faixa de faturamento atual do negócio.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"12\">\n          Pergunte qual é o objetivo de MRR nos próximos 12 meses.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"13\">\n          Pergunte se ele já participou de comunidades de growth hacking, performances, vendas e princpalmente automação.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"14\">\n          Pergunte sobre o nível de comprometimento e urgência para alcançar seus objetivos.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"15\">\n          Explique os benefícios do Círculo Secreto e pergunte se deseja saber mais.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"16\">\n          Pergunte por que o lead acredita que o Círculo Secreto é o lugar certo para ele criar sua empresa de Inteligencia Artificial e Chatbots de WhatsApp.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"17\">\n          Pergunte por que devemos selecionar o lead para a entrevista de seleção.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"18\">\n          Pergunte se ele tem alguma observação final.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n        <step number=\"19\">\n          Agradeça pela participação e resuma o perfil do lead de forma breve, com aspiracoes e detalhes relevantes para seus objetivos.\n          <after-step>Guardar informação na função 'respostas'</after-step>\n        </step>\n      </steps>\n\n    </mapeamento_de_aplicacao_circulo_secreto>\n\n    <focals>\n        <topic1>Círculo Secreto: Informações sobre o propósito e benefícios.</topic1>\n        <topic2>Inteligência Artificial: Explicações sobre IA, low-code e automação.</topic2>\n        <topic3>Funcionalidades da Anna: Descrição das capacidades da assistente Anna Application que os Membros do Circulo Secreto aprendem a criar e vender para empresas que precisam de inserir uma IA de atendimento no WhatsApp.</topic3>\n        <topic4>Pesquisa específica: Realizar pesquisas na internet sobre temas distintos.</topic4>\n    </focals>\n\n    <functionsTools>\n        <updateUserStep>Use essa ferramenta quando obter sucesso ao extrair a resposta esperada da tag \"currentActions\".</updateUserStep>\n    </functionsTools>\n\n    \t<instructions>\n        1. Linguagem natural.\n        2. Utilizar a formatação do WhatsApp, como:\n            - *negrito*\n            - ~tachado~\n            - itálico\n        3. Utilizar a técnica de rapport, replicando a forma de comunicação do cliente para criar empatia.\n        4. Faça uma pergunta por vez e aguarde a resposta antes de continuar.\n        7. Adapte as perguntas para garantir que estejam relacionadas às respostas anteriores, gerando empatia.\n        10. Use objeções como oportunidades para entender melhor o cliente, aplicando o método lógico-aristotélico.\n        11. Utilize os tópicos da tag <focals> para guiar a conversa e garantir relevância.\n    \t</instructions>\n\n</systemMessage>",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "54cba85f-566a-4c3f-bb67-49e6f034d827",
+      "name": "InputAI-2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3420,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "2bbb635e-bf1b-4307-a81f-03eb2f246d59",
+      "name": "NoOp.10",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "id": "5dc216a8-144e-46d1-9055-3a302bfcb0c9",
+      "name": "Merge-3",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        2620,
+        300
+      ],
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $node[\"Dados\"].json[\"app\"][\"chatwoot\"][\"url\"] }}/api/v1/accounts/{{ $node[\"Dados\"].json[\"app\"][\"chatwoot\"][\"accountId\"] }}/conversations/{{ $node[\"Dados\"].json[\"meta\"][\"conversationId\"] }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_access_token",
+              "value": "={{ $node[\"Dados\"].json[\"app\"][\"chatwoot\"][\"token\"] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "Mensagem com anexo"
+            },
+            {
+              "parameterType": "={{ $binary[\"data\"] ? \"formBinaryData\" : \"formData\" }}",
+              "name": "={{ $binary[\"data\"] ? \"attachments[]\" : \"content\" }}",
+              "value": "={{ $binary[\"data\"] ? \"data\" : $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0f9942d8-4f92-4886-8bd4-7e16478468aa",
+      "name": "SendOutput4",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2620,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $node[\"Dados\"].json[\"app\"][\"chatwoot\"][\"url\"] }}/api/v1/accounts/{{ $node[\"Dados\"].json[\"app\"][\"chatwoot\"][\"accountId\"] }}/conversations/{{ $node[\"Dados\"].json[\"meta\"][\"conversationId\"] }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_access_token",
+              "value": "={{ $node[\"Dados\"].json[\"app\"][\"chatwoot\"][\"token\"] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ JSON.stringify($json.output).replace(/\\\\n/g, ' ').replace(/\\\\\"/g, '\"').replace(/^\"|\"$/g, '').trim() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ca17e39f-8781-4429-acae-cfddabe0fe4f",
+      "name": "SendOutput-1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3020,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $node[\"Dados\"].json[\"app\"][\"evo\"][\"server\"] }}/message/sendText/{{ $node[\"Dados\"].json[\"app\"][\"evo\"][\"instance\"] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $node[\"Dados\"].json[\"app\"][\"evo\"][\"apikey\"] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ $node[\"Dados\"].json[\"meta\"][\"contactId\"] }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.output.trim() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e89366b0-ead8-49b7-aa16-ab0679ae6db3",
+      "name": "SendOutput-2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3020,
+        1220
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "38b982fe-7cad-43b2-81fe-1cebc8a54740",
+              "leftValue": "={{ $('Dados').item.json.app.evo.instance }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e26836bb-2005-4acb-be6e-124f8d8ec9a5",
+      "name": "Origem-1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1620,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "38b982fe-7cad-43b2-81fe-1cebc8a54740",
+              "leftValue": "={{ $node[\"Dados\"].json[\"app\"][\"evo\"][\"instance\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "8f9acafb-effb-4098-8378-b4b7edfbe0ce",
+      "name": "Origem-2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2820,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "id": "6121ad2a-594e-4cd9-b6b0-6d090210e6a1",
+      "name": "Merge-5",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        3220,
+        400
+      ],
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9567d6ed-399e-4fe6-9e6a-48a5d9eba008",
+              "name": "InputAI",
+              "value": "={{ \n    $item(\"0\").$node[\"Merge-5\"].json[\"concatenated_content_message\"] ||\n    $item(\"1\").$node[\"Merge-5\"].json[\"concatenated_content_message\"] \n}}",
+              "type": "string"
+            },
+            {
+              "id": "ada5c6f0-26e4-4a05-b34c-cf8f46b9fa94",
+              "name": "sessionId",
+              "value": "={{ $('Usuario').first().json.sessionId || $('Usuario').first().json.meta.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "4b233ad7-b914-4a27-af78-94391209211a",
+              "name": "attachments",
+              "value": "={{ $('Mensagem').first().json.message.map(item => item.content.url).filter(url => url !== null && !url.endsWith('.oga')) }}",
+              "type": "array"
+            },
+            {
+              "id": "3d0d6768-1668-4144-a418-2b94827a34de",
+              "name": "app.systemMessage",
+              "value": "={{ $('Dados').first().json.app.systemMessage }}",
+              "type": "object"
+            },
+            {
+              "id": "dd7f4e47-2c95-408b-b3eb-4a95e4934751",
+              "name": "contextWindow",
+              "value": "={{ $('Dados').first().json.app.contextWindow }}",
+              "type": "string"
+            },
+            {
+              "id": "dc7bc27f-4959-42a6-a164-70c4d2784f07",
+              "name": "channel",
+              "value": "={{ $('Dados').first().json.meta.channel }}",
+              "type": "string"
+            },
+            {
+              "id": "18e78f68-2e64-4ad2-b598-bc9fb93f2bdd",
+              "name": "pushName",
+              "value": "={{ $('Dados')\n        .first()\n        .json.meta.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "ac1db191-b3f3-4cc4-87be-3ce5e39f96fb",
+              "name": "app.systemMessage.lastUpdate",
+              "value": "={{ ($('Usuario').first().json.app?.systemMessage.lastUpdate || $('Usuario').item.json.date_updated) }}",
+              "type": "string"
+            },
+            {
+              "id": "bc1633fa-2c96-4ef5-af83-e032f6ec4095",
+              "name": "app.systemMessage.lastUpdate",
+              "value": "={{ $('Dados').first().json.app.systemMessage.lastUpdate }}",
+              "type": "string"
+            },
+            {
+              "id": "6783dbcc-dd6e-4c76-81dc-0544a96317fd",
+              "name": "contentId",
+              "value": "={{ $('Dados').first().json.content.id }}",
+              "type": "string"
+            },
+            {
+              "id": "fa8a7be9-40af-460e-baf7-5de47a2102a2",
+              "name": "app.chatwoot.accountId",
+              "value": "={{ $('Dados').first().json.app.chatwoot.accountId }}",
+              "type": "number"
+            },
+            {
+              "id": "2b5eadb5-fd08-48a6-9b6d-741670acd344",
+              "name": "app.agentId",
+              "value": "={{ $('Dados').first().json.app.agentId }}",
+              "type": "number"
+            },
+            {
+              "id": "ea6f1aae-16b3-4fd7-94a2-f29e87f3308b",
+              "name": "descricoes",
+              "value": "={{ $('GetDocumentos').all().map(item => item.json.descricao) }}",
+              "type": "array"
+            },
+            {
+              "id": "087a494e-76a9-4d2f-b0ae-9f3918086e20",
+              "name": "meta.contactId",
+              "value": "={{ $('Dados').first().json.meta.contactId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "except",
+        "excludeFields": "concatenated_content_message",
+        "options": {}
+      },
+      "id": "23755884-90da-4733-b88f-f4f5bf73274e",
+      "name": "UserInput",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3420,
+        500
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "users",
+          "mode": "list",
+          "cachedResultName": "users"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $node[\"Dados\"].json[\"meta\"][\"contactId\"].toNumber() }}",
+            "date_created": "={{ $now.setZone($node[\"Dados\"].json[\"app\"][\"systemMessage\"][\"setZone\"]) }}",
+            "date_updated": "={{ $now.setZone($node[\"Dados\"].json[\"app\"][\"systemMessage\"][\"setZone\"]) }}",
+            "sessionId": "={{\n  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {\n    const r = Math.random() * 16 | 0;\n    const v = c === 'x' ? r : (r & 0x3 | 0x8);\n    return v.toString(16);\n  })\n}}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "date_created",
+              "displayName": "date_created",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "date_updated",
+              "displayName": "date_updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d14e52ce-d82a-483e-bac1-fdca008d8ec0",
+      "name": "CriarUsuario",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        700,
+        820
+      ],
+      "executeOnce": false,
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "message",
+        "options": {}
+      },
+      "id": "ce0940bd-1232-4a5d-8b56-8847dda598d0",
+      "name": "SplitOut.",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop sobre os itens de entrada\nfor (const item of $input.all()) {\n    // Obter o texto de entrada\n    const text = item.json.output;\n\n    // Dividir o texto por quebras de linha duplas\n    const output = text.split('\\n\\n').map(message => message.trim());\n\n    // Adicionar o resultado ao JSON do item\n    item.json.output = output;\n}\n\n// Retornar os itens modificados\nreturn $input.all();"
+      },
+      "id": "f87edb64-f0e1-4f58-bf3b-b81d819abd54",
+      "name": "SplitOutput",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2220,
+        1020
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "4d835875-e273-47d9-810d-e3d7789c2c22",
+      "name": "NoOp.3",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3020,
+        820
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "37abd34a-041f-489c-ba47-11a4998102dc",
+      "name": "Usuario",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        900,
+        920
+      ],
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "users",
+          "mode": "list",
+          "cachedResultName": "users"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $node[\"Dados\"].json[\"meta\"][\"contactId\"] }}",
+            "date_updated": "={{ $now.setZone($node[\"Dados\"].json[\"app\"][\"systemMessage\"][\"setZone\"]) }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date_created",
+              "displayName": "date_created",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date_updated",
+              "displayName": "date_updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4db3d2c0-3fb9-4dc8-b693-0ba1ec59c2ca",
+      "name": "UpdateUsuario",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2820,
+        920
+      ],
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "a",
+                    "rightValue": "b",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "23280ffb-c38e-4e11-8f9e-4d9ff8ed5131",
+                    "leftValue": "a",
+                    "rightValue": "a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a65e1616-226f-4d53-9201-6fee74efe291",
+                    "leftValue": "a",
+                    "rightValue": "b",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c623dbf2-48c9-4676-896e-8e94c64adee9",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        2020,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $('Dados').first().json.app.workflowCore }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "cc975bcd-94da-4493-abd6-49f2c15e3eb2",
+      "name": "ExecuteCore",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1820,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "documentos",
+          "mode": "list",
+          "cachedResultName": "documentos"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "ai",
+              "value": "={{ $('Dados').item.json.app.agentId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7953234e-40dc-4d39-8aea-b265e2a12ff4",
+      "name": "GetDocumentos",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1100,
+        920
+      ],
+      "executeOnce": false,
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ JSON.parse($json.message.first()).contentId }}",
+                    "rightValue": "={{ $('Dados').item.json.content.id }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "noOp"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "fdd1e894-df1c-4ebd-8f56-82f66dad03be",
+                    "leftValue": "={{ JSON.parse($json.message.last()).timestamp }}",
+                    "rightValue": "={{ $now.minus($node[\"Dados\"].json[\"app\"][\"debouncerTime\"], 'seconds') }}",
+                    "operator": {
+                      "type": "dateTime",
+                      "operation": "before"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "continue"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "addTime"
+        }
+      },
+      "id": "d0f167e2-a8a8-4033-a5a3-18c3bd2eaeff",
+      "name": "Alterna",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0f5b3d89-7f61-4b86-95a3-48f37acff871",
+                    "leftValue": "={{ $json.content.type }}",
+                    "rightValue": "pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "endsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pdf"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.content.type }}",
+                    "rightValue": "image",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "image"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a4f0ea6d-038c-44c9-a233-12e6c85173dd",
+                    "leftValue": "={{ $json.content.type }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ef10a60f-bd52-4f0d-a81f-8989e42b2ece",
+      "name": "TipoMidia",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        2220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "id": "8dae8cc4-8388-4d0b-a323-6117179eaa98",
+      "name": "Merge-4",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        2620,
+        100
+      ],
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {
+          "language": "pt"
+        }
+      },
+      "id": "3c98ec96-5cf0-4cf7-b166-a4c13eee7394",
+      "name": "Transcrição",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.5,
+      "position": [
+        2420,
+        500
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "3raLgi1Pp00Yk6mH",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "input": "={{ $json.output }}",
+        "options": {
+          "response_format": "mp3",
+          "speed": 1,
+          "binaryPropertyOutput": "data"
+        }
+      },
+      "id": "2dbefc87-a70e-4b5a-9551-9a05a4af51eb",
+      "name": "GeraAudio",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.7,
+      "position": [
+        2220,
+        820
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "3raLgi1Pp00Yk6mH",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Processo\nANNA",
+        "height": 80,
+        "width": 150,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        -100
+      ],
+      "typeVersion": 1,
+      "id": "5ae19a36-3e37-4d05-8fb1-2758c3ea8389",
+      "name": "Sticky Note"
+    }
+  ],
+  "connections": {
+    "CriarUsuario?": {
+      "main": [
+        [
+          {
+            "node": "CriarUsuario",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Usuario",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "DeletaMsg": {
+      "main": [
+        [
+          {
+            "node": "Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ConvertePDF": {
+      "main": [
+        [
+          {
+            "node": "Merge-4",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "LoopItems": {
+      "main": [
+        [
+          {
+            "node": "UpdateUsuario",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Origem-2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Digitando": {
+      "main": [
+        [
+          {
+            "node": "NoOp.6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Segmentos": {
+      "main": [
+        [
+          {
+            "node": "LoopItems",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NoOp.6": {
+      "main": [
+        [
+          {
+            "node": "LoopItems",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NoOp.7": {
+      "main": [
+        [
+          {
+            "node": "Merge-2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "GetMidia": {
+      "main": [
+        [
+          {
+            "node": "Converte",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ObtemMsg": {
+      "main": [
+        [
+          {
+            "node": "Alterna",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguarda": {
+      "main": [
+        [
+          {
+            "node": "ObtemMsg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EmpilhaMsg": {
+      "main": [
+        [
+          {
+            "node": "ObtemMsg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem": {
+      "main": [
+        [
+          {
+            "node": "SplitOut.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MidiaExiste?": {
+      "main": [
+        [
+          {
+            "node": "Origem-1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "NoOp.7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download": {
+      "main": [
+        [
+          {
+            "node": "NoOp.5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Padronização": {
+      "main": [
+        [
+          {
+            "node": "Merge-2",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "NoOp.5": {
+      "main": [
+        [
+          {
+            "node": "TipoMidia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Converte": {
+      "main": [
+        [
+          {
+            "node": "TipoMidia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge-2": {
+      "main": [
+        [
+          {
+            "node": "UnificaTexto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UnificaTexto": {
+      "main": [
+        [
+          {
+            "node": "Merge-5",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "UnificaMidia ": {
+      "main": [
+        [
+          {
+            "node": "Merge-5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NoOp.10": {
+      "main": [
+        [
+          {
+            "node": "Merge-4",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge-3": {
+      "main": [
+        [
+          {
+            "node": "Merge-2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SendOutput4": {
+      "main": [
+        [
+          {
+            "node": "UpdateUsuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SendOutput-1": {
+      "main": [
+        [
+          {
+            "node": "Digitando",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SendOutput-2": {
+      "main": [
+        [
+          {
+            "node": "Digitando",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Origem-1": {
+      "main": [
+        [
+          {
+            "node": "Download",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GetMidia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Origem-2": {
+      "main": [
+        [
+          {
+            "node": "SendOutput-1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SendOutput-2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge-5": {
+      "main": [
+        [
+          {
+            "node": "UserInput",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UserInput": {
+      "main": [
+        [
+          {
+            "node": "ExecuteCore",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dados": {
+      "main": [
+        [
+          {
+            "node": "CriarUsuario?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CriarUsuario": {
+      "main": [
+        [
+          {
+            "node": "Usuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input": {
+      "main": [
+        [
+          {
+            "node": "Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitOut.": {
+      "main": [
+        [
+          {
+            "node": "MidiaExiste?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitOutput": {
+      "main": [
+        [
+          {
+            "node": "Segmentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Usuario": {
+      "main": [
+        [
+          {
+            "node": "GetDocumentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UpdateUsuario": {
+      "main": [
+        [
+          {
+            "node": "NoOp.3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "GeraAudio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SplitOutput",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ExecuteCore": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetDocumentos": {
+      "main": [
+        [
+          {
+            "node": "EmpilhaMsg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alterna": {
+      "main": [
+        [
+          {
+            "node": "NoOp.",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "DeletaMsg",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Aguarda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TipoMidia": {
+      "main": [
+        [
+          {
+            "node": "Merge-3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "ConvertePDF",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "NoOp.10",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge-3",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Transcrição",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge-4": {
+      "main": [
+        [
+          {
+            "node": "UnificaMidia ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcrição": {
+      "main": [
+        [
+          {
+            "node": "Padronização",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GeraAudio": {
+      "main": [
+        [
+          {
+            "node": "SendOutput4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "61a632e3-225d-4044-a497-e46d2f9442ac",
+  "triggerCount": 0,
+  "tags": [
+    {
+      "createdAt": "2025-02-11T08:34:07.900Z",
+      "updatedAt": "2025-02-11T08:34:07.900Z",
+      "id": "PDGdF7WZ9gSQmP0W",
+      "name": "Anna"
+    }
+  ]
+}
