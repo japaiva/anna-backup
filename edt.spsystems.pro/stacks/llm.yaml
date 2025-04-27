@@ -1,0 +1,43 @@
+services:
+  litellm:
+    image: ghcr.io/berriai/litellm:main-v1.57.7
+    hostname: "{{.Service.Name}}.{{.Task.Slot}}"
+    # ports:
+    #  - 4000:4000
+    networks:
+      - interna
+      - externa
+    environment:
+      - DATABASE_URL=postgres://postgres:Sps2025pos@postgres:5432/litellm
+      - STORE_MODEL_IN_DB=true
+      - LITELLM_DROP_PARAMS=true
+      - LITELLM_MASTER_KEY=litellm-master-2025
+      - UI_USERNAME=admin
+      - UI_PASSWORD=Sps2025llm
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1524M
+
+      labels: 
+        traefik.enable: "true"
+        traefik.http.routers.litellm.service: "litellm"
+        traefik.http.routers.litellm.rule: "Host(`ltm.spsystems.pro`)"
+        traefik.http.routers.litellm.tls: "true"
+        traefik.http.routers.litellm.tls.certresolver: "le"
+        traefik.http.routers.litellm.entrypoints: "websecure"
+        traefik.http.services.litellm.loadbalancer.server.port: 4000
+
+
+        traefik.http.services.litellm.loadbalancer.passhostheader: "true"
+        traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto: "https"
+        traefik.http.routers.litellm.middlewares: "sslheader@docker"
+
+networks:
+  interna:
+    external: true
+  externa:
+    external: true
