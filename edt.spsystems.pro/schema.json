@@ -1601,10 +1601,6 @@
               "value": "x-ai/grok-3-beta"
             },
             {
-              "text": "NVIDIA: Llama 3.1 Nemotron Nano 8B v1 (free)",
-              "value": "nvidia/llama-3.1-nemotron-nano-8b-v1:free"
-            },
-            {
               "text": "NVIDIA: Llama 3.3 Nemotron Super 49B v1 (free)",
               "value": "nvidia/llama-3.3-nemotron-super-49b-v1:free"
             },
@@ -2943,16 +2939,16 @@
               "value": "eleven_flash_v2"
             },
             {
+              "text": "Eleven Multilingual v1",
+              "value": "eleven_multilingual_v1"
+            },
+            {
               "text": "Eleven English v2",
               "value": "eleven_english_sts_v2"
             },
             {
               "text": "Eleven Multilingual v2",
               "value": "eleven_multilingual_sts_v2"
-            },
-            {
-              "text": "Eleven Multilingual v1",
-              "value": "eleven_multilingual_v1"
             },
             {
               "text": "Eleven English v1",
