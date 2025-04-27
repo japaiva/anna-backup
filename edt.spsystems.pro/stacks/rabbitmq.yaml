@@ -1,0 +1,35 @@
+x-variaveis: &variaveis
+    RABBITMQ_DEFAULT_USER: "admin" 
+    RABBITMQ_DEFAULT_PASS: "Sps2025rmq" 
+    RABBITMQ_ERLANG_COOKIE: "server"
+
+services:
+  rabbitmq:
+    image: rabbitmq:4.0.8-management
+    hostname: rabbitmq
+    environment:
+      <<: *variaveis
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/
+      # - rabbitmq_config:/etc/rabbitmq
+    networks:
+      - externa
+      - interna
+    deploy:
+      labels:
+        traefik.enable: "true"
+        traefik.http.routers.rabbitmq.entrypoints: "websecure"
+        traefik.http.routers.rabbitmq.tls.certresolver: "le"
+        traefik.http.services.rabbitmq.loadbalancer.server.port: 15672
+        traefik.http.routers.rabbitmq.service: "rabbitmq"
+        traefik.http.routers.rabbitmq.rule: "Host(`rmq.spsystems.pro`)"
+volumes:
+  rabbitmq_data:
+    external: true
+    name: rabbitmq_data
+  # rabbitmq_config:
+networks:
+  externa:
+    external: true
+  interna:
+    external: true
