@@ -1,0 +1,923 @@
+{
+  "createdAt": "2025-03-10T18:18:45.628Z",
+  "updatedAt": "2025-04-12T23:57:07.590Z",
+  "id": "HQqdPEqtLURqg4GN",
+  "name": "jobber_sync_visits_v1",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        -20
+      ],
+      "id": "62104eb4-dab8-42d0-834b-0a5e4e927ab8",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "try {\n    const responseData = item.json || item;\n    const result = Array.isArray(responseData) ? responseData[0] : responseData;\n    \n    if (!result?.data?.visits) {\n        throw new Error('Invalid response structure');\n    }\n    \n    const { nodes, pageInfo } = result.data.visits;\n    const existingData = Array.isArray(item?.json?.allData) ? item.json.allData : [];\n    const allData = [...existingData, ...nodes];\n\n    return {\n        json: {\n            allData,\n            data: nodes,\n            variables: {\n                first: 5,\n                after: pageInfo.endCursor\n            },\n            continuePagination: pageInfo.hasNextPage,\n            completed: !pageInfo.hasNextPage\n        }\n    };\n} catch (error) {\n    console.log('Error:', error.message);\n    return {\n        json: {\n            error: error.message,\n            continuePagination: false,\n            completed: true,\n            allData: item.json.allData || []\n        }\n    };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        380,
+        -20
+      ],
+      "id": "fe6bf1b2-fd37-42ba-ac15-63f4bf0104d8",
+      "name": "pagination"
+    },
+    {
+      "parameters": {
+        "operation": "incr",
+        "key": "counter"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        -20
+      ],
+      "id": "a13b997a-2947-4570-928c-5439dbe98917",
+      "name": "counter_2",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($first: Int!, $after: String) {\n  visits(first: $first, after: $after) {\n    nodes {\n      id\n      client {\n        id\n      }\n      property {\n        id\n      }\n      job {\n        id\n      }\n      invoice {\n        id\n      }\n      title              \n      isDefaultTitle     \n      instructions       \n      allDay             \n      arrivalWindow {    \n        id \n        duration\n      }\n      startAt            \n      endAt              \n      duration           \n      visitStatus        \n      completedAt        \n      assignedUsers {    \n        edges {\n          node {\n            name {\n              first \n              last\n            }\n          }\n        }\n      }\n      isComplete         \n      isLastScheduledVisit \n      timeSheetEntries {   \n        edges {\n          node {\n            id          \n            startAt\n            endAt\n          }\n        }\n      }\n      lineItems {        \n        edges {\n          node {\n            id\n            name\n            quantity\n            totalPrice                      \n          }\n        }\n      }\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 5, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        -220
+      ],
+      "id": "0b2ed194-74a7-42d2-994e-547f90cce910",
+      "name": "jobber query",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2b3e8ec4-ba57-4716-b420-44b81136d6f1",
+              "leftValue": "={{ $('counter_2').item.json.counter }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "da7dcbb5-9ca9-4926-8e09-286907986e21",
+              "leftValue": "={{ $('pagination').item.json.continuePagination }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1620,
+        -20
+      ],
+      "id": "26652316-4d24-4378-962d-5232a67757d0",
+      "name": "batch loop"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1NLMxrZUsc7SPTRLh2BzuRe-CaCo5LUkXDDT9nvJf2xo",
+          "mode": "list",
+          "cachedResultName": "jobber_data_sync",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NLMxrZUsc7SPTRLh2BzuRe-CaCo5LUkXDDT9nvJf2xo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 65013384,
+          "mode": "list",
+          "cachedResultName": "visits",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NLMxrZUsc7SPTRLh2BzuRe-CaCo5LUkXDDT9nvJf2xo/edit#gid=65013384"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.title }}",
+            "isDefaultTitle": "={{ $json.isDefaultTitle }}",
+            "instructions": "={{ $json.instructions }}",
+            "allDay": "={{ $json.allDay }}",
+            "arrivalWindow": "={{ $json.arrivalWindow }}",
+            "duration": "={{ $json.duration }}",
+            "visitStatus": "={{ $json.visitStatus }}",
+            "completedAt": "={{ $json.completedAt }}",
+            "assignedUsers": "={{ $json.assignedUsers }}",
+            "isComplete": "={{ $json.isComplete }}",
+            "isLastScheduledVisit": "={{ $json.isLastScheduledVisit }}",
+            "id": "={{ $json.id }}",
+            "client": "={{ $json.client.id }}",
+            "property": "={{ $json.property.id }}",
+            "job": "={{ $json.job.id }}",
+            "invoice": "={{ $json.invoice }}",
+            "startAt": "={{ $json.startAt }}",
+            "endAt": "={{ $json.endAt }}",
+            "timeSheetEntries": "={{ $json.timeSheetEntries.edges }}",
+            "lineItems": "={{ $json.lineItems.edges }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "client",
+              "displayName": "client",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "property",
+              "displayName": "property",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "job",
+              "displayName": "job",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "invoice",
+              "displayName": "invoice",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "isDefaultTitle",
+              "displayName": "isDefaultTitle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "instructions",
+              "displayName": "instructions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "allDay",
+              "displayName": "allDay",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "arrivalWindow",
+              "displayName": "arrivalWindow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "startAt",
+              "displayName": "startAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "endAt",
+              "displayName": "endAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "duration",
+              "displayName": "duration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "visitStatus",
+              "displayName": "visitStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "completedAt",
+              "displayName": "completedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assignedUsers",
+              "displayName": "assignedUsers",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "isComplete",
+              "displayName": "isComplete",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "isLastScheduledVisit",
+              "displayName": "isLastScheduledVisit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timeSheetEntries",
+              "displayName": "timeSheetEntries",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lineItems",
+              "displayName": "lineItems",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        860,
+        -220
+      ],
+      "id": "741972a0-f797-41e7-8d4b-59494a5b06ef",
+      "name": "posting data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "McEu2DZdx8KDjIrj",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eff9cc2d-c364-4859-902e-3ceb34481092",
+              "name": "variables.first",
+              "value": "={{ $('pagination').item.json.variables.first }}",
+              "type": "number"
+            },
+            {
+              "id": "499c7162-3df3-484c-85c2-d5f72b7bd3ec",
+              "name": "variables.after",
+              "value": "={{ $('pagination').item.json.variables.after }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1460,
+        -20
+      ],
+      "id": "556bf6df-e807-4fc5-8231-d99e249b1c8c",
+      "name": "set loop"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst allData = inputData[0]?.json?.allData || [];\nreturn allData.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        -20
+      ],
+      "id": "3584fd33-eebb-46d7-96b8-648a74465da1",
+      "name": "Set Array"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        -20
+      ],
+      "id": "d6cc2490-bd3d-4630-8a17-7b33b9662ba8",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "counter",
+        "value": "0"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -20
+      ],
+      "id": "1d44b766-2a5e-4f89-88e1-a00ba7b1bfa5",
+      "name": "Init counter",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        -40
+      ],
+      "id": "60eb815c-1887-4914-9e84-dd5ebe07ef12",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "tableId": "visits",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "id",
+              "fieldValue": "={{(() => crypto.randomUUID())()}}"
+            },
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "job_jobber_id"
+            },
+            {
+              "fieldId": "property_id",
+              "fieldValue": "={{ $json.property.id }}"
+            },
+            {
+              "fieldId": "instructions"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        820,
+        -20
+      ],
+      "id": "15f526d4-a0d0-4100-bcb7-a890799bd39f",
+      "name": "Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($first: Int!, $after: String) {\n  visits(first: $first, after: $after) {\n    nodes {\n      id\n      property {\n        id\n      }\n      invoice {\n        id\n      }\n      title              \n      isDefaultTitle     \n      instructions       \n      allDay             \n      arrivalWindow {    \n        id \n        duration\n      }\n      startAt            \n      endAt              \n      duration           \n      visitStatus        \n      completedAt        \n      assignedUsers {    \n        edges {\n          node {\n            name {\n              first \n              last\n            }\n          }\n        }\n      }\n      isComplete         \n      isLastScheduledVisit \n      timeSheetEntries {   \n        edges {\n          node {\n            id          \n            startAt\n            endAt\n          }\n        }\n      }\n      lineItems {        \n        edges {\n          node {\n            id\n            name\n            quantity\n            totalPrice                      \n          }\n        }\n      }\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 5, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        180,
+        -20
+      ],
+      "id": "6e35a052-7ddc-4f1d-9cc0-bb56d29a700f",
+      "name": "jobber query - visits",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "query($first: Int!, $after: String) {\n  clients(first: $first, after: $after) {\n    nodes {\n      id\n      firstName\n      lastName\n      companyName\n      emails {\n        address\n        description\n        primary\n      }\n      phones {\n        number\n        description\n        primary        \n      }\n      billingAddress {\n        street\n        city\n        postalCode\n        country\n      }\n      \n      isCompany\n      isLead\n      createdAt\n      updatedAt\n      tags {\n        edges {\n          node {\n            id\n          }\n        }\n      }\n      customFields {\n        ... on CustomFieldDropdown {\n          id\n          valueDropdown\n        }\n        ... on CustomFieldText {\n          id\n          valueText\n        }        \n      }\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 30, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        -560
+      ],
+      "id": "c7ab4ea2-ca26-4f47-bb11-a651f60b7d60",
+      "name": "jobber query - clients",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "query($first: Int!, $after: String) {\n  properties(first: $first, after: $after) {\n    nodes {\n      id\n      address {\n        street\n        city\n        postalCode\n        country\n      }\n      client {\n        id\n          \n     }\n      isBillingAddress\n      \n      customFields {\n        ... on CustomFieldDropdown {\n          id\n          valueDropdown\n        }\n        ... on CustomFieldText {\n          id\n          valueText\n        }\n      }\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 50, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        100,
+        -540
+      ],
+      "id": "ab376fa4-82b2-4a4d-9ac2-55176e420e3a",
+      "name": "jobber query - properties",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($first: Int!, $after: String) {\n  requests(first: $first, after: $after) {\n    nodes {\n      id\n      title\n      assessment {\n        id\n        title\n        allDay\n        startAt\n        endAt\n        assignedUsers {\n          nodes {\n            id\n            # Other user fields\n          }\n        }\n        # Other assessment fields\n      }\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 30, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        340,
+        -540
+      ],
+      "id": "437920b5-b6bc-456e-a423-9a78ad22ab08",
+      "name": "jobber query - requests",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($first: Int!, $after: String) {\n  quotes(first: $first, after: $after) {\n    nodes {\n      id\n      title\n      quoteNumber\n      quoteStatus\n      message\n      contractDisclaimer\n      clientHubUri\n      clientHubViewedAt\n      \n      amounts {\n        subtotal\n        total\n      }\n      \n            \n      depositAmountUnallocated\n      \n      depositRecords {\n        nodes {\n          id\n        }\n      }\n      \n      lineItems {\n        nodes {\n          id\n        }\n      }\n      \n      property {\n        id\n      }\n      \n      request {\n        id\n        title\n      }\n      \n      salesperson {\n        id\n      }\n      \n      taxDetails {\n        totalTaxAmount\n        totalTaxRate {\n          id\n          name\n          # Removed 'rate' field as it doesn't exist on TaxRateBase\n        }\n      }\n      \n      unallocatedDepositRecords {\n        nodes {\n          id\n        }\n      }\n      \n      createdAt\n      updatedAt\n      transitionedAt\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 5, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        860,
+        -540
+      ],
+      "id": "0eae3741-4b3f-4b72-9447-58111ae5cfd4",
+      "name": "jobber query - quotes",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($first: Int!, $after: String) {\n  users(first: $first, after: $after) {\n    nodes {\n      id\n      name {\n        first\n        last\n        full\n      }\n      email {\n      raw\n      isValid\n      }\n      uuid\n      status\n      isAccountAdmin\n      isAccountOwner\n      isCurrentUser\n      availableForScheduling\n      firstDayOfTheWeek\n      franchiseTokenLastFour\n      lastLoginAt\n      createdAt\n      \n      account {\n        id\n      }\n      \n      address {\n        street\n        city\n        province\n        postalCode\n        country\n      }\n      \n      apps {\n        nodes {\n          id\n        }\n      }\n      \n      assignedVehicle {\n        id\n      }\n      \n      phone {\n        areaCode\n        countryCode\n        friendly\n        isValid\n        raw\n      }\n      timezone\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 5, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        600,
+        -540
+      ],
+      "id": "ab376bf7-1c44-4a4d-84a8-44a144512ba3",
+      "name": "jobber query - users",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($first: Int!, $after: String) {\n  jobs(first: $first, after: $after) {\n    nodes {\n      id\n      title\n      jobNumber\n      jobStatus\n      jobType\n      \n      createdAt\n      updatedAt\n      startAt\n      endAt\n      completedAt\n      bookingConfirmationSentAt\n      \n      property {\n        id\n      }\n      \n      instructions\n      total\n      invoicedTotal\n      uninvoicedTotal\n      \n      lineItems {\n        nodes {\n          id\n          name\n          description\n          quantity\n          unitPrice\n        }\n      }\n      \n      billingType\n      \n      jobBalanceTotals {\n        outstandingAmount\n        totalAmount\n      }\n      \n      quote {\n        id\n      }\n      \n      request {\n        id\n      }\n      \n      salesperson {\n        id\n        name {\n          full\n        }\n      }\n      \n      source\n      willClientBeAutomaticallyCharged\n      \n      \n      \n      defaultVisitTitle\n      allowReviewRequest\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 5, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        -540
+      ],
+      "id": "2275ad59-c93a-4694-a5eb-11bcb49ea571",
+      "name": "jobber query - jobs",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($first: Int!, $after: String) {\n  invoices(first: $first, after: $after) {\n    nodes {\n      id\n      invoiceNumber\n      invoiceStatus\n      invoiceNet\n      \n      createdAt\n      updatedAt\n      issuedDate\n      dueDate\n      receivedDate\n      dateViewedInClientHub\n      \n      subject\n      message\n      clientHubUri\n      \n      amounts {\n        depositAmount\n        discountAmount\n        invoiceBalance\n        legacyDiscountAmount\n        nonTaxAmount\n        paymentsTotal\n        subtotal\n        taxAmount\n        tipsTotal\n        total\n      }\n      \n      billingAddress {\n        street\n        city\n        province\n        postalCode\n        country\n      }\n      \n      billingIsSameAsPropertyAddress\n      \n      client {\n        id\n        name\n      }\n      \n      jobs {\n        nodes {\n          id\n          title\n        }\n      }\n      \n      lineItems {\n        nodes {\n          id\n          name\n          description\n          quantity\n          unitPrice\n          totalPrice\n          taxable\n          date\n          category\n          createdAt\n          updatedAt\n          linkedProductOrService {\n            id\n            name\n          }\n          \n        }\n      }\n      \n      paymentRecords {\n        nodes {\n          id\n          amount\n        }\n      }\n      \n      properties {\n        nodes {\n          id\n          address {\n            street\n            city\n          }\n        }\n      }\n      \n      salesperson {\n        id\n        name {\n          full\n        }\n      }\n      \n      taxCalculationMethod\n      \n      jobberWebUri\n      allowReviewRequest\n      nextDateToSendReviewSms\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 4, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        -540
+      ],
+      "id": "c0b9d15e-4e1f-4642-af63-96047969b976",
+      "name": "jobber query - invoices",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "visits",
+        "filterType": "string"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        -240
+      ],
+      "id": "413ff689-a4f8-40a2-b7f5-3fbb8cfe3a82",
+      "name": "Zap Visits",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Init counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pagination": {
+      "main": [
+        [
+          {
+            "node": "Set Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "counter_2": {
+      "main": [
+        [
+          {
+            "node": "set loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber query": {
+      "main": [
+        []
+      ]
+    },
+    "batch loop": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "jobber query - visits",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "posting data": {
+      "main": [
+        []
+      ]
+    },
+    "set loop": {
+      "main": [
+        [
+          {
+            "node": "batch loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "counter_2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init counter": {
+      "main": [
+        [
+          {
+            "node": "jobber query - visits",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing1": {
+      "main": [
+        []
+      ]
+    },
+    "Supabase": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber query - visits": {
+      "main": [
+        [
+          {
+            "node": "pagination",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "c18cb90d-677f-4222-830b-e606065f9b9b",
+  "triggerCount": 0,
+  "tags": []
+}
