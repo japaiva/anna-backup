@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-04-26T20:38:17.301Z",
-  "updatedAt": "2025-04-27T20:16:30.627Z",
+  "updatedAt": "2025-04-27T20:22:13.391Z",
   "id": "LQ19C52Nja6cCqe5",
   "name": "[Anna] v2",
   "active": true,
@@ -2127,7 +2127,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "7cac8195-03f0-4173-a987-0ea3fa9371fb",
+  "versionId": "39a5770f-f057-4c3b-9dd7-1d6de8bcd299",
   "triggerCount": 6,
   "tags": []
 }
