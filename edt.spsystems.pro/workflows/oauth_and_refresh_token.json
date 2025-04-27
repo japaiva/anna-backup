@@ -1,0 +1,939 @@
+{
+  "createdAt": "2025-04-03T13:10:55.770Z",
+  "updatedAt": "2025-04-12T11:24:55.964Z",
+  "id": "S4nXaKRsWaLAJyK7",
+  "name": "oauth_and_refresh_token",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "oauth/callback",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        160,
+        -140
+      ],
+      "id": "63fd43c6-e1d8-4c35-9324-5af05e947587",
+      "name": "get the auth code",
+      "webhookId": "b3727495-71ab-41a7-9310-cd01931b2872"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5b78c218-7857-4304-9a4c-fec1f2f00a29",
+              "name": "access_token",
+              "value": "={{ $json.access_token }}",
+              "type": "string"
+            },
+            {
+              "id": "fc27a03a-8a09-4747-8636-f768541c6526",
+              "name": "refresh_token",
+              "value": "={{ $json.refresh_token }}",
+              "type": "string"
+            },
+            {
+              "id": "d6b9c9b1-b7ec-4736-aea0-7198c748f8dc",
+              "name": "expires_at",
+              "value": "={{new Date(Date.now() + 3600000).toISOString()}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        600,
+        -140
+      ],
+      "id": "3dc4a228-f378-4499-ad1b-f9a07851bf21",
+      "name": "set token refresh token and expire date"
+    },
+    {
+      "parameters": {
+        "tableId": "jobber_tokens",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "access_token",
+              "fieldValue": "={{ $json.access_token }}"
+            },
+            {
+              "fieldId": "refresh_token",
+              "fieldValue": "={{ $json.refresh_token }}"
+            },
+            {
+              "fieldId": "expires_at",
+              "fieldValue": "={{ $json.expires_at }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "now()"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1480,
+        -40
+      ],
+      "id": "fa5f6200-c6d3-4eb3-a3dd-0cf689200a17",
+      "name": "Supabase_store_token_refresh_token",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "refresh_token_endpoint",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        160,
+        400
+      ],
+      "id": "597937eb-67b2-4052-bc04-738df892d7d5",
+      "name": "refresh_token_endpoint",
+      "webhookId": "4300459a-8d08-4d29-912f-fa5d411107f3"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "jobber_tokens",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "d1d4abce-8e67-42b7-b521-613892dde196"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        380,
+        400
+      ],
+      "id": "73cdb258-d41a-4a83-b095-cf647a83e019",
+      "name": "Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "60cad69a-fad7-44bf-a904-477f5e3babdd",
+              "leftValue": "={{$node[\"function\"].json.tokenNeedsRefresh}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        820,
+        400
+      ],
+      "id": "246c2970-f0b3-4237-b769-9b39c19bc2ac",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Add better error handling to check if token exists\nconst inputData = $input.item.json;\n\n// Log the input data to help debug\nconsole.log(\"Input data:\", JSON.stringify(inputData, null, 2));\n\n// Check if inputData exists and is in the expected format\nif (!inputData) {\n  console.log(\"No input data found\");\n  return { tokenNeedsRefresh: true, tokens: null };\n}\n\n// Handle different possible input structures\nlet tokens;\nif (Array.isArray(inputData)) {\n  // If input is an array, take the first item\n  tokens = inputData[0];\n} else if (inputData.rows && Array.isArray(inputData.rows)) {\n  // If input has a rows property that's an array\n  tokens = inputData.rows[0];\n} else {\n  // Otherwise, use the input data directly\n  tokens = inputData;\n}\n\n// Final check to make sure we have tokens\nif (!tokens || !tokens.expires_at) {\n  console.log(\"No valid token data found\");\n  return { tokenNeedsRefresh: true, tokens: null };\n}\n\nconst now = new Date();\nconst expiresAt = new Date(tokens.expires_at);\n\n// If token expires in less than 5 minutes, refresh it\nconst tokenNeedsRefresh = !tokens.access_token || ((expiresAt - now) < 300000);\n\nconsole.log(`Token expires at: ${expiresAt}`);\nconsole.log(`Current time: ${now}`);\nconsole.log(`Token needs refresh: ${tokenNeedsRefresh}`);\n\nreturn {\n  tokenNeedsRefresh,\n  tokens\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        400
+      ],
+      "id": "d6b34514-776b-4f49-a154-a6ffcc3b3dfe",
+      "name": "function"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "jobber_tokens",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "d1d4abce-8e67-42b7-b521-613892dde196"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "access_token",
+              "fieldValue": "={{ $json.access_token }}"
+            },
+            {
+              "fieldId": "refresh_token",
+              "fieldValue": "={{ $json.refresh_token }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "=now()"
+            },
+            {
+              "fieldId": "expires_at",
+              "fieldValue": "={{ new Date(Date.now() + 3600*1000).toISOString() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1260,
+        300
+      ],
+      "id": "a0eee45b-653e-4c81-8826-3f479042f92c",
+      "name": "Supabase1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "289aa8f8-10a5-492c-8227-4961c2ef5f44",
+              "name": "tokens.access_token",
+              "value": "={{ $('get refresh token').item.json.access_token }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1480,
+        300
+      ],
+      "id": "4986af4f-4c04-4656-80cd-2dfcff531a47",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3af528db-f4bd-496e-a00f-a6da9bdffdb2",
+              "name": "tokens.access_token",
+              "value": "={{ $json.tokens.access_token }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1480,
+        500
+      ],
+      "id": "5cbe99c8-7755-4e94-8937-edaac5b37ce7",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1700,
+        400
+      ],
+      "id": "b051404e-5529-474d-8ea6-fa03249544cd",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0ecab173-ccbd-4a1d-891e-0f13d5149051",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1040,
+        -140
+      ],
+      "id": "d16c84a0-553f-4114-a9a9-62badc76ad4e",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "jobber_tokens",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "d1d4abce-8e67-42b7-b521-613892dde196"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "access_token",
+              "fieldValue": "={{ $json.access_token }}"
+            },
+            {
+              "fieldId": "refresh_token",
+              "fieldValue": "={{ $json.refresh_token }}"
+            },
+            {
+              "fieldId": "expires_at",
+              "fieldValue": "={{ $json.expires_at }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "now()"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1480,
+        -240
+      ],
+      "id": "44f8df76-eb05-464c-ab93-995803ef30bc",
+      "name": "Supabase_store_token_refresh_token1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "jobber_tokens",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "d1d4abce-8e67-42b7-b521-613892dde196"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        820,
+        -140
+      ],
+      "id": "7e925fe7-fe8f-49fb-b029-d71b4b4c9a5e",
+      "name": "Supabase2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1920,
+        400
+      ],
+      "id": "949232a3-78cb-49f2-830a-3f32635f6ffa",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3135e9d7-e9b6-49be-bc5e-8a388c20f4e7",
+              "name": "access_token",
+              "value": "={{ $('set token refresh token and expire date').item.json.access_token }}",
+              "type": "string"
+            },
+            {
+              "id": "6ee2f24f-97d2-486e-88fb-3fe77bf4aba4",
+              "name": "refresh_token",
+              "value": "={{ $('set token refresh token and expire date').item.json.refresh_token }}",
+              "type": "string"
+            },
+            {
+              "id": "215314a0-a3ce-428b-b040-bc40946cd3cb",
+              "name": "expires_at",
+              "value": "={{ $('set token refresh token and expire date').item.json.expires_at }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1260,
+        -240
+      ],
+      "id": "c2dd7d99-b9c5-41eb-a107-d815ae09d20b",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3135e9d7-e9b6-49be-bc5e-8a388c20f4e7",
+              "name": "access_token",
+              "value": "={{ $('set token refresh token and expire date').item.json.access_token }}",
+              "type": "string"
+            },
+            {
+              "id": "6ee2f24f-97d2-486e-88fb-3fe77bf4aba4",
+              "name": "refresh_token",
+              "value": "={{ $('set token refresh token and expire date').item.json.refresh_token }}",
+              "type": "string"
+            },
+            {
+              "id": "215314a0-a3ce-428b-b040-bc40946cd3cb",
+              "name": "expires_at",
+              "value": "={{ $('set token refresh token and expire date').item.json.expires_at }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1260,
+        -40
+      ],
+      "id": "ccc9e990-372a-459c-ba51-71f2f42d2195",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.getjobber.com/api/oauth/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "client_id",
+              "value": "2e77c35b-27af-4563-ad9a-91110761a53c"
+            },
+            {
+              "name": "client_secret",
+              "value": "cc2fa853da22683c1fdc38f556a2c6616109fede96fe3cbcf56608c736181b58"
+            },
+            {
+              "name": "grant_type",
+              "value": "refresh_token"
+            },
+            {
+              "name": "refresh_token",
+              "value": "={{ $json.tokens.refresh_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        300
+      ],
+      "id": "c38b38db-0ca7-432a-b16c-8e819489653b",
+      "name": "get refresh token"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.getjobber.com/api/oauth/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "client_id",
+              "value": "2e77c35b-27af-4563-ad9a-91110761a53c"
+            },
+            {
+              "name": "client_secret",
+              "value": "cc2fa853da22683c1fdc38f556a2c6616109fede96fe3cbcf56608c736181b58"
+            },
+            {
+              "name": "grant_type",
+              "value": "authorization_code"
+            },
+            {
+              "name": "code",
+              "value": "={{ $json.query.code }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        380,
+        -140
+      ],
+      "id": "f5707c35-b400-4228-807d-70cd27c28e97",
+      "name": "get 1st authorization code and refresh token"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        160,
+        880
+      ],
+      "id": "181d4ceb-2618-4cfd-b149-49dca6a5c4f5",
+      "name": "When clicking ‘Test workflow’",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.getjobber.com/api/oauth/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "client_id",
+              "value": "2e77c35b-27af-4563-ad9a-91110761a53c"
+            },
+            {
+              "name": "client_secret",
+              "value": "cc2fa853da22683c1fdc38f556a2c6616109fede96fe3cbcf56608c736181b58"
+            },
+            {
+              "name": "grant_type",
+              "value": "refresh_token"
+            },
+            {
+              "name": "refresh_token",
+              "value": "=e522b804551ab417abb728ae13a2c46f"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        380,
+        880
+      ],
+      "id": "d4a58754-bea1-48dd-96f2-29083e8ab26b",
+      "name": "get refresh token1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "jobber_tokens",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "d1d4abce-8e67-42b7-b521-613892dde196"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "access_token",
+              "fieldValue": "={{ $json.access_token }}"
+            },
+            {
+              "fieldId": "refresh_token",
+              "fieldValue": "={{ $json.refresh_token }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "now()"
+            },
+            {
+              "fieldId": "expires_at",
+              "fieldValue": "={{ new Date(Date.now() + 3600*1000).toISOString() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        600,
+        880
+      ],
+      "id": "3796406b-31ce-4813-851a-fa0859d9faf6",
+      "name": "Supabase3",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "1st Authorization Code workflow\nThis workflow is triggered whenever a user connects to BI Compass App",
+        "height": 520,
+        "width": 1660,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        60,
+        -360
+      ],
+      "id": "6867c031-8fa8-41c8-928e-b0d82c1f5e44",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Refresh access token\nThis workflow is triggered whenever a user needs a new Jobber access token (token expired)",
+        "height": 520,
+        "width": 2100,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        60,
+        220
+      ],
+      "id": "900f1524-8708-4c72-bb32-876339e1233e",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Test workflow refresh access token",
+        "height": 280,
+        "width": 800
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        60,
+        800
+      ],
+      "id": "6408b3a9-cd60-47a3-bd54-0326ef232b4e",
+      "name": "Sticky Note2"
+    }
+  ],
+  "connections": {
+    "get the auth code": {
+      "main": [
+        [
+          {
+            "node": "get 1st authorization code and refresh token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set token refresh token and expire date": {
+      "main": [
+        [
+          {
+            "node": "Supabase2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "refresh_token_endpoint": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase": {
+      "main": [
+        [
+          {
+            "node": "function",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "function": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "get refresh token",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase2": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_store_token_refresh_token": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Supabase_store_token_refresh_token1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Supabase_store_token_refresh_token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get refresh token": {
+      "main": [
+        [
+          {
+            "node": "Supabase1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get 1st authorization code and refresh token": {
+      "main": [
+        [
+          {
+            "node": "set token refresh token and expire date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "get refresh token1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get refresh token1": {
+      "main": [
+        [
+          {
+            "node": "Supabase3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "abd65b9c-779b-4e3a-92ce-6b5c816cd05c",
+  "triggerCount": 2,
+  "tags": []
+}
