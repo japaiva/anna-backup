@@ -1,0 +1,37 @@
+version: '3.8'
+services:
+  simuladordjango:
+    image: joseantoniopaiva/simuladordjango:latest
+    networks:
+      - interna
+      - externa
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://postgres:Sps2025pos@191.101.234.50:5432/Fuza
+      - SECRET_KEY=django-insecure-4xi0^%4s=o)&z32e%w#=hk#-i1zl&i=4um@3*-g^7+^!y9r8c&
+      - DEBUG=False
+      - ALLOWED_HOSTS=simulador.spsystems.pro,localhost,127.0.0.1
+    # Comando para produção usando gunicorn
+    command: gunicorn --bind 0.0.0.0:8000 django_simulador.wsgi:application
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.simulador-django.rule=Host(`simulador.spsystems.pro`)"
+        - "traefik.http.routers.simulador-django.entrypoints=websecure"
+        - "traefik.http.routers.simulador-django.tls.certresolver=le"
+        - "traefik.http.routers.simulador-django.tls=true"
+        - "traefik.http.services.simulador-django.loadbalancer.server.port=8000"
+        - "traefik.http.services.simulador-django.loadbalancer.passHostHeader=true"
+
+volumes:
+  static_volume:
+  media_volume:
+
+networks:
+  externa:
+    external: true
+  interna:
+    external: true
