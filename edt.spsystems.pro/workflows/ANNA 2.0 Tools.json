@@ -1,0 +1,705 @@
+{
+  "createdAt": "2025-02-10T17:52:47.075Z",
+  "updatedAt": "2025-04-13T00:01:04.139Z",
+  "id": "bbeY3YVBo3AvfLo7",
+  "name": "ANNA 2.0 Tools",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatwoot",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        120,
+        220
+      ],
+      "id": "20f203ac-d70d-444f-bb97-2f18d792ceba",
+      "name": "Chatwoot Input",
+      "webhookId": "d503e6f9-0989-42d5-a598-e268b20c3182"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        520,
+        320
+      ],
+      "id": "a2f737fb-956e-4888-bdba-e83c4779cbde",
+      "name": "No Operation "
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "numberOutputs": 2,
+        "output": "={{ \n  $json.body.event === 'message_created' &&\n  $json.body.conversation.messages[0].sender_type !== 'AgentBot' &&\n  $json.body.conversation.meta.sender.phone_number !== '+123456'\n    ? 0 : 1\n}}"
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        320,
+        220
+      ],
+      "id": "8dbcb1d9-393e-4dbb-ad4b-42d0e2ec3cee",
+      "name": "Switch "
+    },
+    {
+      "parameters": {
+        "queue": "main-n8n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rabbitmq",
+      "typeVersion": 1.1,
+      "position": [
+        520,
+        120
+      ],
+      "id": "8593556b-3a9f-42bb-8d18-5c14d081282d",
+      "name": "Sender",
+      "credentials": {
+        "rabbitmq": {
+          "id": "zbqB1qaBGZEpzbgR",
+          "name": "RabbitMQ account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "queue": "dlx-queue",
+        "options": {
+          "acknowledge": "executionFinishesSuccessfully",
+          "jsonParseBody": true,
+          "onlyContent": true
+        }
+      },
+      "type": "n8n-nodes-base.rabbitmqTrigger",
+      "typeVersion": 1,
+      "position": [
+        120,
+        660
+      ],
+      "id": "a2be0df8-425d-491e-a751-600cd000aca5",
+      "name": "DLX Consumer",
+      "credentials": {
+        "rabbitmq": {
+          "id": "zbqB1qaBGZEpzbgR",
+          "name": "RabbitMQ account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $json.body.sender.id.toString() }}"
+      },
+      "id": "86becfcd-ba1e-4c7e-b06d-2b8d2d42c78b",
+      "name": "Reset List ",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        320,
+        660
+      ],
+      "notesInFlow": false,
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 500,
+        "width": 700,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        20,
+        20
+      ],
+      "id": "b61190d9-cd8e-41d5-9965-53e29eab3ebf",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 300,
+        "width": 500,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        20,
+        560
+      ],
+      "id": "6dc8f8bc-b221-4df6-b2ec-63c1ebbf8500",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 880,
+        "width": 1660,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "e16e22b2-c3f4-4487-8e54-3dcfe8c3b250",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "url": "https://openrouter.ai/api/v1/models",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.openrouter_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1240,
+        320
+      ],
+      "id": "e276b98a-7e17-446c-b1b5-c912d00d7306",
+      "name": "Get Models",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "http://directus:8055/fields/ai_agents/models",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Get Global Vars').item.json.directus_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"meta\": {\n    \"interface\": \"select-dropdown\",\n    \"options\": {\n      \"choices\": {{ \n        JSON.stringify($json.data.map(model => ({\n          \"text\": model.name,\n          \"value\": model.id\n        })))\n      }},\n      \"allowOther\": false\n    }\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        320
+      ],
+      "id": "011ccdbf-941f-4e1e-abe6-67b554deab88",
+      "name": "Update Options",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "global_vars",
+          "mode": "list",
+          "cachedResultName": "global_vars"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1040,
+        320
+      ],
+      "id": "d682e59b-3527-40ac-9e73-d4358770db0b",
+      "name": "Get Global Vars",
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 3
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        840,
+        320
+      ],
+      "id": "beed27ac-7cea-478f-a015-7f26961e585d",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 300,
+        "width": 900,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        740,
+        220
+      ],
+      "id": "3eb45e8d-d15f-43c2-9ab7-f5385550c741",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "Início do workflow, recebe dados, filtra eles, e envia pro RabbitMQ.",
+        "height": 80,
+        "width": 260,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        40,
+        40
+      ],
+      "id": "4211f96e-9986-4f65-bfe4-7716d7fcc030",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "Limpa o Redis em caso de execuções mal sucedidas",
+        "height": 80,
+        "width": 260,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        40,
+        540
+      ],
+      "id": "53fcac2a-d131-4c68-888a-96462d560478",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "Atualiza a lista de modelos de LLMs disponíveis no sistema",
+        "height": 80,
+        "width": 260,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        760,
+        200
+      ],
+      "id": "88610c43-f1c7-4802-8b1f-803a67992b87",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "tableName": {
+          "__rl": true,
+          "value": "users",
+          "mode": "list",
+          "cachedResultName": "users"
+        },
+        "additionalFields": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTrigger",
+      "typeVersion": 1,
+      "position": [
+        640,
+        660
+      ],
+      "id": "5a5f3ef3-3c8c-496c-bd49-d09343120b59",
+      "name": "Listen Insert Users",
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Listen Insert Users').item.json.payload.picture_url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        660
+      ],
+      "id": "a2b1afae-ea56-4df7-99b7-ee143fcd5906",
+      "name": "Download Picture"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "global_vars",
+          "mode": "list",
+          "cachedResultName": "global_vars"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        840,
+        660
+      ],
+      "id": "249c3d87-5127-481a-bfc1-454316fa5ad7",
+      "name": "Get Global Vars 2",
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "users",
+          "mode": "list",
+          "cachedResultName": "users"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Listen Insert Users').item.json.payload.id }}",
+            "date_updated": "={{ $now }}",
+            "picture": "={{ $json.data.id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date_created",
+              "displayName": "date_created",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date_updated",
+              "displayName": "date_updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "picture_url",
+              "displayName": "picture_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "picture",
+              "displayName": "picture",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1440,
+        660
+      ],
+      "id": "5424ae7e-fb27-4388-958e-b28bd5952eee",
+      "name": "Add Picture",
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://directus:8055/files",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Get Global Vars 2').item.json.directus_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1240,
+        660
+      ],
+      "id": "3d9b21e0-3b99-4e81-8b30-7ac32f36e571",
+      "name": "Upload Picture"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 300,
+        "width": 1100,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        540,
+        560
+      ],
+      "id": "605dd50a-48db-4291-990b-64fd3f3dcb07",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Adiciona a fato do usuário quando ele é criado",
+        "height": 80,
+        "width": 260,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        540
+      ],
+      "id": "f60c174c-5242-4c84-b9b8-00f5b15bb860",
+      "name": "Sticky Note13"
+    }
+  ],
+  "connections": {
+    "Chatwoot Input": {
+      "main": [
+        [
+          {
+            "node": "Switch ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch ": {
+      "main": [
+        [
+          {
+            "node": "Sender",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DLX Consumer": {
+      "main": [
+        [
+          {
+            "node": "Reset List ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Models": {
+      "main": [
+        [
+          {
+            "node": "Update Options",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Global Vars": {
+      "main": [
+        [
+          {
+            "node": "Get Models",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Global Vars",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listen Insert Users": {
+      "main": [
+        [
+          {
+            "node": "Get Global Vars 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Picture": {
+      "main": [
+        [
+          {
+            "node": "Upload Picture",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Global Vars 2": {
+      "main": [
+        [
+          {
+            "node": "Download Picture",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Picture": {
+      "main": [
+        [
+          {
+            "node": "Add Picture",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "0a42d332-f776-4c59-8fca-af08174423e7",
+  "triggerCount": 0,
+  "tags": [
+    {
+      "createdAt": "2025-02-11T08:45:40.449Z",
+      "updatedAt": "2025-02-11T08:45:40.449Z",
+      "id": "dr4d81bgihHsmK44",
+      "name": "Anna 2.0"
+    }
+  ]
+}
