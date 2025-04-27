@@ -1,0 +1,496 @@
+{
+  "createdAt": "2025-02-11T08:43:12.137Z",
+  "updatedAt": "2025-04-12T23:59:55.736Z",
+  "id": "5FtfvelIJXa51oye",
+  "name": "ANNA 1.1 Agenda",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "2921828c-a521-4e2d-9ab6-092c0bd511b3",
+      "name": "Input",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        560,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "23f998b7-3bb8-4192-884c-8ecfa14f1547",
+      "name": "Anthropic",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        240
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "oxt9DojwJOThqHk3",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "6bf86e6c-c126-4835-8791-df0b552a7d4a",
+      "name": "OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        180,
+        240
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "3raLgi1Pp00Yk6mH",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.2-90b-vision-preview",
+        "options": {}
+      },
+      "id": "4b45d219-98c0-46ef-b714-2c9dc52477a5",
+      "name": "Groq",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        280,
+        240
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "kgYLUXl8fMTzRJXF",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "d1e60bba-f729-404a-ad20-7884ae470161",
+      "name": "Gemini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        380,
+        240
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "s1xC1GDVacTodRcC",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Use esta ferramenta para criar um novo evento no calendário. Forneça os detalhes necessários, como data e hora de início, data e hora de término, resumo e descrição.",
+        "calendar": {
+          "__rl": true,
+          "value": "24df8938d6a8dd77f18f4da9ba33aa46aa585b91d17d1dcf125758e3ad7fcc15@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Cleaners"
+        },
+        "start": "={{ $fromAI(\"start\", \"Data e hora de início do evento no formato ISO 8601\", \"string\") }}",
+        "end": "={{ $fromAI(\"end\", \"Data e hora de término do evento no formato ISO 8601\", \"string\") }}",
+        "additionalFields": {
+          "description": "={{ $fromAI(\"description\", \"Descrição detalhada do evento\", \"string\", \"\") }}",
+          "summary": "={{ $fromAI(\"summary\", \"Título ou resumo do evento\", \"string\") }}"
+        }
+      },
+      "id": "ca3a2f35-029c-430c-95a8-027a092db317",
+      "name": "create",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.2,
+      "position": [
+        1340,
+        320
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "7JgachnZjoFdulep",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Use esta ferramenta para deletar um evento do calendário. Forneça o parâmetro eventId. O identificador único do evento a ser deletado.",
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "24df8938d6a8dd77f18f4da9ba33aa46aa585b91d17d1dcf125758e3ad7fcc15@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Cleaners"
+        },
+        "eventId": "={{ $fromAI(\"eventId\", \"O identificador único do evento a ser deletado\", \"string\") }}",
+        "options": {}
+      },
+      "id": "4a5a23bc-ce37-40f0-8e6b-a7e8023f9a82",
+      "name": "delete",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.2,
+      "position": [
+        1640,
+        320
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "7JgachnZjoFdulep",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Use esta ferramenta para obter eventos do calendário. Forneça os parâmetros necessários para filtrar os eventos, como data e hora mínima e máxima, limite de resultados e termos de busca. ",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "24df8938d6a8dd77f18f4da9ba33aa46aa585b91d17d1dcf125758e3ad7fcc15@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Cleaners"
+        },
+        "limit": "={{ $fromAI(\"limit\", \"Número máximo de eventos a serem retornados (opcional, padrão é 20)\", \"number\", 20) }}",
+        "options": {
+          "timeMin": "={{ $fromAI(\"timeMin\", \"Data e hora mínima para filtrar os eventos (formato ISO 8601)\", \"string\", \"\") }}",
+          "timeMax": "={{ $fromAI(\"timeMax\", \"Data e hora máxima para filtrar os eventos (formato ISO 8601)\", \"string\", \"\") }}",
+          "query": "={{ $fromAI(\"query\", \"Termo de busca para filtrar eventos por palavra-chave\", \"string\", \"\") }}"
+        }
+      },
+      "id": "f1fe0b05-1871-4e3d-b3c0-553b284ee44e",
+      "name": "fetch",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.2,
+      "position": [
+        1500,
+        320
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "7JgachnZjoFdulep",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "446d37b7-24a1-4b13-bb98-b3b96a0846b2",
+              "name": "response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c93610da-e7fe-46d6-aa9d-5cc575b08c7f",
+      "name": "Resposta",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Use esta ferramenta para atualizar um evento existente no calendário. Forneça os seguintes parâmetros:\n\neventId: O identificador único do evento a ser atualizado.\nsummary: Novo título ou resumo do evento (opcional).\ndescription: Nova descrição detalhada do evento (opcional).\nstart: Nova data e hora de início do evento no formato ISO 8601 (opcional).\nend: Nova data e hora de término do evento no formato ISO 8601 (opcional).",
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "24df8938d6a8dd77f18f4da9ba33aa46aa585b91d17d1dcf125758e3ad7fcc15@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Cleaners"
+        },
+        "eventId": "={{ $fromAI(\"eventId\", \"O identificador único do evento a ser atualizado\", \"string\") }}",
+        "updateFields": {
+          "description": "={{ $fromAI(\"description\", \"Nova descrição detalhada do evento\", \"string\") }}",
+          "end": "={{ $fromAI(\"end\", \"Nova data e hora de término do evento no formato ISO 8601\", \"string\") }}",
+          "start": "={{ $fromAI(\"start\", \"Nova data e hora de início do evento no formato ISO 8601\", \"string\") }}",
+          "summary": "={{ $fromAI(\"summary\", \"Novo título ou resumo do evento\", \"string\") }}"
+        }
+      },
+      "id": "a0872233-ac4f-4095-ac66-1eb266ce1b7a",
+      "name": "update",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.2,
+      "position": [
+        1760,
+        320
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "7JgachnZjoFdulep",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 599.658681580821,
+        "width": 2119.2969705412984,
+        "color": 6
+      },
+      "id": "d838e9ea-7260-4c52-bf5b-669657a30a2a",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "LLMs",
+        "height": 259.9560257125531,
+        "width": 419.8387214184153,
+        "color": 2
+      },
+      "id": "63f41b38-7e4e-4fca-ba1c-f8bc76effedf",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        60,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "content": "TOOLS DE AGENDAMENTO",
+        "height": 300,
+        "width": 721,
+        "color": 2
+      },
+      "id": "606a6119-6f68-483f-8dda-490f4c10b732",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Use esta ferramenta para obter os slots de tempo ocupados no calendário dentro de um intervalo de datas específico. Forneça os seguintes parâmetros:\n\ntimeMin: Data e hora mínima para buscar os slots ocupados (formato ISO 8601).\ntimeMax: Data e hora máxima para buscar os slots ocupados (formato ISO 8601).\n",
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "24df8938d6a8dd77f18f4da9ba33aa46aa585b91d17d1dcf125758e3ad7fcc15@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Cleaners"
+        },
+        "timeMin": "={{ $fromAI(\"timeMin\", \"Data e hora mínima para buscar os slots ocupados (formato ISO 8601)\", \"string\") }}",
+        "timeMax": "={{ $fromAI(\"timeMax\", \"Data e hora máxima para buscar os slots ocupados (formato ISO 8601)\", \"string\") }}",
+        "options": {
+          "outputFormat": "bookedSlots"
+        }
+      },
+      "id": "16110320-f3b7-472f-9665-7e89abd021b1",
+      "name": "Slots",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.2,
+      "position": [
+        1900,
+        320
+      ],
+      "notesInFlow": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "7JgachnZjoFdulep",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sessionId }}"
+      },
+      "id": "0c6a691d-6b02-42de-aea7-7667296ecf9c",
+      "name": "Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        680,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Por favor, processe a seguinte solicitação do usuário:\n\nOperação: {{ $json.query.operation }}\nConsulta do Usuário: {{ $json.query.userQuery }}\nHistórico da Conversa: {{ $json.query.conversationHistory }}\n\nUtilize as informações acima para executar a operação solicitada. Extraia os detalhes necessários da consulta do usuário e aplique as ferramentas disponíveis para realizar a tarefa. Não interaja diretamente com o usuário; apenas processe a entrada e retorne o resultado para que eu possa continuar o atendimento.",
+        "options": {
+          "systemMessage": "=Você é um agente especializado em agendamento responsável por interpretar as solicitações do usuário para gerenciar eventos no calendário. A data e hora atuais são {{ $now.toString() }} e o dia da semana é {{ $now.format('cccc') }}. Sua tarefa é extrair as informações necessárias da consulta do usuário para executar a operação solicitada: criar, atualizar, deletar ou obter eventos.\n\nEm caso de operações que necessitam do eventId (como atualizar ou deletar eventos), você deve primeiramente usar a ferramenta FetchEvents para obter o ID do evento e só depois executar a operação principal. A ferramenta FetchEvents contém o parâmetro query, que pode proporcionar uma busca mais precisa. Se a busca não retornar os dados necessários, deixe o parâmetro query em branco para obter uma maior abrangência de dados.\n\nUse as ferramentas fornecidas para realizar a operação com os parâmetros corretos. Não interaja diretamente com o usuário; em vez disso, processe a entrada e retorne o resultado para o agente principal.\n\nFerramentas Disponíveis:\nCreateEvent\nUpdateEvent\nDeleteEvent\nFetchEvents",
+          "returnIntermediateSteps": false
+        }
+      },
+      "id": "df92f16c-a100-4f99-870c-06a5e3c7b377",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        760,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## AGENDA\nAnna",
+        "height": 80,
+        "width": 150,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        -100
+      ],
+      "typeVersion": 1,
+      "id": "69513c10-52b0-48e9-a35a-98b53498053a",
+      "name": "Sticky Note1"
+    }
+  ],
+  "connections": {
+    "Input": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fetch": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "delete": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slots": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "5538e3f2-2d9d-448f-a3bc-6d89379703f4",
+  "triggerCount": 0,
+  "tags": [
+    {
+      "createdAt": "2025-02-11T08:34:07.900Z",
+      "updatedAt": "2025-02-11T08:34:07.900Z",
+      "id": "PDGdF7WZ9gSQmP0W",
+      "name": "Anna"
+    }
+  ]
+}
