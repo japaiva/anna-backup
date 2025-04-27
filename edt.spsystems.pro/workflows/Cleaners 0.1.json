@@ -1,0 +1,936 @@
+{
+  "createdAt": "2025-02-11T08:37:10.571Z",
+  "updatedAt": "2025-04-12T23:54:47.274Z",
+  "id": "DH03WkZoYrx9GUQU",
+  "name": "Cleaners 0.1",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "54086cfb-487d-43f6-8adb-911b90a37498",
+      "name": "Calculator",
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "content": "LLMs",
+        "height": 259.6035924395444,
+        "width": 419.8387214184153,
+        "color": 2
+      },
+      "id": "42a980c0-e178-4549-88a2-5f5375b6f921",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "39863f54-8613-4571-9b59-3cce45c3394f",
+      "name": "Anthropic",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.2,
+      "position": [
+        -880,
+        1120
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "oxt9DojwJOThqHk3",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.7,
+          "timeout": 10000
+        }
+      },
+      "id": "9cfe3b1e-ea10-4179-bdfb-ff0fe48e87f3",
+      "name": "OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        -780,
+        1120
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "3raLgi1Pp00Yk6mH",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.2-90b-vision-preview",
+        "options": {}
+      },
+      "id": "b99b2f75-4fe0-4f5b-945e-3d06a6717e2c",
+      "name": "Groq",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -680,
+        1120
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "kgYLUXl8fMTzRJXF",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-pro-002",
+        "options": {}
+      },
+      "id": "8ef67082-08bf-4fc2-843e-5e91dd36eeef",
+      "name": "Gemini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        1120
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "s1xC1GDVacTodRcC",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Input').item.json.sessionId }}",
+        "sessionTTL": 864000,
+        "contextWindowLength": "={{ $('Input').item.json.contextWindow }}"
+      },
+      "id": "f13a8d0e-3f0d-4379-8235-7ce55b176583",
+      "name": "Redis",
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.3,
+      "position": [
+        -280,
+        1100
+      ],
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "TOOLS",
+        "height": 240,
+        "width": 959,
+        "color": 2
+      },
+      "id": "27e3a123-3ad7-4a17-9307-f100620d13e5",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "groupMessages": true
+        }
+      },
+      "id": "9c122dc5-ede5-4454-949e-3753d61ebc4c",
+      "name": "Chat Memory Manager",
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        -1360,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "ai",
+          "mode": "list",
+          "cachedResultName": "ai"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "Conta_Chatwoot",
+              "value": "={{ $('Input').item.json.app.chatwoot.accountId }}"
+            }
+          ]
+        },
+        "options": {
+          "outputColumns": [
+            "pinecone_host",
+            "pinecone_key",
+            "openai_key",
+            "namespace",
+            "topK",
+            "directus_host",
+            "directus_key"
+          ]
+        }
+      },
+      "id": "b84e7397-4aba-4777-8436-9ce4309c6535",
+      "name": "Directus.2",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1000,
+        640
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "EventManager",
+        "description": "Use essa tool para gerenciar eventos de forma simplificada. Chame essa função fornecendo a operação desejada, a consulta do usuário e, opcionalmente, informações relevantes do histórico da conversa. Esta ferramenta está projetada para passar essas informações para uma IA especializada que realizará o agendamento ou outra operação necessária, interpretando o contexto e os detalhes fornecidos pelo usuário.",
+        "workflowId": {
+          "__rl": true,
+          "value": "5FtfvelIJXa51oye",
+          "mode": "list",
+          "cachedResultName": "ANNA 1.1 Agenda"
+        },
+        "fields": {
+          "values": [
+            {
+              "name": "sessionId",
+              "stringValue": "={{ $('Input').item.json.sessionId }}"
+            }
+          ]
+        },
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"operation\": {\n      \"type\": \"string\",\n      \"description\": \"A operação a ser realizada: 'create', 'update', 'delete' ou 'fetch'\",\n      \"enum\": [\"create\", \"update\", \"delete\", \"fetch\"],\n      \"example\": \"create\"\n    },\n    \"userQuery\": {\n      \"type\": \"string\",\n      \"description\": \"A instrução ou pedido fornecido pelo usuário\",\n      \"example\": \"Agende uma reunião com a equipe para discutir o novo projeto na próxima semana.\"\n    },\n    \"conversationHistory\": {\n      \"type\": \"string\",\n      \"description\": \"Informações relevantes do histórico da conversa para fornecer contexto adicional à IA especializada\",\n      \"example\": \"O usuário mencionou que todos estão disponíveis na quarta-feira.\"\n    }\n  },\n  \"required\": [\"operation\", \"userQuery\"]\n}"
+      },
+      "id": "760d1930-ce45-40bb-a333-6c222bd364d7",
+      "name": "EventMgr",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        40,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "name": "VectorManager",
+        "description": "=Use esta ferramenta para invocar o agente especializado em gerenciamento de vetores. Essa ferramenta permite especificar de forma clara as necessidades do agente principal e os resultados esperados, fornecendo todas as informações relevantes para que o agente especializado execute as operações necessárias no sistema de vector stores.",
+        "workflowId": {
+          "__rl": true,
+          "value": "IlNuVaH69CuSnKfr",
+          "mode": "list",
+          "cachedResultName": "ANNA 1.1 Vector DB"
+        },
+        "fields": {
+          "values": [
+            {
+              "name": "attachments",
+              "type": "arrayValue",
+              "arrayValue": "={{ $('Input').item.json.attachments }}"
+            },
+            {
+              "name": "contentId",
+              "stringValue": "={{ $('Input').item.json.contentId }}"
+            },
+            {
+              "name": "sessionId",
+              "stringValue": "={{ $('Input').item.json.sessionId }}"
+            },
+            {
+              "name": "agentId",
+              "type": "numberValue",
+              "numberValue": "={{ $('Input').item.json.app.agentId }}"
+            }
+          ]
+        },
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"task\": {\n      \"type\": \"string\",\n      \"description\": \"Instrução detalhada para o agente especializado. Inclua a necessidade específica e o resultado esperado, com base na solicitação do usuário.\",\n      \"example\": \"Crie vetores de alta qualidade a partir do documento fornecido, organizando-os no índice 'knowledge_index' e no namespace 'faq'.\"\n    }\n  },\n  \"required\": [\"task\"]\n}"
+      },
+      "id": "f6f23508-de1e-40c2-9269-630e615c4b31",
+      "name": "VectorMgr",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        140,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use esta ferramenta para transferir a conversa para o atendimento humano quando solicitado pelo usuário. Ao acionar esta ferramenta, a conversa será atribuída a um membro da equipe humana para continuar o atendimento.",
+        "method": "POST",
+        "url": "={{ $('Dados').item.json.app.chatwoot.url }}/api/v1/accounts/{{ $('Dados').item.json.app.chatwoot.accountId }}/conversations/{{ $('Dados').item.json.meta.conversationId }}/assignments",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "parametersBody": {
+          "values": [
+            {
+              "name": "team_id",
+              "valueProvider": "fieldValue",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "id": "02874dc0-3ac5-43c3-abc7-13a6ae38948a",
+      "name": "Transfer",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        1100
+      ],
+      "notesInFlow": true,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Input').item.json.sessionId }}",
+        "sessionTTL": 864000,
+        "contextWindowLength": 80
+      },
+      "id": "c8bd8acb-5248-47af-a458-22ff822ee4f1",
+      "name": "Redis.",
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.3,
+      "position": [
+        -1360,
+        1100
+      ],
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "RetrieveVectors",
+        "description": "Utilize esta ferramenta para realizar buscas no banco de dados vetorial (Vector Store) utilizando consultas no formato de perguntas. A ferramenta retorna os vetores mais relevantes com base nas queries fornecidas, auxiliando o agente principal a responder ao usuário final de forma precisa e informativa.",
+        "jsCode": "const axios = require('axios');\n\n// Obter variáveis do nó anterior\nconst inputData = $input.first().json;\nconst openaiApiKey = inputData.openai_key;\nconst pineconeApiKey = inputData.pinecone_key;\nconst pineconeEndpoint = inputData.pinecone_host;\nconst namespace = inputData.namespace || 'default';\nconst topK = inputData.topK || 5;\n\n// Parâmetros de entrada\nconst inputText = query.text;\n\nlet response = '';\n\ntry {\n  // Passo 1: Gerar o embedding com a OpenAI\n  const openAiResponse = await axios.post(\n    'https://api.openai.com/v1/embeddings',\n    {\n      model: 'text-embedding-3-small',\n      input: inputText,\n      dimensions: 1024 // Define explicitamente a dimensão como 1024\n    },\n    {\n      headers: {\n        'Content-Type': 'application/json',\n        'Authorization': `Bearer ${openaiApiKey}`\n      }\n    }\n  );\n\n  const embeddingVector = openAiResponse.data.data[0].embedding;\n\n  // Passo 2: Consultar o Pinecone\n  const pineconeResponse = await axios.post(\n    `${pineconeEndpoint}/query`,\n    {\n      namespace: namespace,\n  //  namespace: 'document_namespace',\n      topK: topK,\n      includeValues: true,\n      includeMetadata: true,\n      vector: embeddingVector\n    },\n    {\n      headers: {\n        'Content-Type': 'application/json',\n        'Api-Key': pineconeApiKey\n      }\n    }\n  );\n\n  // Filtrar resultados para remover o campo 'values'\n  const filteredResults = pineconeResponse.data.matches.map(match => {\n    const { values, ...rest } = match; // Remove o campo 'values'\n    return rest;\n  });\n\n  // Retornar os resultados filtrados\n  response = JSON.stringify(filteredResults);\n\n} catch (error) {\n  response = `Erro na execução da tool: ${error.message}`;\n}\n\nreturn response;",
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"text\": {\n      \"type\": \"string\",\n      \"description\": \"A pergunta ou consulta que será usada para buscar vetores relevantes no banco de dados vetorial. Deve ser uma string representando a pergunta do usuário ou uma consulta específica.\"\n    }\n  },\n  \"required\": [\"text\"]\n}"
+      },
+      "id": "10349c9b-7b1f-4513-84ec-5201d11f1844",
+      "name": "Research",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.1,
+      "position": [
+        -1080,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "e9380c39-d114-49cf-9ac3-b9e5279dd53f",
+      "name": "SerpAPI",
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        360,
+        1100
+      ],
+      "credentials": {
+        "serpApi": {
+          "id": "AF1rfS1RGkotWtKu",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e2074e28-41da-40ef-ae8d-508528d918dd",
+              "name": "datetime_property",
+              "value": "={{\n  $('Input').item.json.app.systemMessage.options.includes('Data_&_Hora_Correntes') \n    ? 'Agora são ' + \n      $now\n        .setZone($('Input').item.json.timeZone)\n        .toFormat('yyyy-MM-dd HH:mm:ss') + '\\n' : ''\n}}",
+              "type": "string"
+            },
+            {
+              "id": "e318b30f-cbaf-4d11-8068-20acae8747aa",
+              "name": "greeting_message_property",
+              "value": "={{\n  '  <greeting_message>\\n    ' + \n  $('Input').item.json.app.systemMessage.greeting\n    .replace(\n      /{nome}/g, \n      $('Input')\n        .item.json.pushName\n        .split(' ')[0]\n        .toLowerCase()\n        .replace(/^./, match => match.toUpperCase())\n    )\n    .replace(\n      /{sobrenome}/g, \n      $('Input')\n        .item.json.pushName\n        .split(' ')\n        .slice(-1)[0]\n        .toLowerCase()\n        .replace(/^./, match => match.toUpperCase())\n    )\n    .replace(\n      /{nome_completo}/g, \n      $('Input')\n        .item.json.pushName\n        .toLowerCase()\n        .split(' ')\n        .map(word => \n          word.length <= 2 \n            ? word \n            : word.replace(/^./, match => match.toUpperCase())\n        )\n        .join(' ')\n    )\n    .replace(\n      /{saudacao}/g, \n      $now.setZone($('Input').item.json.app.systemMessage.setZone).hour < 12 \n        ? \"bom dia\" \n        : ($now.hour < 18 ? \"boa tarde\" : \"boa noite\")\n    ) \n  + '\\n  </greeting_message>'\n}}",
+              "type": "string"
+            },
+            {
+              "id": "044a5d6d-321f-4c1e-b719-24a46e45edf9",
+              "name": "canal_de_atendimento",
+              "value": "={{\n  $('Input').item.json.app.systemMessage.options.includes('canal_de_atendimento') \n    ? '    Canal de atendimento: ' + \n      (\n        $('Input').item.json.channel.startsWith('Channel::') \n          ? ($('Input').item.json.channel.replace('Channel::', '') === 'Api' \n              ? 'WhatsApp Web' \n              : $('Input').item.json.channel.replace('Channel::', '')\n            ) \n          : $('Input').item.json.channel\n      ) + '\\n' : ''\n}}",
+              "type": "string"
+            },
+            {
+              "id": "88004edc-fc7e-41b5-9da2-86069ad3ec88",
+              "name": "ultima_interação_usuario",
+              "value": "={{\n  $('Input').item.json.app.systemMessage.options.includes('ultima_interação_usuario')\n    ? (\n        $('Input').item.json.app.systemMessage.lastUpdate\n          ? '    A última interação do usuário foi ' +\n            $('Input').item.json.app.systemMessage.lastUpdate\n              .toDateTime()\n              .setZone($('Input').item.json.app.systemMessage.setZone)\n              .toRelative({ locale: 'pt-BR' }) + '\\n'\n          : ''\n      )\n    : ''\n}}",
+              "type": "string"
+            },
+            {
+              "id": "2bd0fbc7-43c9-42e0-b414-b726c1c3c383",
+              "name": "personality_property",
+              "value": "={{ \n  $('Input').item.json.app.systemMessage.personality && \n  $('Input').item.json.app.systemMessage.personality.length > 0 \n    ? '  <personality>\\n' +\n      $('Input').item.json.app.systemMessage.personality\n        .slice()\n        .reverse()\n        .map((item, index) => '  ' + (index + 1) + '. ' + item)\n        .join('\\n') +\n      '\\n  </personality>'\n    : null \n}}",
+              "type": "string"
+            },
+            {
+              "id": "314de110-66b5-415f-b262-f3c2cd61bb34",
+              "name": "identity_property",
+              "value": "={{ \n  $('Input').item.json.app.systemMessage.identity\n    ? '  <identity>\\n    ' +\n      $('Input').item.json.app.systemMessage.identity +\n      '\\n  </identity>' \n    : null \n}}",
+              "type": "string"
+            },
+            {
+              "id": "fba602a9-eaa0-4f1f-bd3d-cf6dd42b49eb",
+              "name": "role_property",
+              "value": "={{ \n  $('Input').item.json.app.systemMessage.role\n    ? '  <your_role>\\n    ' +\n      $('Input').item.json.app.systemMessage.role\n        .replace(/\\n/g, '\\n    ') +\n      '\\n  </your_role>' \n    : null \n}}",
+              "type": "string"
+            },
+            {
+              "id": "bfc3f90e-48a5-45d5-aca2-a21bcedfd003",
+              "name": "instructions_property",
+              "value": "={{ \n  $('Input').item.json.app.systemMessage.instructions && \n  $('Input').item.json.app.systemMessage.instructions.length > 0 \n    ? '  <instructions>\\n' +\n      $('Input').item.json.app.systemMessage.instructions\n        .slice()\n        .reverse()\n        .map((item, index) => '  ' + (index + 1) + '. ' + item)\n        .join('\\n') +\n      '\\n  </instructions>'\n    : null \n}}",
+              "type": "string"
+            },
+            {
+              "id": "4b76609b-6744-44b5-9fab-05d1cec76f8b",
+              "name": "instructions_error",
+              "value": "={{ \n  $('Input').item.json.app.systemMessage.erro \n    ? '  <error_message>\\n    ' +\n      $('Input').item.json.app.systemMessage.erro\n        .replace(/\\n/g, '\\n    ') +\n      '\\n  </error_message>' \n    : null \n}}",
+              "type": "string"
+            },
+            {
+              "id": "8c1365f8-7634-4a9f-bca5-3c129a48400b",
+              "name": "documentos_enviados",
+              "value": "={{ \n  $('Input').item.json.app.systemMessage.options.includes('documentos_enviados') && $('Input').first().json.attachments.length > 0\n    ? '    Foram enviados ' + $('Input').first().json.attachments.length + \n      ' documentos pelo usuário, e já estão disponíveis no sistema para vetorizacão em lote.\\n' \n    : '' \n}}",
+              "type": "string"
+            },
+            {
+              "id": "4875c764-53e0-461c-a3eb-0ecc5008cd87",
+              "name": "directus_host",
+              "value": "={{ $('Directus.2').first().json.directus_host }}",
+              "type": "string"
+            },
+            {
+              "id": "50a6bfde-8042-4065-a228-d7bbf1bcffa4",
+              "name": "directus_key",
+              "value": "={{ $('Directus.2').first().json.directus_key }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -40,
+        640
+      ],
+      "id": "642491be-37a7-49d9-ad73-924e93d4da49",
+      "name": "Variáveis"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "64df3be0-f687-471e-9dbf-0fe87590eecb",
+              "name": "systemMessage",
+              "value": "=<system_message>\n{{ $json.identity_property }}\n\n{{ $json.role_property }}\n\n{{ $json.greeting_message_property }}\n\n{{ $json.instructions_error }}\n\n  <internal_system_information>\n    {{ (\n        $json.datetime_property +\n        $json.canal_de_atendimento +\n        $json['ultima_interação_usuario'] +\n        $json.documentos_enviados\n       ).trim()\n    }}\n  </internal_system_information>\n\n{{ $json.personality_property }}\n\n{{ $json.instructions_property }}\n\n  <tools>\n    Qualquer assunto relacionado a gerenciamento de vetores ivoque a tool 'VectorManager', incluindo a criação de vetores a partir de documentos no sistema\n  </tools>\n\n  <avoided_topics>\n  </avoided_topics>\n\n  <your_capabilities>\n    1. Detelar o usuário do BD.\n  </your_capabilities>\n\n  <vectorStoreReturn>\n    {{ $node[\"VectorSearch\"].json[\"output\"] }}\n  </vectorStoreReturn>\n</system_message>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d6cd6977-ac1d-46f2-a892-02e869d529a6",
+      "name": "SystemMessage",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        640
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {},
+      "id": "99bc73c0-8be7-4d83-af00-080d41ac0ede",
+      "name": "Input",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1560,
+        740
+      ]
+    },
+    {
+      "parameters": {
+        "name": "DeleteUser",
+        "description": "Use essa tool para deletar o seu usuário específico do banco de dados (DB). Chame essa função para remover seu perfil ou conta de usuário do sistema. Essa operação é irreversível, portanto, use com cautela.",
+        "jsCode": "// Importa o módulo axios\nconst axios = require('axios');\n\n// Configuração da API com valores dinâmicos\nconst baseURL = `${$('Directus.2').first().json.directus_host}/items`;\nconst table = 'users';\nconst contactId = $('Input').item.json.meta.contactId; // Obtém o ID do contato dinamicamente\nconst token = $('Directus.2').first().json.directus_key; // Obtém o token dinamicamente\n\nasync function deleteRow() {\n    try {\n        // Realiza a requisição DELETE\n        const response = await axios.delete(`${baseURL}/${table}/${contactId}`, {\n            headers: {\n                Authorization: `Bearer ${token}`,\n            },\n        });\n\n        // Retorna o status da operação\n        return response.status === 204 ? 'Linha excluída com sucesso!' : 'Erro ao excluir';\n    } catch (error) {\n        // Lida com erros\n        return `Erro: ${error.response?.data?.errors || error.message}`;\n    }\n}\n\n// Executa a função\nreturn deleteRow();"
+      },
+      "id": "fed9970f-6690-4b9f-9e15-24b88b9f84a3",
+      "name": "DeleteUser",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.1,
+      "position": [
+        260,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 840.031885803101,
+        "width": 2581.0309562240827,
+        "color": 6
+      },
+      "id": "c7b07150-26ee-4cf7-9a29-3755c6457597",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1660,
+        540
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "7bdd6cc0-096a-41dd-80a5-4f240735daa9",
+      "name": "NoOp.",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        740
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {
+          "includeUnpaired": true
+        }
+      },
+      "id": "1615f0d3-100a-468f-b072-f90c9150d09e",
+      "name": "Merge.",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -600,
+        640
+      ],
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {
+          "includeUnpaired": true
+        }
+      },
+      "id": "d132cf02-7428-434c-90a3-44c79f3113e2",
+      "name": "Merge.1",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        360,
+        740
+      ],
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Por favor, com base na entrada do usuário abaixo e no histórico recente da conversa, decida se é necessário realizar buscas no banco de dados vetorial. Se necessário, formule as consultas adequadas e retorne as informações relevantes para me auxiliar a responder ao usuário.\n\nEntrada do usuário: <UserInput>{{ $('Input').item.json.InputAI }}</UserInput>\n\nHistórico da conversa: <ConversationHistory>{{ JSON.stringify($('Chat Memory Manager').first().json.messages.slice(-5)) }}</ConversationHistory>",
+        "options": {
+          "systemMessage": "=Você é um agente especializado em busca e recuperação de informações no banco de dados vetorial para auxiliar o agente principal a responder ao usuário final. A cada nova entrada do usuário, você deve decidir se é necessário realizar buscas utilizando a técnica de RAG (Retrieval-Augmented Generation). As consultas devem ser formuladas no formato de perguntas.\n\nSumário dos documentos disponíveis: \n<DocumentSummaries>\n{{ $('Input').item.json.descricoes }}\n</DocumentSummaries>\n\nSeu objetivo é:\n\nDeterminar se é necessário realizar buscas no banco de dados vetorial com base na entrada do usuário.\n\nSe necessário, formular uma ou mais consultas no formato de perguntas para buscar informações relevantes.\n\nRetornar ao agente principal apenas as informações necessárias para responder ao usuário.\n\nSe não encontrar informações relevantes ou se optar por não realizar buscas, retorene a seguinte mensagem: 'RAG não retornou dados relevantes'\n\nLembre-se:\n\nSeja eficiente e conciso em suas respostas.\n\nNão inclua informações desnecessárias.\n\nNão interaja diretamente com o usuário; sua comunicação é apenas com o agente principal.",
+          "maxIterations": 15,
+          "returnIntermediateSteps": true,
+          "passthroughBinaryImages": true
+        }
+      },
+      "id": "4b6a96a7-e6ea-482f-a89d-7afb2b96d116",
+      "name": "VectorSearch",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -400,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Input').item.json.InputAI || ' ' }}",
+        "options": {
+          "systemMessage": "={{ $node[\"SystemMessage\"].json[\"systemMessage\"] }}",
+          "maxIterations": 10,
+          "returnIntermediateSteps": true,
+          "passthroughBinaryImages": true
+        }
+      },
+      "id": "1ec78b23-a26b-4639-ac07-d2b571ee100a",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        560,
+        740
+      ],
+      "retryOnFail": false,
+      "waitBetweenTries": 100,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "url": "http://n8n_webhook:5678/webhook/d7db486d-c31d-477a-834f-ffa4965c1dbd",
+        "options": {}
+      },
+      "id": "78fc6c8b-e6be-47b7-8df4-59b0845a6088",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://webhook.bitfy.ai/webhook/d7db486d-c31d-477a-834f-ffa4965c1dbd",
+        "options": {}
+      },
+      "id": "82480516-fc04-4a7e-bd79-29c5cc60257f",
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "path": "d7db486d-c31d-477a-834f-ffa4965c1dbd",
+        "options": {}
+      },
+      "id": "6c2c571b-e226-4f11-ab09-2485faa5a15f",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        180
+      ],
+      "webhookId": "d7db486d-c31d-477a-834f-ffa4965c1dbd"
+    },
+    {
+      "parameters": {
+        "content": "## Cleaners\nAPP CORE",
+        "height": 80,
+        "width": 300,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1660,
+        440
+      ],
+      "typeVersion": 1,
+      "id": "4d99de9a-73be-42cf-9013-c5708ce90314",
+      "name": "Sticky Note2"
+    }
+  ],
+  "connections": {
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory Manager": {
+      "main": [
+        [
+          {
+            "node": "Directus.2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Directus.2": {
+      "main": [
+        [
+          {
+            "node": "Merge.",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "EventMgr": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VectorMgr": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transfer": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis.": {
+      "ai_memory": [
+        [
+          {
+            "node": "Chat Memory Manager",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research": {
+      "ai_tool": [
+        [
+          {
+            "node": "VectorSearch",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Variáveis": {
+      "main": [
+        [
+          {
+            "node": "SystemMessage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SystemMessage": {
+      "main": [
+        [
+          {
+            "node": "Merge.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory Manager",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "NoOp.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeleteUser": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "VectorSearch",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NoOp.": {
+      "main": [
+        [
+          {
+            "node": "Merge.",
+            "type": "main",
+            "index": 2
+          },
+          {
+            "node": "Merge.1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge.": {
+      "main": [
+        [
+          {
+            "node": "VectorSearch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge.1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VectorSearch": {
+      "main": [
+        [
+          {
+            "node": "Variáveis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "d2aca874-c6cd-4b8e-8565-f783eafece6f",
+  "triggerCount": 0,
+  "tags": [
+    {
+      "createdAt": "2025-02-21T12:48:32.581Z",
+      "updatedAt": "2025-02-21T12:48:32.581Z",
+      "id": "6CbovJW8KYtPFBhY",
+      "name": "mvp"
+    }
+  ]
+}
