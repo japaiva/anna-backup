@@ -1,0 +1,6107 @@
+{
+  "createdAt": "2025-02-11T08:44:44.716Z",
+  "updatedAt": "2025-04-13T00:00:06.632Z",
+  "id": "IlNuVaH69CuSnKfr",
+  "name": "ANNA 1.1 Vector DB",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "text": "={{ $node[\"DocsInput\"].json[\"body\"][\"task\"] }} <segment>{{ $node[\"LoopItems.4\"].json[\"segment\"] }}</segment>",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"array\",\n  \"items\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"q\": {\n        \"type\": \"string\",\n        \"description\": \"Pergunta principal\"\n      },\n      \"sq\": {\n        \"type\": \"array\",\n        \"items\": {\n          \"type\": \"string\"\n        },\n        \"description\": \"Perguntas similares\"\n      },\n      \"a\": {\n        \"type\": \"string\",\n        \"description\": \"Resposta\"\n      },\n      \"t\": {\n        \"type\": \"string\",\n        \"description\": \"Trecho(s) do documento usado para responder a pergunta\"\n      },\n      \"tags\": {\n        \"type\": \"array\",\n        \"items\": {\n          \"type\": \"string\"\n        },\n        \"description\": \"Tags relacionadas ao conteúdo\"\n      }\n    },\n    \"required\": [\"q\", \"sq\", \"a\", \"t\", \"tags\"]\n  }\n}\n",
+        "options": {
+          "systemPromptTemplate": "=Você é um especialista em ensino interessado no conteúdo fornecido pelo autor. Sua super habilidade é extrair o melhor e mais prático conteúdo de todo material enviado a você, para que esse conhecimento seja passado adiante da maneira mais clara e objetiva possível, mas mantendo a personalidade do autor.\n\nO objetivo é criar um Q&A completo que (1) divide e transforma o conteúdo em perguntas e respostas para (2) depois usar como base de conhecimento para um chatbot que (3) responda exatamente como o autor responderia.\n\nPortanto, preciso que as respostas sejam extremamente similares ao que o autor responderia, incluindo, mas não limitado a tom de voz, estilo de escrita, personalidade, e tudo que compreende o estilo de escrita do autor que você encontrará e analisará nos conteúdos enviados para você.\n\nVocê vai formular o número de Q&A (perguntas e respostas) solicitadas que reflitam o conteúdo enviado seguindo as regras abaixo.\n\nRegras:\n\nCrie perguntas unicamente se encontrar trechos no documento que podem ser usados para responder a essa pergunta.\nGere sempre novas perguntas, revise as que foram criadas e crie perguntas diferentes.\nAs respostas devem ser escritas em primeira pessoa, como se fossem do próprio autor, e devem manter o estilo de escrita descrito abaixo em Estilo do Autor.\nAs respostas devem ser formatadas em markdown seguindo o padrão de perguntas e respostas conforme descrito em Formatação da Saída; elas devem ser preenchidas conforme o exemplo descrito em Exemplo.\nUtilize o texto original sempre que possível. Tente variar o mínimo possível do conteúdo e estilo do autor. Crie e parafraseie somente para que a resposta faça mais sentido e flua melhor.\nEstilo do Autor:\n\nTom e Estrutura: O texto tem um tom reflexivo e introspectivo, com uma abordagem filosófica e prática. A estrutura segue um fluxo de pensamento, introduzindo conceitos, conectando-os com experiências pessoais e exemplos históricos, e finalizando com insights ou questionamentos.\nTemas e Conteúdo: O conteúdo é rico em metáforas, referências filosóficas, citações de pensadores, e aplicações práticas. Inclua temas de autoconhecimento, desenvolvimento pessoal, e aprendizado através da modelagem.\nEstilo de Linguagem: Use uma linguagem eloquente, mas acessível. Empregue frases bem construídas e vocabulário variado, incluindo termos técnicos quando apropriado (como \"neurônios-espelho\", \"córtex pré-frontal\").\nElementos Pessoais: Integre narrativas pessoais e experiências, demonstrando vulnerabilidade e aprendizados.\nConexão com o Leitor: Fale diretamente ao leitor, com perguntas e convites à reflexão, criando uma conexão pessoal.\nElementos de Estilo de Escrita:\nFrases simples e curtas;\nPalavras simples, que qualquer um entende;\nTom escrito como se fosse para alguém da 5ª série;\nMuitos exemplos e analogias.\nFormatação da Saída:\n\nq: Pergunta\nsq: 3 Perguntas Similares\na: Resposta\nt: Trecho(s) do documento usado para responder a pergunta.\ntags: tag1, tag2, tag3\nInstruções Finais:\n\nAplique a tag '{{ $('DocsInput').first().json.body.tags }}' Obrigatoriamente.\nOutras tags disponíveis no sistema são: '{{ $('DocsInput').first().json.body.systemTags }}'\n\nLembre-se de simular o tom de voz e a maneira como o autor escreve do jeito mais similar possível. Se 10 pessoas lessem suas respostas, então 10 pessoas deveriam acreditar que foi o autor que escreveu.\nFormate a saída conforme o formato encontrado em Formatação da Saída, sem esquecer nenhum dos itens (q:, sq:, a:, t:, tags:).\nLembre-se: a Resposta em a: precisa ser o mais similar possível a como o autor escreveria. A ponto de que se o autor procurasse o texto que você escreveu, quase encontraria dito da mesma maneira no material.\nAgora gere 15 perguntas e RESPOSTAS ÚNICAS seguindo estas instruções. Ou seja, não pode repetir nenhuma pergunta que você já tenha feito, seja deste ou de outro documento dentro dessa janela de contexto da nossa conversa.\nSempre escreva em português brasileiro, seguindo o estilo do autor."
+        }
+      },
+      "id": "8e218e8a-a553-4169-996c-2d6e9055a4bf",
+      "name": "Information Extractor",
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        1260,
+        1840
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/embeddings",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('DocsInput').first().json.body.openaiKey }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "text-embedding-3-small"
+            },
+            {
+              "name": "input",
+              "value": "={{ \n  JSON.stringify(\n    Object.values($('SetData.1').item.json)\n      .filter(value => typeof value === 'string' || Array.isArray(value))\n      .flat()\n  )\n}}"
+            },
+            {
+              "name": "dimensions",
+              "value": 1024
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "51952de9-0c4b-47c7-840c-7bc15b0fee3d",
+      "name": "OpenAI embeddings",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1660,
+        1640
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('DocsInput').first().json.body.pineconeHost }}/vectors/upsert",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $('DocsInput').first().json.body.pineconeKey }}"
+            },
+            {
+              "name": "X-Pinecone-API-Version",
+              "value": "2024-10"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"vectors\": [\n    {\n      \"id\": \"{{ $('SetData.1').item.json.uuid }}\",\n      \"values\": {{ JSON.stringify($('OpenAI embeddings').item.json.data[0].embedding) }},\n      \"metadata\": {\n        \"q\": \"{{ JSON.stringify($node[\"LoopItems.5\"].json[\"q\"]).replace(/^\"|\"$/g, '') }}\",\n        \"sq\": {{ JSON.stringify($node[\"LoopItems.5\"].json[\"sq\"]) }},\n        \"a\": \"{{ JSON.stringify($node[\"LoopItems.5\"].json[\"a\"]).replace(/^\"|\"$/g, '') }}\",\n        \"t\": \"{{ JSON.stringify($node[\"LoopItems.5\"].json[\"t\"]).replace(/^\"|\"$/g, '') }}\",\n        \"tags\": {{ JSON.stringify($node[\"SetData.1\"].json[\"tags\"]) }}\n      }\n    }\n  ],\n  \"namespace\": \"{{ $('DocsInput').first().json.body.systemNamespace || $('DocsInput').first().json.body.aiNamespace }}\"\n}",
+        "options": {}
+      },
+      "id": "1f08d6b7-2803-4791-b05e-b7461dd23945",
+      "name": "vectors/upsert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1860,
+        1640
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "e541cdef-befb-48e7-bf44-7863deadd09f",
+      "name": "NoOp.1",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        540,
+        2400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.pinecone.io/indexes",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials.\"].json[\"pinecone_key\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "546db0e1-b73c-4840-8f61-e1bd2a76f7e5",
+      "name": "List indexes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1060,
+        2500
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pinecone.io/indexes",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials.\"].json[\"pinecone_key\"] }}"
+            },
+            {
+              "name": "X-Pinecone-API-Version",
+              "value": "2024-10"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"name\": \"test\",\n  \"dimension\": 1024,\n  \"metric\": \"cosine\",\n  \"spec\": {\n    \"serverless\": {\n      \"cloud\": \"aws\",\n      \"region\": \"us-east-1\"\n    }\n  },\n  \"tags\": {},\n  \"deletion_protection\": \"disabled\"\n}",
+        "options": {}
+      },
+      "id": "3f49a53b-1700-4b26-9734-3c690d7f66ec",
+      "name": "Create an index",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1060,
+        2300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "df7e8c09-0a66-46d4-b015-3b2f4545d8ec",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "test",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "17cb2b79-b78a-4119-9100-a362803574a2",
+      "name": "Filter",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -660,
+        2500
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.pinecone.io/indexes/{{ $node[\"Filter\"].json[\"name\"] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials.\"].json[\"pinecone_key\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b38e79a0-ebbb-4534-b66b-2c69612152aa",
+      "name": "Describe an index",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -460,
+        2500
+      ]
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "=https://api.pinecone.io/indexes/{{ $node[\"Filter\"].json[\"name\"] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials.\"].json[\"pinecone_key\"] }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "67ef75a5-7e91-45d5-bc0e-6a7a4adf56b8",
+      "name": "Delete an index",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -460,
+        2700
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://{{ $node[\"Describe an index\"].json[\"host\"] }}/describe_index_stats",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials.\"].json[\"pinecone_key\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2838c734-fa1c-40a3-8c08-c3c43ec23a0d",
+      "name": "Get index stats",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -260,
+        2500
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://{{ $node[\"Describe an index\"].json[\"host\"] }}/vectors/list",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "namespace",
+              "value": "={{ $node[\"Get index stats\"].json[\"namespaces\"].keys().first() }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials.\"].json[\"pinecone_key\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "754d01b6-bb3d-4e5c-8d89-228c1b36e98e",
+      "name": "List vector IDs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -60,
+        2500
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "indexes",
+        "options": {}
+      },
+      "id": "d0ad5582-9839-460a-a811-7219db5c622a",
+      "name": "SplitOut.",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        2500
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "vectors",
+        "options": {}
+      },
+      "id": "362eb2eb-55bb-4f3f-a982-4b691f61de3c",
+      "name": "SplitOut.1",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        140,
+        2500
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "94037288-11fb-4aa2-b8ab-c8f7fe529487",
+      "name": "LoopItems.",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        340,
+        2500
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "d4cf8605-99f8-463d-bf3c-7a822438f663",
+      "name": "LoopItems.1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        740,
+        2300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "94648201-8dc8-4885-813a-73eec629aa1f",
+      "name": "NoOp.2",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        940,
+        2200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $node[\"GetCredentials\"].json[\"pinecone_host\"] }}/vectors/upsert",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials\"].json[\"pinecone_key\"] }}"
+            },
+            {
+              "name": "X-Pinecone-API-Version",
+              "value": "2024-10"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"vectors\": [\n    {\n      \"id\": \"{{ $node[\"ItemsUpdate\"].json[\"body\"][\"keys\"][\"0\"] }}\",\n      \"values\": {{ JSON.stringify($node[\"OpenAIembed.\"].json[\"data\"][\"0\"][\"embedding\"]) }},\n      \"metadata\": {\n        \"q\": \"{{ JSON.stringify($node[\"GetData.\"].json[\"q\"]).replace(/^\"|\"$/g, '') }}\",\n        \"sq\": {{ JSON.stringify($node[\"GetData.\"].json[\"sq\"]?.split(',').map(item => item.trim())) }},\n        \"a\": \"{{ JSON.stringify($node[\"GetData.\"].json[\"a\"]).replace(/^\"|\"$/g, '') }}\",\n        \"t\": \"{{ JSON.stringify($node[\"GetData.\"].json[\"t\"]).replace(/^\"|\"$/g, '') }}\",\n        \"tags\": {{ JSON.stringify($node[\"GetData.\"].json[\"tags\"]?.split(',').map(item => item.trim())) }}\n      }\n    }\n  ],\n  \"namespace\": \"{{ $node[\"GetCredentials\"].json[\"namespace\"] }}\"\n}",
+        "options": {}
+      },
+      "id": "cb8156e6-e689-4d4f-85a9-93db8c39be8c",
+      "name": "vectors/upsert.1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1300,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 900,
+        "width": 4059,
+        "color": 6
+      },
+      "id": "6c640b56-069a-4aa3-9b7c-9a9f52404c9f",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1400,
+        2080
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://{{ $node[\"Describe an index\"].json[\"host\"] }}/vectors/fetch",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ids",
+              "value": "={{ $node[\"LoopItems.\"].json[\"id\"] }}"
+            },
+            {
+              "name": "namespace",
+              "value": "={{ $node[\"Get index stats\"].json[\"namespaces\"].keys().first() }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials.\"].json[\"pinecone_key\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bfb09172-892d-4123-af18-332dd7ffb9fe",
+      "name": "Fetch vectors",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        540,
+        2600
+      ]
+    },
+    {
+      "parameters": {
+        "content": "#### Sincronização do Pinecone com o Directus",
+        "height": 80,
+        "width": 361.5468993739327,
+        "color": 4
+      },
+      "id": "d5b2172d-b7ae-4607-ae72-89c7b2978c86",
+      "name": "Sticky Note16",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1340,
+        2120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "dimensoes",
+          "mode": "list",
+          "cachedResultName": "dimensoes"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "dimensoes": "={{ $node[\"OpenAIembed.\"].json[\"data\"][\"0\"][\"embedding\"].join(\",\") }}",
+            "vetor": "={{ $node[\"ItemsUpdate\"].json[\"body\"][\"keys\"][\"0\"] }}"
+          },
+          "matchingColumns": [
+            "vetor"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vetor",
+              "displayName": "vetor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "dimensoes",
+              "displayName": "dimensoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0854307b-21dd-4732-b5d8-12c8c09c8b95",
+      "name": "DimensionsUpdate ",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1500,
+        720
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "#### Integração do Directus com o Pinecone",
+        "height": 80,
+        "width": 361.5468993739327,
+        "color": 4
+      },
+      "id": "db5b21aa-edd8-43cc-b001-7ce2d81765d9",
+      "name": "Sticky Note17",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        20,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2652af0d-01e2-4cd2-bbf0-a1d7acae5721",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "035f8961-3ecd-4409-9fb8-67120bb41271",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5155f572-ebfa-4f15-99f5-774f58a75c07",
+      "name": "Filter.",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        340,
+        2800
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://{{ $node[\"Describe an index\"].json[\"host\"] }}/vectors/delete",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials.\"].json[\"pinecone_key\"] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"ids\": [\n    \"{{ $node[\"Filter.\"].json[\"id\"] }}\"\n  ],\n  \"namespace\": \"{{ $node[\"Get index stats\"].json[\"namespaces\"].keys().first() }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "6b3a4c2b-f45e-432e-be19-c6fe64353cf5",
+      "name": "Delete vectors",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        540,
+        2800
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "ai",
+          "mode": "list",
+          "cachedResultName": "ai"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "id",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {
+          "outputColumns": [
+            "pinecone_key",
+            "pinecone_host",
+            "namespace"
+          ]
+        }
+      },
+      "id": "617161f5-cbbe-47c5-b28c-f36cf9388915",
+      "name": "GetCredentials.",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1260,
+        2500
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE vectors\nSET {{\n  Object.entries($('ItemsUpdate').item.json.body.payload)\n    .map(([key, value]) => `${key} = ${JSON.stringify(value)\n      .replace(/\\\\n/g, '\\n')\n      .replace(/\\//g, \"\")\n      .replace(/\\\\\\\"/g, '\"')\n      .replace(/'/g, \"''\")\n      .replace(/^\"|\"$/g, \"'\")}`)\n    .join(', ')\n}}\nWHERE id = '{{ $('ItemsUpdate').item.json.body.keys[0] }}';\n",
+        "options": {}
+      },
+      "id": "eec8f673-e243-4c62-8c66-4d270d525194",
+      "name": "DirectusUpdate.",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        500,
+        720
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      },
+      "notes": "UPDATE vectors\nSET {{\n  Object.entries($json.body.payload)\n    .map(([key, value]) => `${key} = ${JSON.stringify(value).replace(/\\n/g, '\\\\n').replace(/'/g, \"''\").replace(/\\\\\"/g, '\"').replace(/^\"|\"$/g, \"'\")}`)\n    .join(', ')\n}}, status = '#3399FF'\nWHERE id = '{{ $json.body.keys[0] }}';"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "vectors",
+          "mode": "list",
+          "cachedResultName": "vectors"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "habilitar": false,
+            "id": "={{ $node[\"ItemsUpdate\"].json[\"body\"][\"keys\"][\"0\"] }}",
+            "status": "#D1D5DC"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "a",
+              "displayName": "a",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "q",
+              "displayName": "q",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "sq",
+              "displayName": "sq",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "t",
+              "displayName": "t",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "tags",
+              "displayName": "tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "habilitar",
+              "displayName": "habilitar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1cbcdc72-f27d-446f-a929-11bb7397f2a0",
+      "name": "DirectusUpdate.1",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        900,
+        920
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "vectors",
+          "mode": "list",
+          "cachedResultName": "vectors"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "id",
+              "value": "={{ $node[\"ItemsUpdate\"].json[\"body\"][\"keys\"][\"0\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1b4c67e3-4382-4f1a-9d99-b9b8695eaee3",
+      "name": "GetData.",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        700,
+        720
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "vectors",
+          "mode": "list",
+          "cachedResultName": "vectors"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "id",
+              "value": "={{ $node[\"ItemsUpdate\"].json[\"body\"][\"keys\"][\"0\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b6d49ff8-6463-456e-9e0d-7f9d3b28bc53",
+      "name": "GetData.1",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        500,
+        1120
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/embeddings",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $node[\"GetCredentials\"].json[\"openai_key\"] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "text-embedding-3-small"
+            },
+            {
+              "name": "input",
+              "value": "={{ \n  JSON.stringify(\n  ['a', 'q', 'sq', 't', 'tags']\n    .flatMap(key => {\n      const value = $json[key];\n      return Array.isArray(value) ? value : [value];\n    })\n    .filter(value => value)\n  )\n}}"
+            },
+            {
+              "name": "dimensions",
+              "value": 1024
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "82b1d167-d7b6-4957-bae9-1fa1036ca03a",
+      "name": "OpenAIembed.",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        720
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "3raLgi1Pp00Yk6mH",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "dimensoes",
+          "mode": "list",
+          "cachedResultName": "dimensoes"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "vetor",
+              "value": "={{ $node[\"ItemsUpdate\"].json[\"body\"][\"keys\"][\"0\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bc2db550-5f5c-4145-b5a5-9dea52d8c69d",
+      "name": "GetData.2",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        700,
+        1120
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $node[\"GetCredentials\"].json[\"pinecone_host\"] }}/vectors/upsert",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials\"].json[\"pinecone_key\"] }}"
+            },
+            {
+              "name": "X-Pinecone-API-Version",
+              "value": "2024-10"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"vectors\": [\n    {\n      \"id\": \"{{ $node[\"ItemsUpdate\"].json[\"body\"][\"keys\"][\"0\"] }}\",\n      \"values\": {{ JSON.stringify($node[\"GetData.2\"].json.dimensoes.split(',').map(item => parseFloat(item.trim()))) }},\n      \"metadata\": {\n        \"q\": \"{{ JSON.stringify($node[\"GetData.1\"].json[\"q\"]).replace(/^\"|\"$/g, '') }}\",\n        \"sq\": {{ JSON.stringify($node[\"GetData.1\"].json[\"sq\"]?.split(',').map(item => item.trim())) }},\n        \"a\": \"{{ JSON.stringify($node[\"GetData.1\"].json[\"a\"]).replace(/^\"|\"$/g, '') }}\",\n        \"t\": \"{{ JSON.stringify($node[\"GetData.1\"].json[\"t\"]).replace(/^\"|\"$/g, '') }}\",\n        \"tags\": {{ JSON.stringify($node[\"GetData.1\"].json[\"tags\"]?.split(',').map(item => item.trim())) }}\n      }\n    }\n  ],\n  \"namespace\": \"{{ $node[\"GetNamespace.2\"].json[\"namespaces\"].keys().first() }}\"\n}",
+        "options": {}
+      },
+      "id": "910db825-0b08-4f88-9c0f-7cf7edb4ab57",
+      "name": "vectors/upsert.",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node[\"GetCredentials\"].json[\"pinecone_host\"] }}/describe_index_stats",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials\"].json[\"pinecone_key\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3c96db1c-da7b-411e-8516-8b60da2a60dd",
+      "name": "GetNamespace.",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        500,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $node[\"GetCredentials\"].json[\"pinecone_host\"] }}/vectors/delete",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials\"].json[\"pinecone_key\"] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"ids\": [\n    \"{{ $node[\"ItemsUpdate\"].json[\"body\"][\"keys\"][\"0\"] }}\"\n  ],\n  \"namespace\": \"{{ $node[\"GetCredentials\"].json[\"namespace\"] }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "74a893e4-a097-4bfe-aa8e-5b4c86950c88",
+      "name": "DeleteVectors.",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        700,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "vectors",
+          "mode": "list",
+          "cachedResultName": "vectors"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "habilitar": true,
+            "id": "={{ $node[\"ItemsUpdate\"].json[\"body\"][\"keys\"][\"0\"] }}",
+            "status": "#2ECDA7"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "a",
+              "displayName": "a",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "q",
+              "displayName": "q",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "sq",
+              "displayName": "sq",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "t",
+              "displayName": "t",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "tags",
+              "displayName": "tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "habilitar",
+              "displayName": "habilitar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e6c16a6f-fa15-44f2-b611-39a8cd7956a6",
+      "name": "DirectusUpdate.2",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1300,
+        1120
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $node[\"GetCredentials\"].json[\"pinecone_host\"] }}/describe_index_stats",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials\"].json[\"pinecone_key\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "304989d4-fc31-48b6-aa07-3e0884acf2cc",
+      "name": "GetNamespace.2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node[\"GetCredentials\"].json[\"pinecone_host\"] }}/describe_index_stats",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials\"].json[\"pinecone_key\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3a2fe61d-b673-4fa0-8706-1d66409f5d56",
+      "name": "GetNamespace.1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "vectors",
+          "mode": "list",
+          "cachedResultName": "vectors"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "habilitar": true,
+            "id": "={{ $node[\"ItemsUpdate\"].json[\"body\"][\"keys\"][\"0\"] }}",
+            "status": "#2ECDA7"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "a",
+              "displayName": "a",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "q",
+              "displayName": "q",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "sq",
+              "displayName": "sq",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "t",
+              "displayName": "t",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "tags",
+              "displayName": "tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "habilitar",
+              "displayName": "habilitar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a3e06035-e41a-49d6-9203-c9e552091840",
+      "name": "DirectusUpdate.3",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1700,
+        720
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 700,
+        "width": 4060,
+        "color": 6
+      },
+      "id": "3ec23184-63c6-4413-b11e-6741b3b15b10",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1400,
+        1340
+      ]
+    },
+    {
+      "parameters": {
+        "content": "#### Gere novos vetores a partir de documento ou url",
+        "height": 80,
+        "width": 361.5468993739327,
+        "color": 4
+      },
+      "id": "5af7ec1b-d025-479d-841b-522bda540c2d",
+      "name": "Sticky Note18",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1380,
+        1940
+      ]
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "vectors",
+          "mode": "list",
+          "cachedResultName": "vectors"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "dimensoes": "=",
+            "id": "={{ $node[\"LoopItems.1\"].json[\"vectors\"][Object.keys($json[\"vectors\"])[0]].id }}",
+            "q": "={{ $node[\"LoopItems.1\"].json[\"vectors\"][Object.keys($json[\"vectors\"])[0]].metadata.q }}",
+            "tags": "={{ $node[\"LoopItems.1\"].json[\"vectors\"][Object.keys($json[\"vectors\"])[0]].metadata.tags.join(\",\") }}",
+            "t": "={{ $node[\"LoopItems.1\"].json[\"vectors\"][Object.keys($json[\"vectors\"])[0]].metadata.t }}",
+            "sq": "={{ $node[\"LoopItems.1\"].json[\"vectors\"][Object.keys($json[\"vectors\"])[0]].metadata.sq.join(\",\") }}",
+            "a": "={{ $node[\"LoopItems.1\"].json[\"vectors\"][Object.keys($json[\"vectors\"])[0]].metadata.a }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "a",
+              "displayName": "a",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "q",
+              "displayName": "q",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sq",
+              "displayName": "sq",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "t",
+              "displayName": "t",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tags",
+              "displayName": "tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "dimensoes",
+              "displayName": "dimensoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0cd36f17-42c9-4084-8ca8-ebf4a0bce984",
+      "name": "AddVectors.",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        940,
+        2400
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "dimensoes",
+          "mode": "list",
+          "cachedResultName": "dimensoes"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "vetor": "={{ $node[\"LoopItems.1\"].json[\"vectors\"][Object.keys($json[\"vectors\"])[0]].id }}",
+            "dimensoes": "={{ $node[\"LoopItems.1\"].json[\"vectors\"][Object.keys($json[\"vectors\"])[0]].values.join(\",\") }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vetor",
+              "displayName": "vetor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "dimensoes",
+              "displayName": "dimensoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cff8f824-1d7c-4fe6-831d-d139a51d7676",
+      "name": "AddDimensions.",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        940,
+        2600
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "vectors",
+          "mode": "list",
+          "cachedResultName": "vectors"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('SetData.1').item.json.uuid }}",
+            "q": "={{ JSON.stringify($node[\"LoopItems.5\"].json[\"q\"]).replace(/^\"|\"$/g, '') }}",
+            "t": "={{ JSON.stringify($node[\"LoopItems.5\"].json[\"t\"]).replace(/^\"|\"$/g, '') }}",
+            "sq": "={{ JSON.stringify($node[\"LoopItems.5\"].json[\"sq\"].join(\",\")).replace(/^\"|\"$/g, '') }}",
+            "a": "={{ JSON.stringify($node[\"LoopItems.5\"].json[\"a\"]).replace(/^\"|\"$/g, '') }}",
+            "documento": "={{ $('DocsInput').first().json.body.contentId.toNumber() }}",
+            "tags": "={{ JSON.stringify($node[\"SetData.1\"].json[\"tags\"].join(\",\")).replace(/^\"|\"$/g, '') }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "a",
+              "displayName": "a",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "q",
+              "displayName": "q",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sq",
+              "displayName": "sq",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "t",
+              "displayName": "t",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tags",
+              "displayName": "tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "habilitar",
+              "displayName": "habilitar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "documento",
+              "displayName": "documento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8fe2dd19-3e0c-4dfb-939f-f6355b6feed2",
+      "name": "AddVectors.1",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2060,
+        1640
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "dimensoes",
+          "mode": "list",
+          "cachedResultName": "dimensoes"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "vetor": "={{ $('SetData.1').item.json.uuid }}",
+            "dimensoes": "={{ $node[\"OpenAI embeddings\"].json[\"data\"][\"0\"][\"embedding\"].join(\",\") }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vetor",
+              "displayName": "vetor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "dimensoes",
+              "displayName": "dimensoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "61d487e9-7ddf-4323-9b8c-0345b162670a",
+      "name": "AddDimensions.1",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2260,
+        1640
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "id": "042ea09e-6a15-4504-a2b8-cc1f931b96ac",
+      "name": "Merge.",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1140,
+        2600
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "ai",
+          "mode": "list",
+          "cachedResultName": "ai"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "id",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {
+          "outputColumns": [
+            "pinecone_key",
+            "pinecone_host",
+            "openai_key",
+            "namespace"
+          ]
+        }
+      },
+      "id": "db75e170-7f63-4695-a05b-cd1c61383b12",
+      "name": "GetCredentials",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1040,
+        780
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "id": "66dc3300-973a-461c-9978-77ae9be6f9c5",
+      "name": "SplitOut.2",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1060,
+        1540
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body.attachments",
+        "options": {}
+      },
+      "id": "b60d5945-abea-4d43-a1a1-08ec35f4b2dd",
+      "name": "SplitOut.3",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        1740
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "9a5459ca-7782-45e0-8998-bdd77b5cf460",
+      "name": "LoopItems.2",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -700,
+        1740
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "a0dceb0c-9f8e-4e43-84d0-cac76fcdd966",
+      "name": "Anthropic",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.2,
+      "position": [
+        -1360,
+        1480
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "oxt9DojwJOThqHk3",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseFormat": "text",
+          "temperature": 0.7
+        }
+      },
+      "id": "df674ede-85ea-471b-9da5-c615367bf8d2",
+      "name": "OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        -1260,
+        1480
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "3raLgi1Pp00Yk6mH",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.2-90b-vision-preview",
+        "options": {}
+      },
+      "id": "81c64e0e-8133-4467-8964-fc7c94901dae",
+      "name": "Groq",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -1160,
+        1480
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "kgYLUXl8fMTzRJXF",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-pro-002",
+        "options": {}
+      },
+      "id": "30e864f1-9136-4746-9b06-763a9ab2ad27",
+      "name": "Gemini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        1480
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "s1xC1GDVacTodRcC",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Normalização para teste",
+        "height": 199.92100851423996,
+        "width": 180.90155202154455,
+        "color": 2
+      },
+      "id": "8578c29c-2e75-4782-bc5a-c09e4d694a2f",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1120,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 300.50076792982566,
+        "width": 499.37270351996943,
+        "color": 6
+      },
+      "id": "3bcaeefc-ffaa-4966-987c-cb681df2d291",
+      "name": "Sticky Note14",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1400,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"query\": {\n    \"operation\": \"\",\n    \"userQuery\": \"{{ JSON.stringify($json.chatInput).replace(/^\"|\"$/g, '') }}\",\n    \"conversationHistory\": \"\"\n  },\n  \"app\": {\n    \"dify\": {\n      \"url\": \"https://apidify.bitfy.ai/v1\",\n      \"key\": \"dataset-MEPKHkXXpmSOlAVlTHXXhdVi\"\n    }\n  },\n  \"meta\": {\n    \"pushName\": \"Pedro Nascimento\"\n  }\n}",
+        "options": {}
+      },
+      "id": "6fecbf3a-2162-4286-adaf-1a298dd42b81",
+      "name": "Normalização",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1080,
+        120
+      ],
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": true
+        }
+      },
+      "id": "627b63a1-1158-4845-8b19-dd41295d19a0",
+      "name": "Inicio",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1280,
+        120
+      ],
+      "webhookId": "87f46cb1-8f92-4945-a5a8-f3aeb210b8b8"
+    },
+    {
+      "parameters": {
+        "content": "Início, recebe info do Agente Principal",
+        "height": 199.92100851423996,
+        "width": 180.90155202154455,
+        "color": 2
+      },
+      "id": "832c9920-4b04-4c05-9d64-33ea5678af3b",
+      "name": "Sticky Note24",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1340,
+        1060
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 140.49531120719155,
+        "width": 279.6037416231338,
+        "color": 2
+      },
+      "id": "a014f994-fcab-45ee-979f-d47febc9a51f",
+      "name": "Sticky Note23",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -760,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Indexa vetores em lote e obtém o progresso da indexação ",
+        "height": 99.59648863162016,
+        "width": 280.1497053800572,
+        "color": 4
+      },
+      "id": "2ce90a6f-3c68-4965-88d3-a21a435ba1f2",
+      "name": "Sticky Note25",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -760,
+        1520
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Selecione seu modelo de preferencia e configure as credenciais",
+        "height": 259.215612611261,
+        "width": 419.8387214184153,
+        "color": 2
+      },
+      "id": "d091d8c6-3d8f-41cd-afc7-ccdcebdeb1bd",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1380,
+        1360
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "5e55fc2d-e5dd-4a45-9a83-94a975412aed",
+      "name": "Input",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1300,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "name": "BatchVectorize",
+        "description": "=Utilize esta ferramenta para criar múltiplos vetores a partir de documentos no formato de Pergunta e Resposta (Q&A). A ferramenta processa o documento em segmentos para não exceder a janela de contexto da IA especializada em gerar vetores de alta qualidade. Você deve fornecer uma instrução detalhada (task) para o agente especializado, incluindo todo o contexto relevante do documento. A instrução deve ser o mais completa possível, fornecendo ao agente especializado todas as informações necessárias para gerar vetores de alta qualidade. A instrução deve terminar com \"Segue segmento atual:\", indicando que o segmento a ser processado será fornecido junto com a solicitação.",
+        "jsCode": "const axios = require('axios');\n\n// Obter variáveis do nó anterior\nconst inputData = $input.first().json;\n\n// Extraindo parâmetros do 'query'\nconst queryData = query; // 'query' é o objeto com os parâmetros fornecidos pela AI\n\n// Adicionando logs para depuração\nconsole.log('queryData:', queryData);\n\n// Certifique-se de que 'queryData' contém todos os campos necessários\nconst task = queryData.task;\nconst aiNamespace = queryData.namespace; // Renomeando o namespace gerado pela AI\nconst index = queryData.index;\nconst tags = queryData.tags || [];\nconst maxLength = queryData.maxLength ? Number(queryData.maxLength) : 1500;\nconst overlapPercentage = queryData.maxLength ? Number(queryData.overlapPercentage) : 15;\n\n// Parâmetros adicionais\nconst pineconeHost = $json.pinecone_host; // Host do Pinecone\nconst pineconeKey = $json.pinecone_key; // Chave de API do Pinecone\nconst jinaAIKey = $json.jinaAI_key; // Chave de API da Jina AI\nconst openaiKey = $json.openai_key; // Chave de API da OpenAI\nconst id = $json.id ? Number($json.id) : null; // ID como número inteiro\n\n// Extraindo namespace do sistema\nconst systemNamespace = inputData.namespace; // Namespace do sistema\n\n// Logando os valores extraídos\nconsole.log('task:', task);\nconsole.log('aiNamespace:', aiNamespace);\nconsole.log('systemNamespace:', systemNamespace);\nconsole.log('index:', index);\nconsole.log('tags:', tags);\nconsole.log('maxLength:', maxLength);\nconsole.log('overlapPercentage:', overlapPercentage);\nconsole.log('pineconeHost:', pineconeHost);\nconsole.log('pineconeKey:', pineconeKey);\nconsole.log('jinaAIKey:', jinaAIKey);\nconsole.log('openaiKey:', openaiKey);\nconsole.log('id:', id);\n\n// Verificando se algum parâmetro está faltando\nif (!task || !index || !aiNamespace || !systemNamespace || !pineconeHost || !pineconeKey || !jinaAIKey || !openaiKey || id === null) {\n  throw new Error('Os parâmetros obrigatórios estão ausentes: \"task\", \"index\", \"aiNamespace\", \"systemNamespace\", \"pinecone_host\", \"pinecone_key\", \"jinaAI_key\", \"openai_key\", \"id\".');\n}\n\n// Obtendo os attachments\nconst attachments = inputData.attachments || [];\nconst contentId = $json[\"contentId\"]; // Adicionando contentId\nconst systemTags = $json.tags || []; // Obtendo tags do sistema\n\nconsole.log('attachments:', attachments);\nconsole.log('contentId:', contentId);\nconsole.log('systemTags:', systemTags); // Log das tags do sistema\n\n// Montando o objeto de requisição diretamente no body\nconst requestData = {\n  task: task,\n  tags: tags,\n  systemTags: systemTags, // Adicionando tags do sistema no body\n  maxLength: maxLength,\n  overlapPercentage: overlapPercentage,\n  index: index,\n  aiNamespace: aiNamespace, // Adicionando namespace da AI\n  systemNamespace: systemNamespace, // Adicionando namespace do sistema\n  attachments: attachments,\n  contentId: contentId, // Adicionando contentId no body\n  pineconeHost: pineconeHost, // Adicionando host do Pinecone\n  pineconeKey: pineconeKey, // Adicionando chave do Pinecone\n  jinaAIKey: jinaAIKey, // Adicionando chave da Jina AI\n  openaiKey: openaiKey, // Adicionando chave da OpenAI\n  id: id // Adicionando ID no body\n};\n\n// Logando o objeto de requisição\nconsole.log('requestData:', JSON.stringify(requestData, null, 2));\n\n// Construindo a URL com base na variável $json.webhook_url\nconst baseUrl = $json.webhook_url; // Obtém a base da URL do JSON\nconst fullUrl = `${baseUrl}/webhook/dc03e33d-24b0-42dd-b63a-81b70461d488`; // Mantém o path fixo\n\nconsole.log('Webhook URL:', fullUrl);\n\nlet response = '';\n\ntry {\n  // Enviando a requisição HTTP\n  const apiResponse = await axios.post(\n    fullUrl,\n    requestData,\n    {\n      headers: {\n        'Content-Type': 'application/json'\n      }\n    }\n  );\n\n  // Retornando o body da resposta do webhook\n  response = apiResponse.data;\n  console.log('Resposta da API:', response);\n\n} catch (error) {\n  console.error('Erro na execução da tool:', error.message);\n  response = `Erro na execução da tool: ${error.message}`;\n}\n\nreturn response;",
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"task\": {\n      \"type\": \"string\",\n      \"description\": \"Instrução detalhada para o agente especializado em gerar vetores. Deve incluir todo o contexto do documento fornecido pelo agente principal, sendo o mais completa possível. A instrução deve terminar com 'Segue segmento atual:' para indicar que o segmento a ser processado será fornecido em conjunto.\"\n    },\n    \"tags\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"Tags opcionais para categorizar os vetores.\"\n    },\n    \"maxLength\": {\n      \"type\": \"integer\",\n      \"default\": 1500,\n      \"description\": \"Tamanho máximo de cada segmento do documento.\"\n    },\n    \"overlapPercentage\": {\n      \"type\": \"integer\",\n      \"default\": 15,\n      \"description\": \"Porcentagem de sobreposição entre os segmentos do documento.\"\n    },\n    \"index\": {\n      \"type\": \"string\",\n      \"description\": \"Nome do índice no Pinecone onde os vetores serão armazenados.\"\n    },\n    \"namespace\": {\n      \"type\": \"string\",\n      \"description\": \"Namespace no Pinecone para os vetores gerados.\"\n    }\n  },\n  \"required\": [\"task\", \"index\", \"namespace\"]\n}"
+      },
+      "id": "3ab6c20a-7404-4c43-a8a8-a26e97d0af67",
+      "name": "BatchVectorize",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.1,
+      "position": [
+        -720,
+        1380
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node[\"GetCredentials\"].json[\"pinecone_host\"] }}/describe_index_stats",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials\"].json[\"pinecone_key\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4931f3a6-7888-45ed-b559-1d9235e4de13",
+      "name": "GetNamespace.3",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        500,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $node[\"GetCredentials\"].json[\"pinecone_host\"] }}/vectors/delete",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials\"].json[\"pinecone_key\"] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"ids\": {{ JSON.stringify($('LoopItems.3').item.json.payload) }},\n  \"namespace\": \"{{ $node[\"GetCredentials\"].json[\"namespace\"] }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "3acba7db-2bc0-470e-bca5-74b02d2abe38",
+      "name": "DeleteVectors.1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1500,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4e217975-c54d-41f3-9576-77b5f5dff65e",
+              "name": "payload",
+              "value": "={{ $('ItemsUpdate').item.json.body.payload }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "40f39a8f-5432-4afa-bda8-317116f911be",
+      "name": "Edit Fields1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        700,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "payload",
+        "options": {}
+      },
+      "id": "8aa3223b-9e54-4c78-95d1-2ccd009bfe40",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        900,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "c1b1c1d2-37bd-469e-a31b-6b7cc95177b6",
+      "name": "LoopItems.3",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1100,
+        420
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "d97483ee-7678-41f5-b378-66e8411cd855",
+      "name": "NoOp.6",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "id": "aed4be2a-3edc-4209-862e-0abdf9744703",
+      "name": "Wait.",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1860,
+        1840
+      ],
+      "webhookId": "dc2b2b2e-b666-41f8-8898-a68177f37bcb"
+    },
+    {
+      "parameters": {
+        "amount": 0.1
+      },
+      "id": "ddfea674-13c7-43fd-bd05-69d4654895eb",
+      "name": "Wait.1",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1700,
+        520
+      ],
+      "webhookId": "dc2b2b2e-b666-41f8-8898-a68177f37bcb"
+    },
+    {
+      "parameters": {
+        "content": "URL do flow de Indexação do Directus",
+        "height": 199.92100851423996,
+        "width": 180.90155202154455,
+        "color": 2
+      },
+      "id": "f7746ba9-ccf1-4aa8-a5f9-77550dcbe8b4",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1320,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Recebe info da BatchVectorize",
+        "height": 199.92100851423996,
+        "width": 180.90155202154455,
+        "color": 2
+      },
+      "id": "a57bcd4c-1f12-455f-a09e-52cc0c094ceb",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1340,
+        1680
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=Documento está sendo processado. O status pode ser monitorado usando o EmbeddingProcessID: '{{ $('DocsInput').item.json.body.contentId }}'",
+        "options": {}
+      },
+      "id": "0c9707dd-90b6-4059-b4cc-6971a6ea68f0",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -1100,
+        1740
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 140.49531120719155,
+        "width": 160.00000000000003,
+        "color": 2
+      },
+      "id": "352cd89c-d1c5-4231-b2be-43be8d799972",
+      "name": "Sticky Note26",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -940,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Obtém histórico de messages ",
+        "height": 99.10223424208493,
+        "width": 159.54970538005725,
+        "color": 4
+      },
+      "id": "21fd5a71-3238-47ad-93f4-96891c018d58",
+      "name": "Sticky Note27",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -940,
+        1520
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "output",
+        "key": "={{ $node[\"DocsInput\"].json[\"body\"][\"contentId\"] }}",
+        "options": {}
+      },
+      "id": "8a7c1010-2e19-43e8-b940-d68ee393c9eb",
+      "name": "ObtemMsg",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1060,
+        1740
+      ],
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "00435a6f-ec6d-4f0c-b3fe-0cea01fdac04",
+      "name": "OpenAI.",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        280,
+        1940
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "3raLgi1Pp00Yk6mH",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "04bc33c4-3f06-48f6-a5f6-e3755f0fde65",
+      "name": "LoopItems.5",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1260,
+        1540
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "=133889"
+      },
+      "id": "d51e25b9-a711-4f35-a3c0-3b8dc235fc0f",
+      "name": "DeletaMsg",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1660,
+        1440
+      ],
+      "notesInFlow": true,
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      },
+      "notes": "\n"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "output",
+        "key": "={{ $json.body.contentId }}",
+        "options": {}
+      },
+      "id": "8a29980d-041d-4b97-8bd3-9cc1d541c66f",
+      "name": "ObtemMsg.",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        660,
+        1420
+      ],
+      "notesInFlow": true,
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "ai",
+          "mode": "list",
+          "cachedResultName": "ai"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "id",
+              "value": "={{ $json.agentId }}"
+            }
+          ]
+        },
+        "options": {
+          "outputColumns": [
+            "tags",
+            "webhook_url",
+            "pinecone_host",
+            "pinecone_key",
+            "namespace",
+            "jinaAI_key",
+            "openai_key",
+            "id"
+          ]
+        }
+      },
+      "id": "c8682ae0-ea6f-4f5c-938e-1879a36e22ce",
+      "name": "Postgres",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1100,
+        1120
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b98f6605-1a34-4ae3-bf2b-c3e6ff5a7750",
+              "name": "query",
+              "value": "={{ $('Input').item.json.query }}",
+              "type": "object"
+            },
+            {
+              "id": "3dedd78c-480e-458a-b4f8-785ea8a4dde6",
+              "name": "attachments",
+              "value": "={{ $('Input').item.json.attachments }}",
+              "type": "array"
+            },
+            {
+              "id": "eb22af2f-00f7-4706-a8a6-2e3c3c28ad7d",
+              "name": "contentId",
+              "value": "={{ $('Input').item.json.contentId }}",
+              "type": "string"
+            },
+            {
+              "id": "cb1d6325-c9b4-42e9-8d84-0b584d7fa854",
+              "name": "sessionId",
+              "value": "={{ $('Input').item.json.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "76ee23d2-99a4-4a63-8803-7670e04a09b5",
+              "name": "tags",
+              "value": "={{ $json.tags.split(\",\") }}",
+              "type": "array"
+            },
+            {
+              "id": "c7d62c7e-8b0f-451d-9330-d5f09cc4a5fd",
+              "name": "webhook_url",
+              "value": "={{ $json.webhook_url }}",
+              "type": "string"
+            },
+            {
+              "id": "3cce6d36-4628-4bf6-8f34-79f0088b45a6",
+              "name": "pinecone_host",
+              "value": "={{ $json.pinecone_host }}",
+              "type": "string"
+            },
+            {
+              "id": "76774acc-63b4-4262-bcac-477a394ee76d",
+              "name": "pinecone_key",
+              "value": "={{ $json.pinecone_key }}",
+              "type": "string"
+            },
+            {
+              "id": "93cb2658-41a7-4cbf-91cd-cf1db262c1ff",
+              "name": "namespace",
+              "value": "={{ $json.namespace }}",
+              "type": "string"
+            },
+            {
+              "id": "8454bddf-f73f-44d6-9f0c-709ccfafa0f9",
+              "name": "jinaAI_key",
+              "value": "={{ $json.jinaAI_key }}",
+              "type": "string"
+            },
+            {
+              "id": "689a4146-d4da-4f8f-bfd7-7751ae80d42e",
+              "name": "openai_key",
+              "value": "={{ $json.openai_key }}",
+              "type": "string"
+            },
+            {
+              "id": "47302eea-ef4f-409b-9973-0c438bd083d7",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7db543a6-24d4-4e8c-ae8a-f1ea31083299",
+      "name": "SetData.",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -780,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "446d37b7-24a1-4b13-bb98-b3b96a0846b2",
+              "name": "response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "adc62cca-247a-4f1b-9e9b-e0768f848ef8",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a0cdc6b8-57f4-4670-87e9-fce4431b6da1",
+      "name": "Resposta.",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -220,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Obtém o progresso da indexação ",
+        "height": 179.32100851423996,
+        "width": 599.1981047098644,
+        "color": 2
+      },
+      "id": "cb9e3376-fe85-488e-9daf-3000768b1673",
+      "name": "Sticky Note28",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        420,
+        1400
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 140.49531120719155,
+        "width": 260.14455307729924,
+        "color": 2
+      },
+      "id": "bd90e6d2-9046-483a-b240-71bae281c02c",
+      "name": "Sticky Note29",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        140,
+        1880
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7a38e146-0af3-4196-aa94-8b3e6b5f32fe",
+              "name": "tags",
+              "value": "={{ $json.tags.concat($node[\"DocsInput\"].json[\"body\"][\"tags\"].filter(tag => !$json.tags.includes(tag))) }}",
+              "type": "array"
+            },
+            {
+              "id": "60ba7de2-eaf7-41f0-92de-73f26f45b889",
+              "name": "uuid",
+              "value": "={{\n  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {\n    const r = Math.random() * 16 | 0;\n    const v = c === 'x' ? r : (r & 0x3 | 0x8);\n    return v.toString(16);\n  })\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "6169fc3d-512c-4f12-84ce-a03ebbb7dd34",
+      "name": "SetData.1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1460,
+        1640
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://r.jina.ai/{{ $node[\"LoopItems.2\"].json[\"body.attachments\"] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('DocsInput').item.json.body.jinaAIKey }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2e3fbb67-6a61-43c2-8ff3-d990a28d0979",
+      "name": "JinaScraping",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -500,
+        1840
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Input').first().json.sessionId || $('Inicio').first().json.sessionId}}-LPHPAw12y8EoZU0b"
+      },
+      "id": "53a00157-0ca2-4f4d-aab1-4f4b0956fd5a",
+      "name": "Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -900,
+        1380
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 600,
+        "width": 1380,
+        "color": 6
+      },
+      "id": "1e99ff56-57c3-4b0e-8a45-4524ab8bff25",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1400,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "deleteTable",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "dimensoes",
+          "mode": "list",
+          "cachedResultName": "dimensoes"
+        },
+        "deleteCommand": "delete",
+        "where": {
+          "values": [
+            {
+              "column": "vetor",
+              "value": "={{ $('LoopItems.3').item.json.payload }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e7fa364e-9a08-413a-9082-2dbf8ee070c9",
+      "name": "DimensionsDelete ",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1300,
+        520
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Variáveis obtidas do JSON no nó\nconst documentText = $node[\"Summarize\"].json[\"concatenated_data\"];\nconst inputData = $node[\"DocsInput\"].json;\nconst task = inputData.body.task;\nconst tags = inputData.body.tags || [];\nconst maxLength = inputData.body.maxLength || 1500; // Valor padrão 1500 caso não seja fornecido\nconst overlapPercentage = inputData.body.overlapPercentage || 15; // Valor padrão 15% caso não seja fornecido\nconst overlapLength = Math.floor(maxLength * overlapPercentage / 100); // Calcula o tamanho da sobreposição\n\n// Função para dividir o texto em segmentos com sobreposição\nfunction splitTextWithOverlap(inputText, maxLen, overlapLen) {\n    const segments = [];\n    let start = 0;\n\n    while (start < inputText.length) {\n        const end = Math.min(start + maxLen, inputText.length);\n        const segment = inputText.slice(start, end).trim();\n        segments.push(segment);\n\n        // Avança com sobreposição\n        start += maxLen - overlapLen;\n    }\n\n    return segments;\n}\n\n// Dividir o texto com sobreposição\nconst segments = splitTextWithOverlap(documentText, maxLength, overlapLength);\n\n// Retornar os segmentos no formato esperado pelo n8n\nreturn segments.map(segment => ({\n    task: task,\n    tags: tags,\n    segment: segment\n}));"
+      },
+      "id": "c02f76fc-9fa3-42d1-bd9b-936af3e10931",
+      "name": "SplitChunks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        1640
+      ]
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "concatenate",
+              "field": "data",
+              "separateBy": "\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "40ea3f60-f7ca-4ffe-9918-56ac11b25633",
+      "name": "Summarize",
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1,
+      "position": [
+        -500,
+        1640
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "b960e4a0-3ba0-468e-abeb-51893c66fcfc",
+      "name": "NoOp.8",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        1440
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 0.01
+      },
+      "id": "ae4d1a0a-e1b0-4cb2-bf67-7da17e6a191b",
+      "name": "Wait.2",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2460,
+        1640
+      ],
+      "webhookId": "dc2b2b2e-b666-41f8-8898-a68177f37bcb",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "amount": 0.01
+      },
+      "id": "0682bd97-a393-431a-a2c1-b859e574d0c0",
+      "name": "Wait.3",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -300,
+        1840
+      ],
+      "webhookId": "dc2b2b2e-b666-41f8-8898-a68177f37bcb",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "documentos",
+          "mode": "list",
+          "cachedResultName": "documentos"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('DocsInput').first().json.body.contentId.toNumber() }}",
+            "descricao": "={{ $('Summarization Chain').first().json.response.text }}",
+            "ai": "={{ $('DocsInput').first().json.body.id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "documento",
+              "displayName": "documento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "descricao",
+              "displayName": "descricao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai",
+              "displayName": "ai",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bc184147-78e3-4acf-ac91-8d27e772ba55",
+      "name": "AddDocumento",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        60,
+        1640
+      ],
+      "executeOnce": false,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-pro-002",
+        "options": {}
+      },
+      "id": "8aa80cde-90f6-408a-8671-cfae5a39c652",
+      "name": "Gemini.",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        140,
+        1940
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "s1xC1GDVacTodRcC",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 1320,
+        "width": 2659,
+        "color": 6
+      },
+      "id": "d8a6af1f-5c86-430b-818e-2c39dfe4fceb",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "39072f57-6d69-443d-85f1-fa04e3d6d011",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "09c786d0-0a2d-4150-9a87-94c37a6519f9",
+      "name": "Status",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        460,
+        1440
+      ],
+      "webhookId": "39072f57-6d69-443d-85f1-fa04e3d6d011"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $node[\"DocsInput\"].json[\"body\"][\"contentId\"] }}",
+        "messageData": "={{ JSON.stringify({ \n    \"output\": $('Information Extractor').isExecuted ? $(\"Information Extractor\").last().json.output : null,\n    \"totalSegmentTotal\": $('SplitChunks').all().length,\n    \"processedSegments\": ($('ObtemMsg').last().json.output ? $('ObtemMsg').last().json.output.length : 0)\n}) }}",
+        "tail": true
+      },
+      "id": "57b8d573-8e26-41d4-b783-3fe7616faf15",
+      "name": "EmpilhaMsg.",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1660,
+        1840
+      ],
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $node[\"DocsInput\"].json[\"body\"][\"contentId\"] }}",
+        "messageData": "={{ JSON.stringify({ \n    \"output\": null,\n    \"totalSegmentTotal\": $('SplitChunks').all().length,\n    \"processedSegments\": 0\n}) }}",
+        "tail": true
+      },
+      "id": "a38caab4-0fa1-4b8a-884c-6b5443d98f12",
+      "name": "EmpilhaMsg.1",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        460,
+        1840
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "5abb41a2-d13b-49ca-bc16-4547f4079f53",
+      "name": "NoOp.9",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        1120
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "6fd63dc7-f64b-4687-b5d2-484e9a925d4f",
+      "name": "NoOp.",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        460,
+        1640
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 300.3961914404122,
+        "width": 859.5539001616042,
+        "color": 6
+      },
+      "id": "715824d9-709a-42dd-a6bc-85d5703f7625",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 381,
+        "width": 1379,
+        "color": 6
+      },
+      "id": "519b624c-59b5-422c-b05d-dbe0ca6b97e0",
+      "name": "Sticky Note15",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3933acaa-fc71-4a8c-9f36-3a9a3ea1b701",
+                    "leftValue": "={{ $('ItemsUpdate').item.json.body.event }}",
+                    "rightValue": "vectors.items.create",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "create"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "4294884a-7534-497c-95bf-4f8910021e66",
+                    "leftValue": "={{ $('ItemsUpdate').item.json.body.event }}",
+                    "rightValue": "vectors.items.delete",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "delete"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('ItemsUpdate').item.json.body.payload.habilitar }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "notExists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "update"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "5d9c7b64-2fb4-4c11-9762-2add31058858",
+                    "leftValue": "={{ $('ItemsUpdate').item.json.body.payload.habilitar }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "false",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "disable"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8dfe6dfb-f582-47de-930d-55ddc09b1488",
+                    "leftValue": "={{ $('ItemsUpdate').item.json.body.payload.habilitar }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "enable"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6ad93fcb-059a-43cd-aa04-7410f6b1fbc0",
+      "name": "SwitchEvent",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        300,
+        580
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "0bce6cba-8798-4886-bf60-c0ea3f47811e",
+      "name": "NoOp.7",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        100,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $node[\"GetCredentials\"].json[\"pinecone_host\"] }}/vectors/upsert",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials\"].json[\"pinecone_key\"] }}"
+            },
+            {
+              "name": "X-Pinecone-API-Version",
+              "value": "2024-10"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"vectors\": [\n    {\n      \"id\": \"{{ $('DirectusGet.').item.json.id }}\",\n      \"values\": {{ JSON.stringify($node[\"OpenAIembed.1\"].json[\"data\"][\"0\"][\"embedding\"]) }},\n      \"metadata\": {\n        \"q\": \"{{ JSON.stringify($node[\"GetData.3\"].json[\"q\"]).replace(/^\"|\"$/g, '') }}\",\n        \"sq\":[{{ JSON.stringify($node[\"GetData.3\"].json[\"sq\"]?.split(',').map(item => item.trim())).replace(/^\\[|\\]$/g, '') }}],\n        \"a\": \"{{ JSON.stringify($node[\"GetData.3\"].json[\"a\"]).replace(/^\"|\"$/g, '') }}\",\n        \"t\": \"{{ JSON.stringify($node[\"GetData.3\"].json[\"t\"]).replace(/^\"|\"$/g, '') }}\",\n        \"tags\": [{{ JSON.stringify($node[\"GetData.3\"].json[\"tags\"]?.split(',').map(item => item.trim())).replace(/^\\[|\\]$/g, '') }}]\n      }\n    }\n  ],\n  \"namespace\": \"{{ $node[\"GetCredentials\"].json[\"namespace\"] }}\"\n}",
+        "options": {}
+      },
+      "id": "71149e09-e27f-40b5-90d6-fd117f021862",
+      "name": "vectors/upsert.2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1500,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "vectors",
+          "mode": "list",
+          "cachedResultName": "vectors"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "id",
+              "value": "={{ $('DirectusGet.').item.json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9797810c-f9a1-469a-9908-d366c7eb0497",
+      "name": "GetData.3",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        900,
+        120
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/embeddings",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $node[\"GetCredentials\"].json[\"openai_key\"] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "text-embedding-3-small"
+            },
+            {
+              "name": "input",
+              "value": "={{ \n  JSON.stringify(\n  ['a', 'q', 'sq', 't', 'tags']\n    .flatMap(key => {\n      const value = $json[key];\n      return Array.isArray(value) ? value : [value];\n    })\n    .filter(value => value)\n  )\n}}"
+            },
+            {
+              "name": "dimensions",
+              "value": 1024
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e9e534fb-5289-4a54-bc14-384543623757",
+      "name": "OpenAIembed.1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        120
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "3raLgi1Pp00Yk6mH",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $node[\"GetCredentials\"].json[\"pinecone_host\"] }}/describe_index_stats",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "={{ $node[\"GetCredentials\"].json[\"pinecone_key\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1471864f-ccbb-4607-bf97-2beeb4a31e94",
+      "name": "GetNamespace.4",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1300,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "vectors",
+          "mode": "list",
+          "cachedResultName": "vectors"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "habilitar": true,
+            "id": "={{ $('DirectusGet.').item.json.id }}",
+            "status": "#2ECDA7"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "a",
+              "displayName": "a",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "q",
+              "displayName": "q",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "sq",
+              "displayName": "sq",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "t",
+              "displayName": "t",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "tags",
+              "displayName": "tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "habilitar",
+              "displayName": "habilitar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e3d3665e-be95-4129-8390-516b4c25be47",
+      "name": "DirectusUpdate.5",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1900,
+        120
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id\nFROM vectors\nWHERE date_created IS NOT NULL\nORDER BY date_created DESC\nLIMIT 1;",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "id": "ebcf3886-0325-4dd1-bfd7-85638d146931",
+      "name": "DirectusGet.",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        500,
+        120
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      },
+      "notes": "UPDATE vectors\nSET {{\n  Object.entries($json.body.payload)\n    .map(([key, value]) => `${key} = ${JSON.stringify(value).replace(/\\n/g, '\\\\n').replace(/'/g, \"''\").replace(/\\\\\"/g, '\"').replace(/^\"|\"$/g, \"'\")}`)\n    .join(', ')\n}}, status = '#3399FF'\nWHERE id = '{{ $json.body.keys[0] }}';"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE vectors\nSET {{\n  Object.entries($('ItemsUpdate').item.json.body.payload)\n    .map(([key, value]) => `${key} = ${JSON.stringify(value)\n      .replace(/\\\\n/g, '\\n')\n      .replace(/\\//g, \"\")\n      .replace(/\\\\\\\"/g, '\"')\n      .replace(/'/g, \"''\")\n      .replace(/^\"|\"$/g, \"'\")}`)\n    .join(', ')\n}}\nWHERE id = '{{ $('DirectusGet.').item.json.id }}';",
+        "options": {}
+      },
+      "id": "93133db8-0ad3-422f-9603-fb4c3bd7dfcd",
+      "name": "DirectusUpdate.4",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        700,
+        120
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      },
+      "notes": "UPDATE vectors\nSET {{\n  Object.entries($json.body.payload)\n    .map(([key, value]) => `${key} = ${JSON.stringify(value).replace(/\\n/g, '\\\\n').replace(/'/g, \"''\").replace(/\\\\\"/g, '\"').replace(/^\"|\"$/g, \"'\")}`)\n    .join(', ')\n}}, status = '#3399FF'\nWHERE id = '{{ $json.body.keys[0] }}';"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "7865885f-626a-4c06-8169-5eb3cde0f7d9",
+        "options": {
+          "responseData": "200"
+        }
+      },
+      "id": "56e678cf-348a-4613-8ecc-d0c48b553e85",
+      "name": "ItemsUpdate",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1280,
+        780
+      ],
+      "webhookId": "7865885f-626a-4c06-8169-5eb3cde0f7d9"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "dimensoes",
+          "mode": "list",
+          "cachedResultName": "dimensoes"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "dimensoes": "={{ $node[\"OpenAIembed.1\"].json[\"data\"][\"0\"][\"embedding\"].join(\",\") }}",
+            "vetor": "={{ $('DirectusGet.').item.json.id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vetor",
+              "displayName": "vetor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "dimensoes",
+              "displayName": "dimensoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dd055391-8a87-4d7c-8e4f-71c85f8a6e73",
+      "name": "DimensionsCreate ",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1700,
+        120
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "zftfnmd5SAWF1ri0",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f9e8c3e4-c976-42b8-8ea8-8b3c33c65c4b",
+              "name": "message",
+              "value": "={{ \n  $json[\"output\"].map(outputString => {\n    const parsed = JSON.parse(outputString);\n    return {\n      totalSegmentTotal: parsed.totalSegmentTotal,\n      processedSegments: parsed.processedSegments,\n      output: parsed.output ? parsed.output.map(item => ({\n        q: item.q,\n        a: item.a,\n      })) : null,\n    };\n  });\n }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d645f1d1-1381-48e5-a817-7a6c47cb543b",
+      "name": "Resposta.1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        860,
+        1420
+      ],
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "toolDescription": "Invoque esta ferramenta para consultar o status de um processo de EmbeddingProcess ativo. Forneça o ID do processo (EmbeddingProcessID) para obter informações atualizadas sobre o progresso da indexação.",
+        "method": "POST",
+        "url": "={{ $('SetData.').item.json.webhook_url }}/webhook/39072f57-6d69-443d-85f1-fa04e3d6d011",
+        "sendBody": true,
+        "parametersBody": {
+          "values": [
+            {
+              "name": "=contentId",
+              "valueProvider": "fieldValue",
+              "value": "{contentId}"
+            }
+          ]
+        },
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "contentId",
+              "description": "=O identificador único (ID) do processo de EmbeddingProcess cujo status será consultado. Este ID é fornecido ao iniciar a vetorização em lote.",
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "id": "50468c92-287f-4f4f-9497-5769fa1f0c00",
+      "name": "StatusChecker",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        -600,
+        1380
+      ],
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "dc03e33d-24b0-42dd-b63a-81b70461d488",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "489eaf53-f853-40e5-ae6d-24a79a48741a",
+      "name": "DocsInput",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1300,
+        1740
+      ],
+      "webhookId": "dc03e33d-24b0-42dd-b63a-81b70461d488"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "f42f4d04-f4fe-48aa-b7b0-4f028434a86c",
+      "name": "LoopItems.4",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        860,
+        1640
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Input').item.json.query.task }}",
+        "options": {
+          "systemMessage": "=Você é um agente especializado no gerenciamento de vetores em sistemas de vector stores como Pinecone. Sua função é executar operações relacionadas a criação, atualização, organização e exclusão de vetores, bem como gerenciar índices e namespaces. Todas as operações devem ser precisas e alinhadas às necessidades explicitadas pelo agente principal. {{ $('Input').first().json.attachments.length ? 'Foi enviado um documento pelo usuário, já disponíveis no sistema. ' : '' }}tags disponíveis, só crie novas em casso de necessidade: <tags>{{ $('Postgres').item.json.tags }}</tags>",
+          "maxIterations": 15,
+          "returnIntermediateSteps": true,
+          "passthroughBinaryImages": true
+        }
+      },
+      "id": "2ec11a47-ee93-4e58-b2d4-d3b5c2ad530c",
+      "name": "VectorDBManager",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -580,
+        1120
+      ],
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "chunkSize": 200000,
+        "chunkOverlap": 2000,
+        "options": {
+          "summarizationMethodAndPrompts": {
+            "values": {
+              "combineMapPrompt": "Analise o texto a seguir e gere um resumo conciso e direto que destaque os principais tópicos e informações mais relevantes. Este resumo será utilizado para compor uma descrição geral do documento.\n\n\"{text}\"\n\nresumo:",
+              "prompt": "Com base nos resumos a seguir, crie uma descrição clara e objetiva do conteúdo geral do documento. A descrição deve funcionar como um prefácio, informando o que o documento aborda e destacando os temas principais, de forma que o leitor saiba o que esperar antes de começar a leitura.\n\n\"{text}\"\n\ndescrição:"
+            }
+          }
+        }
+      },
+      "id": "7139d89a-eb74-437a-881c-94cc996a7417",
+      "name": "Summarization Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainSummarization",
+      "typeVersion": 2,
+      "position": [
+        -300,
+        1640
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "id": "7f58c262-3564-4757-998c-00aa2355d6cc",
+      "name": "Merge.2",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        660,
+        1740
+      ],
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "content": "## Vector DB\nAnna",
+        "height": 80,
+        "width": 150,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1400,
+        -120
+      ],
+      "typeVersion": 1,
+      "id": "58cbab2e-44e1-482e-981d-dc742356e666",
+      "name": "Sticky Note6"
+    }
+  ],
+  "connections": {
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "EmpilhaMsg.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI embeddings": {
+      "main": [
+        [
+          {
+            "node": "vectors/upsert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "vectors/upsert": {
+      "main": [
+        [
+          {
+            "node": "AddVectors.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List indexes": {
+      "main": [
+        [
+          {
+            "node": "SplitOut.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Describe an index",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete an index",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Describe an index": {
+      "main": [
+        [
+          {
+            "node": "Get index stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get index stats": {
+      "main": [
+        [
+          {
+            "node": "List vector IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitOut.": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List vector IDs": {
+      "main": [
+        [
+          {
+            "node": "SplitOut.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitOut.1": {
+      "main": [
+        [
+          {
+            "node": "LoopItems.",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NoOp.1": {
+      "main": [
+        [
+          {
+            "node": "LoopItems.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LoopItems.": {
+      "main": [
+        [
+          {
+            "node": "NoOp.1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch vectors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LoopItems.1": {
+      "main": [
+        [
+          {
+            "node": "NoOp.2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AddVectors.",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AddDimensions.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "vectors/upsert.1": {
+      "main": [
+        [
+          {
+            "node": "DimensionsUpdate ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch vectors": {
+      "main": [
+        [
+          {
+            "node": "LoopItems.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter.": {
+      "main": [
+        [
+          {
+            "node": "Delete vectors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetCredentials.": {
+      "main": [
+        [
+          {
+            "node": "List indexes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create an index",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DirectusUpdate.": {
+      "main": [
+        [
+          {
+            "node": "GetData.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetData.": {
+      "main": [
+        [
+          {
+            "node": "OpenAIembed.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetData.1": {
+      "main": [
+        [
+          {
+            "node": "GetData.2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetData.2": {
+      "main": [
+        [
+          {
+            "node": "GetNamespace.2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetNamespace.": {
+      "main": [
+        [
+          {
+            "node": "DeleteVectors.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeleteVectors.": {
+      "main": [
+        [
+          {
+            "node": "DirectusUpdate.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "vectors/upsert.": {
+      "main": [
+        [
+          {
+            "node": "DirectusUpdate.2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetNamespace.2": {
+      "main": [
+        [
+          {
+            "node": "vectors/upsert.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAIembed.": {
+      "main": [
+        [
+          {
+            "node": "GetNamespace.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetNamespace.1": {
+      "main": [
+        [
+          {
+            "node": "vectors/upsert.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DimensionsUpdate ": {
+      "main": [
+        [
+          {
+            "node": "DirectusUpdate.3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AddVectors.": {
+      "main": [
+        [
+          {
+            "node": "Merge.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AddDimensions.": {
+      "main": [
+        [
+          {
+            "node": "Merge.",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "AddVectors.1": {
+      "main": [
+        [
+          {
+            "node": "AddDimensions.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AddDimensions.1": {
+      "main": [
+        [
+          {
+            "node": "Wait.2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge.": {
+      "main": [
+        [
+          {
+            "node": "LoopItems.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetCredentials": {
+      "main": [
+        [
+          {
+            "node": "NoOp.7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitOut.3": {
+      "main": [
+        [
+          {
+            "node": "LoopItems.2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LoopItems.2": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "JinaScraping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "VectorDBManager",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inicio": {
+      "main": [
+        [
+          {
+            "node": "Normalização",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input": {
+      "main": [
+        [
+          {
+            "node": "Postgres",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BatchVectorize": {
+      "ai_tool": [
+        [
+          {
+            "node": "VectorDBManager",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetNamespace.3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "LoopItems.3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LoopItems.3": {
+      "main": [
+        [
+          {
+            "node": "NoOp.6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "DimensionsDelete ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait.": {
+      "main": [
+        [
+          {
+            "node": "LoopItems.4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait.1": {
+      "main": [
+        [
+          {
+            "node": "LoopItems.3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LoopItems.5": {
+      "main": [
+        [
+          {
+            "node": "NoOp.8",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SetData.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ObtemMsg.": {
+      "main": [
+        [
+          {
+            "node": "Resposta.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres": {
+      "main": [
+        [
+          {
+            "node": "SetData.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SetData.": {
+      "main": [
+        [
+          {
+            "node": "VectorDBManager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SetData.1": {
+      "main": [
+        [
+          {
+            "node": "OpenAI embeddings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JinaScraping": {
+      "main": [
+        [
+          {
+            "node": "Wait.3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "VectorDBManager",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeleteVectors.1": {
+      "main": [
+        [
+          {
+            "node": "Wait.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DimensionsDelete ": {
+      "main": [
+        [
+          {
+            "node": "DeleteVectors.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Summarization Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitChunks": {
+      "main": [
+        [
+          {
+            "node": "EmpilhaMsg.1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "NoOp.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait.2": {
+      "main": [
+        [
+          {
+            "node": "LoopItems.5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait.3": {
+      "main": [
+        [
+          {
+            "node": "LoopItems.2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini.": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Summarization Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EmpilhaMsg.": {
+      "main": [
+        [
+          {
+            "node": "Wait.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitOut.2": {
+      "main": [
+        [
+          {
+            "node": "LoopItems.5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status": {
+      "main": [
+        [
+          {
+            "node": "ObtemMsg.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NoOp.": {
+      "main": [
+        [
+          {
+            "node": "Merge.2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SwitchEvent": {
+      "main": [
+        [
+          {
+            "node": "DirectusGet.",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GetNamespace.3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "DirectusUpdate.",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GetNamespace.",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GetData.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NoOp.7": {
+      "main": [
+        [
+          {
+            "node": "SwitchEvent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "vectors/upsert.2": {
+      "main": [
+        [
+          {
+            "node": "DimensionsCreate ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetData.3": {
+      "main": [
+        [
+          {
+            "node": "OpenAIembed.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAIembed.1": {
+      "main": [
+        [
+          {
+            "node": "GetNamespace.4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetNamespace.4": {
+      "main": [
+        [
+          {
+            "node": "vectors/upsert.2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DirectusGet.": {
+      "main": [
+        [
+          {
+            "node": "DirectusUpdate.4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DirectusUpdate.4": {
+      "main": [
+        [
+          {
+            "node": "GetData.3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ItemsUpdate": {
+      "main": [
+        [
+          {
+            "node": "GetCredentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DimensionsCreate ": {
+      "main": [
+        [
+          {
+            "node": "DirectusUpdate.5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "StatusChecker": {
+      "ai_tool": [
+        [
+          {
+            "node": "VectorDBManager",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DocsInput": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LoopItems.4": {
+      "main": [
+        [
+          {
+            "node": "SplitOut.2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ObtemMsg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AddDocumento": {
+      "main": [
+        [
+          {
+            "node": "SplitChunks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VectorDBManager": {
+      "main": [
+        [
+          {
+            "node": "Resposta.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond": {
+      "main": [
+        [
+          {
+            "node": "SplitOut.3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ObtemMsg": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarization Chain": {
+      "main": [
+        [
+          {
+            "node": "AddDocumento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge.2": {
+      "main": [
+        [
+          {
+            "node": "LoopItems.4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EmpilhaMsg.1": {
+      "main": [
+        [
+          {
+            "node": "Merge.2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "SplitOut.2": [
+      {
+        "json": {
+          "q": "Quem é Matheus e qual sua experiência?",
+          "sq": [
+            "Qual a formação de Matheus?",
+            "O que Matheus faz?",
+            "Qual a experiência de Matheus na área de tecnologia?"
+          ],
+          "a": "Matheus é um nome importante na comunidade tecnológica brasileira. Ele tem bastante experiência, atuando como gerente da Evolution API, uma ferramenta open source bem conhecida aqui no Brasil.  Ele também trabalha como consultor em automação e low-code, com foco em colocar soluções tecnológicas em prática.",
+          "t": "Um nome de peso na comunidade de tecnologia brasileira, Matheus trouxe uma sólida base técnica e experiência:\n\n● Gerente ativo da Evolution API , uma das principais ferramentas open source do Brasil.\n\n● Consultor em automação e low-code, com ampla experiência em implementação de soluções tecnológicas.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como Pedro e Matheus se conheceram e o que criaram juntos?",
+          "sq": [
+            "Qual a história por trás da Bitfy?",
+            "Como surgiu a Bitfy?",
+            "Quem são os fundadores da Bitfy?"
+          ],
+          "a": "Nos conhecemos, eu (Pedro) e o Matheus, trabalhando com automação. A gente tinha os mesmos objetivos, então resolvemos juntar nossas forças.  Nosso primeiro projeto juntos foi um sucesso e daí nasceu a Bitfy.",
+          "t": "Pedro e Matheus se conheceram no mercado de automação e, com objetivos alinhados, decidiram unir forças. Seu primeiro lançamento conjunto foi um sucesso, resultando na criação da Bitfy.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como funciona o modelo de negócios da Bitfy?",
+          "sq": [
+            "Quais os pilares da Bitfy?",
+            "Em que áreas a Bitfy atua?",
+            "Qual o foco da Bitfy?"
+          ],
+          "a": "A Bitfy funciona como uma holding, com duas áreas principais: ensinando as pessoas na nossa comunidade educacional, o Círculo Secreto, e ajudando empresas com consultoria.",
+          "t": "A Bitfy opera como uma holding, com dois pilares principais de atuação:\n\n1. Comunidade Educacional: O Círculo Secreto\n\n2. Consultoria Empresarial",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que é o Círculo Secreto e quais os níveis de acesso?",
+          "sq": [
+            "Como funciona a comunidade da Bitfy?",
+            "Quais as opções de participação no Círculo Secreto?",
+            "Que tipo de conteúdo o Círculo Secreto oferece?"
+          ],
+          "a": "O Círculo Secreto é nossa comunidade de ensino. Temos diferentes níveis de acesso: o Starter, com cursos gravados na Bitfy Academy; o Mentoring, com mentorias toda semana, networking e conteúdo exclusivo; o Partner, para parcerias de negócios e revenda de soluções; e o Scale, com consultoria focada em crescimento para empresas.",
+          "t": "1. Comunidade Educacional: O Círculo Secreto\n\n● Starter : Acesso à Bitfy Academy , com cursos e treinamentos gravados.\n\n● Mentoring : Mentorias semanais, networking e conteúdos exclusivos.\n\n● Partner : Parcerias estratégicas para negócios e revenda de soluções.\n\n● Scale : Consultoria prática de growth hacking para escalar operações empresariais.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como funciona a consultoria empresarial da Bitfy?",
+          "sq": [
+            "Que tipo de serviço a Bitfy oferece para empresas?",
+            "Quem são os clientes da Bitfy?",
+            "Qual o diferencial da consultoria da Bitfy?"
+          ],
+          "a": "Ajudamos empresas médias e grandes com soluções sob medida em AI e automação low-code. Nosso modelo é exclusivo e conseguimos clientes por indicação.",
+          "t": "2. Consultoria Empresarial\n\n● Atendimento a empresas médias e grandes com soluções personalizadas de AI e automação low-code.\n\n● Modelo exclusivo, com clientes captados por indicação.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Quais os planos da Bitfy para expansão em SaaS?",
+          "sq": [
+            "A Bitfy pretende criar um software?",
+            "Qual o futuro da Bitfy?",
+            "A Bitfy planeja oferecer soluções escaláveis?"
+          ],
+          "a": "Estamos trabalhando para criar soluções escaláveis em modelo SaaS, ou seja, software como serviço. Ainda estamos desenvolvendo essa parte.",
+          "t": "3. Expansão para SaaS\n\n● Desenvolvimento de soluções escaláveis em mode",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que é o Círculo Secreto?",
+          "sq": [
+            "Como posso participar do Círculo Secreto?",
+            "Quais os benefícios de entrar no Círculo Secreto?",
+            "Para quem é o Círculo Secreto?"
+          ],
+          "a": "O Círculo Secreto é tipo um clube exclusivo para quem curte tecnologia! A gente se encontra toda semana para falar sobre coisas legais como Inteligência Artificial, automação e como fazer um negócio crescer rápido. É um lugar para aprender, trocar ideias e conhecer gente que manja muito.",
+          "t": "Círculo Secreto ● Profissionais de tecnologia em busca de aprender, escalar ou consolidar negócios com AI, low-code e automação.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Que tipo de consultoria a Bitfy oferece?",
+          "sq": [
+            "Como a Bitfy ajuda empresas?",
+            "A Bitfy atende qualquer tipo de empresa?",
+            "Quais os serviços de consultoria da Bitfy?"
+          ],
+          "a": "A gente ajuda empresas médias e grandes a melhorarem seus processos usando Inteligência Artificial e low-code.  Pensamos em jeitos específicos para cada empresa, para dar um gás nos resultados e fazer elas crescerem.",
+          "t": "Consultoria Empresarial ● Empresas médias e grandes com operações consolidadas, buscando otimizar processos. ● Soluções rápidas e eficazes, integrando AI e low-code. ● Estratégias personalizadas para otimização e crescimento.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que é a Mentoria Semanal do Círculo Secreto?",
+          "sq": [
+            "Como funciona a mentoria?",
+            "Sobre o que vocês conversam na mentoria?",
+            "Qual a frequência da mentoria?"
+          ],
+          "a": "Toda semana, a gente se reúne para colocar a mão na massa e aprender sobre tecnologia, growth hacking e automação. É prático, sabe? A gente mostra como as coisas funcionam de verdade.",
+          "t": "● Mentoria Semanal : Encontros práticos sobre tecnologia, growth hacking e automação.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Quais ferramentas a Bitfy usa?",
+          "sq": [
+            "Com quais tecnologias a Bitfy trabalha?",
+            "Que tipo de plataformas a Bitfy utiliza?",
+            "Quais as ferramentas preferidas da Bitfy?"
+          ],
+          "a": "A gente usa um monte de ferramentas legais! Para low-code e automação, a gente gosta de n8n, Dify, Directus e Pinecone.  Para Inteligência Artificial, usamos OpenAI, Anthropic, Groq AI e Jina AI.  Também usamos Redis e S3 da AWS para infraestrutura, e Discord, WhatsApp, Telegram e YouTube para comunicação.",
+          "t": "A Bitfy utiliza ferramentas como: ● Low-Code e Automação : n8n, Dify, Directus, Pinecone. ● Inteligência Artificial : OpenAI, Anthropic, Groq AI, Jina AI. ● Infraestrutura : Redis, S3 (AWS). ● Comunicação : Discord, WhatsApp (Evolution Cloud), Telegram, YouTube.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Qual a visão de futuro da Bitfy?",
+          "sq": [
+            "O que a Bitfy quer ser no futuro?",
+            "Quais os planos da Bitfy?",
+            "Onde a Bitfy se vê daqui a alguns anos?"
+          ],
+          "a": "A gente sonha grande! Queremos ser o maior ecossistema de educação em low-code e Inteligência Artificial da América Latina.  Imagina só: transformar nossa comunidade numa fábrica de startups e negócios inovadores!  E como uma holding, a gente quer investir nesses negócios que vão nascer dentro do Círculo Secreto.",
+          "t": "A Bitfy busca ser o maior ecossistema de educação em low-code e AI da América Latina , transformando sua comunidade em uma incubadora de startups e negócios. Como holding, planeja investir em negócios criados pelo Círculo Se",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que é a Bitfy Academy?",
+          "sq": [
+            "Como funciona a Bitfy Academy?",
+            "Que tipo de conteúdo tem na Bitfy Academy?",
+            "Para quem é a Bitfy Academy?"
+          ],
+          "a": "A Bitfy Academy é a nossa plataforma de aprendizado, cheia de conteúdos técnicos e estratégicos para quem quer se aprofundar em low-code, AI e outras tecnologias. É como uma escola online, sabe?",
+          "t": "● Bitfy Academy : Plataforma de aprendizado com conteúdos técnicos e estratégicos.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como funciona o Networking Exclusivo do Círculo Secreto?",
+          "sq": [
+            "Quais as vantagens do Networking Exclusivo?",
+            "Quem eu posso conhecer no Networking Exclusivo?",
+            "Como o Networking Exclusivo me ajuda?"
+          ],
+          "a": "No Círculo Secreto, você não só aprende, como também conhece um monte de gente interessante!  A gente conecta os membros do Círculo com especialistas em diversas áreas, para trocar experiências e quem sabe até começar uma parceria.",
+          "t": "● Networking Exclusivo : Conexão entre membros e especialistas.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Quais são os produtos e serviços oferecidos pela Bitfy?",
+          "sq": [
+            "O que a Bitfy faz?",
+            "Como a Bitfy pode me ajudar?",
+            "Que tipo de soluções a Bitfy oferece?"
+          ],
+          "a": "A gente tem duas coisas principais: o Círculo Secreto, que é nossa comunidade de aprendizado e networking, e a Consultoria Empresarial, onde ajudamos empresas a usar AI e low-code para melhorar seus processos e crescer.",
+          "t": "# Produtos e Serviços\n\n1. Círculo Secreto\n\n2. Consultoria Empresarial",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Quem é o público-alvo da Bitfy?",
+          "sq": [
+            "Quem se beneficia dos serviços da Bitfy?",
+            "Para quem a Bitfy oferece seus produtos?",
+            "Quem deve se interessar pela Bitfy?"
+          ],
+          "a": "Se você trabalha com tecnologia e quer aprender mais sobre AI, low-code e automação, o Círculo Secreto é para você!  E se você tem uma empresa e quer otimizar seus processos, a gente te ajuda com nossa consultoria.",
+          "t": "# Público-Alvo\n\nCírculo Secreto ● Profissionais de tecnologia em busca de aprender, escalar ou consolidar negócios com AI, low-code e automação. \n\nConsultoria Empresarial ● Empresas médias e grandes com operações consolidadas, buscando otimizar processos.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como a Bitfy capta seus clientes?",
+          "sq": [
+            "Qual a estratégia de captação de clientes da Bitfy?",
+            "Como a Bitfy encontra seus clientes?",
+            "De que forma a Bitfy atrai novos clientes?"
+          ],
+          "a": "A gente acredita no poder do boca a boca! Nossos clientes chegam até nós principalmente por indicação, o que mostra que eles confiam no nosso trabalho.",
+          "t": "● Modelo exclusivo, com clientes captados por indicação.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "A Bitfy tem planos para se tornar SaaS?",
+          "sq": [
+            "A Bitfy oferece soluções SaaS?",
+            "Qual o plano da Bitfy para SaaS?",
+            "A Bitfy pretende se tornar uma empresa SaaS?"
+          ],
+          "a": "Sim! A gente está trabalhando para criar soluções escaláveis em um modelo SaaS.  Ainda está em andamento, mas em breve teremos novidades!",
+          "t": "3. Expansão para SaaS ● Desenvolvimento de soluções escaláveis em modelo SaaS (em andamento).",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Quais as vantagens de participar do Círculo Secreto?",
+          "sq": [
+            "Por que eu deveria entrar para o Círculo Secreto?",
+            "O que eu ganho participando do Círculo Secreto?",
+            "Quais os benefícios do Círculo Secreto?"
+          ],
+          "a": "No Círculo Secreto, você tem acesso à Mentoria Semanal, onde a gente discute na prática assuntos como tecnologia, growth hacking e automação. Além disso, você entra para um Networking Exclusivo, conectando-se com outros membros e especialistas. E ainda tem a Bitfy Academy, nossa plataforma cheia de conteúdo técnico e estratégico!",
+          "t": "● Mentoria Semanal : Encontros práticos sobre tecnologia, growth hacking e automação. ● Networking Exclusivo : Conexão entre membros e especialistas. ● Bitfy Academy : Plataforma de aprendizado com conteúdos técnicos e estratégicos.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como a Bitfy aplica a Inteligência Artificial em seus projetos?",
+          "sq": [
+            "De que forma a IA é utilizada pela Bitfy?",
+            "Quais as aplicações de IA na Bitfy?",
+            "Como a Bitfy integra a Inteligência Artificial em suas soluções?"
+          ],
+          "a": "Na consultoria, a gente integra a IA para criar soluções personalizadas que otimizam processos e ajudam as empresas a crescer.  E no Círculo Secreto, usamos a IA como tema de discussão e aprendizado, para que nossos membros fiquem por dentro das novidades e saibam como aplicar essa tecnologia em seus próprios projetos.",
+          "t": "Consultoria Empresarial ● Soluções rápidas e eficazes, integrando AI e low-code. ● Estratégias personalizadas para otimização e crescimento. Círculo Secreto ● Profissionais de tecnologia em busca de aprender, escalar ou consolidar negócios com AI, low-code e automação.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como a Bitfy utiliza low-code em seus serviços?",
+          "sq": [
+            "De que forma o low-code é aplicado pela Bitfy?",
+            "Quais as aplicações de low-code na Bitfy?",
+            "Como a Bitfy integra o low-code em suas soluções?"
+          ],
+          "a": "Assim como a IA, o low-code é uma ferramenta poderosa! A gente usa tanto na consultoria, para criar soluções rápidas e eficazes para nossos clientes, quanto no Círculo Secreto, ensinando nossos membros a usar plataformas low-code para automatizar tarefas e construir seus próprios projetos com mais agilidade.",
+          "t": "Consultoria Empresarial ● Soluções rápidas e eficazes, integrando AI e low-code. Círculo Secreto ● Profissionais de tecnologia em busca de aprender, escalar ou consolidar negócios com AI, low-code e automação.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que é a Bitfy?",
+          "sq": [
+            "Qual a função da Bitfy?",
+            "Pode me explicar sobre a Bitfy?",
+            "O que a Bitfy faz?"
+          ],
+          "a": "A Bitfy, também conhecida como Bitfy AI, junta tecnologia, automação, low-code e inteligência artificial para dar soluções novas em educação e consultoria para empresas.  A gente gosta de ser práticos, ter uma mentalidade de crescimento e focar em resultados que funcionem de verdade.",
+          "t": "A Bitfy Tecnologia e Educação LTDA , conhecida como Bitfy AI , é uma empresa que combina tecnologia, automação, low-code e inteligência artificial para oferecer soluções inovadoras em educação e consultoria empresarial. [...] sua abordagem prática, mentalidade de crescimento e foco em resultados reais",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Quando a Bitfy foi fundada?",
+          "sq": [
+            "Qual a data de fundação da Bitfy?",
+            "Em que ano a Bitfy começou?",
+            "Desde quando a Bitfy existe?"
+          ],
+          "a": "A Bitfy foi fundada no dia 1º de agosto de 2024.",
+          "t": "Fundada em 1º de agosto de 2024",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Qual o significado do nome Bitfy AI?",
+          "sq": [
+            "Por que o nome Bitfy AI?",
+            "O que significa Bitfy AI?",
+            "De onde veio o nome Bitfy AI?"
+          ],
+          "a": "O nome Bitfy AI tem um significado especial. 'Bit' representa a tecnologia e inovação. 'Fy' quer dizer transformação e simplificação. E 'AI', claro, mostra nosso foco em inteligência artificial.",
+          "t": "O nome Bitfy AI reflete os pilares da empresa: ● Bit : Representa a essência da tecnologia e inovação. ● Fy : Simboliza transformação e simplificação. ● AI : Enfatiza o foco na inteligência artificial como motor",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Qual o objetivo da Bitfy?",
+          "sq": [
+            "O que a Bitfy busca?",
+            "Qual a missão da Bitfy?",
+            "O que a Bitfy quer alcançar?"
+          ],
+          "a": "A Bitfy quer ser o maior ecossistema de educação em low-code e inteligência artificial da América Latina.  A gente quer transformar nossa comunidade numa incubadora de startups e negócios.  Como holding, a gente planeja investir em negócios criados pelo Círculo Secreto para aumentar nosso impacto global.",
+          "t": "Bitfy busca ser o maior ecossistema de educação em low-code e AI da América Latina , transformando sua comunidade em uma incubadora de startups e negócios. Como holding, planeja investir em negócios criados pelo Círculo Secreto, ampliando sua equidade e impacto global.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Quais os valores da Bitfy?",
+          "sq": [
+            "No que a Bitfy acredita?",
+            "Quais os princípios da Bitfy?",
+            "O que guia a Bitfy?"
+          ],
+          "a": "A gente valoriza a prática e a colaboração na nossa comunidade.  Acreditamos na mentalidade de crescimento, juntando conhecimento técnico, marketing e saúde pessoal. E, claro, focamos em resultados com ferramentas e estratégias que realmente funcionam.",
+          "t": "Diferenciais e Valores ● Vida Real e Vivência : Uma comunidade prática e colaborativa. ● Mentalidade de Crescimento : Integra técnico, marketing e saúde pessoal. ● Foco em Resultados : Ferramentas e estratégias que realmente funcionam.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que é o Círculo Secreto?",
+          "sq": [
+            "Qual a função do Círculo Secreto?",
+            "Como o Círculo Secreto se relaciona com a Bitfy?",
+            "Pode me explicar sobre o Círculo Secreto?"
+          ],
+          "a": "O Círculo Secreto é uma parte importante da Bitfy.  A gente investe em negócios criados por eles, ajudando a aumentar nosso impacto global.",
+          "t": "Como holding, planeja investir em negócios criados pelo Círculo Secreto, ampliando sua equidade e impacto global.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Qual a área de atuação da Bitfy?",
+          "sq": [
+            "Em que setor a Bitfy atua?",
+            "Qual o mercado da Bitfy?",
+            "Onde a Bitfy se posiciona?"
+          ],
+          "a": "A Bitfy atua na área de educação e consultoria empresarial, usando tecnologia, automação, low-code e inteligência artificial.  A gente quer ser referência nesse setor.",
+          "t": "A Bitfy Tecnologia e Educação LTDA , conhecida como Bitfy AI , é uma empresa que combina tecnologia, automação, low-code e inteligência artificial para oferecer soluções inovadoras em educação e consultoria empresarial. [...] posicionando-se como uma referência em seu setor.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como a Bitfy se diferencia no mercado?",
+          "sq": [
+            "Quais os diferenciais da Bitfy?",
+            "O que torna a Bitfy única?",
+            "Por que escolher a Bitfy?"
+          ],
+          "a": "A gente se diferencia pela nossa abordagem prática, focada na vida real.  Temos uma mentalidade de crescimento, integrando áreas técnicas, marketing e saúde pessoal. E, principalmente, focamos em resultados que realmente fazem a diferença.",
+          "t": "Diferenciais e Valores ● Vida Real e Vivência : Uma comunidade prática e colaborativa. ● Mentalidade de Crescimento : Integra técnico, marketing e saúde pessoal. ● Foco em Resultados : Ferramentas e estratégias que realmente funcionam.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que é low-code?",
+          "sq": [
+            "Como funciona o low-code?",
+            "Qual a importância do low-code para a Bitfy?",
+            "Por que a Bitfy usa low-code?"
+          ],
+          "a": "Low-code é uma maneira de criar softwares e aplicativos usando menos código de programação tradicional. É como montar um quebra-cabeça, onde você junta blocos pré-prontos para criar algo novo.  Isso torna o desenvolvimento mais rápido e acessível.",
+          "t": "Bitfy busca ser o maior ecossistema de educação em low-code e AI da América Latina",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento",
+            "low-code"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como a Bitfy usa inteligência artificial?",
+          "sq": [
+            "Qual o papel da IA na Bitfy?",
+            "De que forma a IA contribui para a Bitfy?",
+            "Quais as aplicações de IA na Bitfy?"
+          ],
+          "a": "A inteligência artificial é o motor da Bitfy! A gente a usa para criar soluções inovadoras em educação e consultoria empresarial. É como ter um assistente super inteligente que nos ajuda a fazer coisas incríveis.",
+          "t": "O nome Bitfy AI reflete os pilares da empresa: [...] AI : Enfatiza o foco na inteligência artificial como motor",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento",
+            "inteligência artificial"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que é uma holding?",
+          "sq": [
+            "Como funciona uma holding?",
+            "Por que a Bitfy é uma holding?",
+            "Qual a vantagem de ser uma holding?"
+          ],
+          "a": "Uma holding é como uma empresa-mãe que controla outras empresas. No nosso caso, a Bitfy, como holding, investe em negócios criados pelo Círculo Secreto. Isso nos ajuda a crescer e ter um impacto maior no mundo.",
+          "t": "Como holding, planeja investir em negócios criados pelo Círculo Secreto, ampliando sua equidade e impacto global.",
+          "tags": [
+            "bitfy",
+            "holding",
+            "investimento",
+            "Círculo Secreto",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que significa \"Bit\" no nome Bitfy?",
+          "sq": [
+            "Qual a relação entre \"Bit\" e tecnologia?",
+            "Por que \"Bit\" representa inovação?",
+            "O que \"Bit\" simboliza?"
+          ],
+          "a": "\"Bit\" é a menor unidade de informação em um computador.  Para a gente, representa a base da tecnologia e a capacidade de inovar, de criar coisas novas e revolucionárias no mundo digital.",
+          "t": "Bit : Representa a essência da tecnologia e inovação.",
+          "tags": [
+            "bitfy",
+            "tecnologia",
+            "inovação",
+            "bit",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que significa \"Fy\" no nome Bitfy?",
+          "sq": [
+            "Por que \"Fy\" simboliza transformação?",
+            "Qual a relação entre \"Fy\" e simplificação?",
+            "O que \"Fy\" representa na Bitfy?"
+          ],
+          "a": "Pensamos em \"Fy\" como um símbolo de transformação e simplificação.  É como pegar algo complexo e torná-lo fácil de entender e usar.  A gente quer simplificar a tecnologia para que todos possam se beneficiar dela.",
+          "t": "Fy : Simboliza transformação e simplificação.",
+          "tags": [
+            "bitfy",
+            "transformação",
+            "simplificação",
+            "fy",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que significa \"AI\" no nome Bitfy?",
+          "sq": [
+            "Por que \"AI\" está no nome da Bitfy?",
+            "Qual a importância da \"AI\" para a Bitfy?",
+            "O que \"AI\" representa?"
+          ],
+          "a": "\"AI\" significa Inteligência Artificial, e é uma parte fundamental da Bitfy.  A gente acredita que a IA é o futuro e a usamos para criar soluções inteligentes e inovadoras.",
+          "t": "AI : Enfatiza o foco na inteligência artificial como motor",
+          "tags": [
+            "bitfy",
+            "AI",
+            "Inteligência Artificial",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como a Bitfy integra saúde pessoal em sua mentalidade de crescimento?",
+          "sq": [
+            "Qual a importância da saúde pessoal para a Bitfy?",
+            "De que forma a Bitfy promove a saúde pessoal?",
+            "Como a saúde pessoal se relaciona com o trabalho na Bitfy?"
+          ],
+          "a": "A gente acredita que para crescer profissionalmente, você também precisa cuidar da sua saúde física e mental.  Por isso, a gente incentiva a prática de atividades saudáveis e o bem-estar dos nossos colaboradores e da nossa comunidade.",
+          "t": "Mentalidade de Crescimento : Integra técnico, marketing e saúde pessoal.",
+          "tags": [
+            "bitfy",
+            "saúde pessoal",
+            "mentalidade de crescimento",
+            "bem-estar",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Qual é o significado por trás do nome Bitfy AI?",
+          "sq": [
+            "O que representa o nome da empresa?",
+            "Por que o nome Bitfy AI?",
+            "Qual a lógica na escolha do nome Bitfy AI?"
+          ],
+          "a": "O nome Bitfy AI junta o que é mais importante pra gente. \"Bit\" fala de tecnologia, que é o nosso foco. \"Fy\" é como a gente quer que as coisas sejam: simples e fáceis. E o \"AI\" mostra que a inteligência artificial é o coração de tudo que fazemos.",
+          "t": "O nome Bitfy AI reflete os pilares da empresa: ● Bit : Representa a essência da tecnologia e inovação. ● Fy : Simboliza transformação e simplificação. ● AI : Enfatiza o foco na inteligência artificial como motor das soluções.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Onde Pedro Nascimento trabalhou antes da Bitfy AI?",
+          "sq": [
+            "Qual a experiência internacional do Pedro?",
+            "Em quais países Pedro atuou?",
+            "Pedro morou fora do Brasil?"
+          ],
+          "a": "Eu morei em vários lugares! Inglaterra, Albânia, Canadá e Havaí.  Em cada lugar, aprendi algo novo que me ajudou a chegar onde estou hoje.",
+          "t": "Com uma trajetória global, passando por países como Inglaterra, Albânia, Canadá e Havaí, Pedro começou explorando a inteligência artificial para aumentar a produtividade.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como Pedro Nascimento começou a usar inteligência artificial?",
+          "sq": [
+            "Qual foi o primeiro contato de Pedro com IA?",
+            "Como Pedro se interessou por IA?",
+            "De que forma Pedro começou a usar IA?"
+          ],
+          "a": "Comecei usando IA para ser mais produtivo, sabe? Queria fazer mais em menos tempo. Daí fui aprendendo e me aprofundando nesse mundo.",
+          "t": "Pedro começou explorando a inteligência artificial para aumentar a produtividade.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que Pedro Nascimento fez antes de fundar a Bitfy AI?",
+          "sq": [
+            "Quais foram os projetos de Pedro antes da Bitfy?",
+            "Como Pedro se preparou para fundar a Bitfy?",
+            "Qual a trajetória de Pedro antes da Bitfy?"
+          ],
+          "a": "Antes da Bitfy, eu tive uma consultoria focada em IA para ajudar empresas a serem mais produtivas. Também criei um assistente pessoal usando automação e low-code, e ainda dei mentoria para quem queria aprender mais sobre isso. Foi uma época de muito aprendizado!",
+          "t": "Iniciou uma consultoria empresarial focada em AI para produtividade. Mergulhou no universo de automação e low-code para criar um assistente pessoal. Viralizou no YouTube com um protótipo, o que levou ao lançamento de sua primeira mentoria e ao início de sua conexão com o mercado de automação e AI.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como Pedro Nascimento ficou conhecido no mercado de automação e IA?",
+          "sq": [
+            "O que impulsionou a carreira de Pedro em IA?",
+            "Como Pedro ganhou visibilidade na área de IA?",
+            "Qual foi o ponto de virada na carreira de Pedro?"
+          ],
+          "a": "Eu criei um protótipo que viralizou no YouTube!  Isso me conectou com o mercado de automação e IA e me deu a chance de começar a minha primeira mentoria. Foi incrível!",
+          "t": "Viralizou no YouTube com um protótipo, o que levou ao lançamento de sua primeira mentoria e ao início de sua conexão com o mercado de automação e AI.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Qual a experiência de Matheus Meinberg?",
+          "sq": [
+            "Em que Matheus trabalhou antes da Bitfy?",
+            "Qual a expertise de Matheus?",
+            "O que Matheus sabe fazer?"
+          ],
+          "a": "O Matheus é fera em tecnologia! Ele gerenciava a Evolution API, uma ferramenta open source super importante aqui no Brasil. Ele também já trabalhava com consultoria em automação e low-code, ajudando empresas a usar a tecnologia de um jeito mais inteligente.",
+          "t": "Matheus Meinberg Um nome de peso na comunidade de tecnologia brasileira, Matheus trouxe uma sólida base técnica e experiência: ● Gerente ativo da Evolution API , uma das principais ferramentas open source do Brasil. ● Consultor em automação e low-code, com ampla experiência em implementação de soluções tecnológicas.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como Pedro e Matheus se conheceram?",
+          "sq": [
+            "Onde os fundadores da Bitfy se encontraram?",
+            "Como surgiu a parceria entre Pedro e Matheus?",
+            "Qual a história por trás da união de Pedro e Matheus?"
+          ],
+          "a": "Nos conhecemos trabalhando com automação.  A gente tinha os mesmos objetivos, então decidimos juntar forças e criar algo grande juntos.",
+          "t": "Pedro e Matheus se conheceram no mercado de automação e, com objetivos alinhados, decidiram unir forças.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como a Bitfy AI surgiu?",
+          "sq": [
+            "Qual a origem da Bitfy AI?",
+            "Como a Bitfy AI foi criada?",
+            "De onde veio a ideia da Bitfy AI?"
+          ],
+          "a": "A Bitfy surgiu depois que eu e o Matheus fizemos um projeto juntos que deu super certo!  Vimos que tínhamos potencial para fazer algo ainda maior e, assim, nasceu a Bitfy.",
+          "t": "Seu primeiro lançamento conjunto foi um sucesso, resultando na criação da Bitfy.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como a Bitfy AI funciona?",
+          "sq": [
+            "Qual o modelo de negócios da Bitfy AI?",
+            "De que forma a Bitfy AI opera?",
+            "Como a Bitfy AI se estrutura?"
+          ],
+          "a": "A Bitfy funciona como uma holding, tipo um guarda-chuva que abriga várias empresas e projetos diferentes. Isso nos permite ser flexíveis e explorar diferentes áreas da tecnologia.",
+          "t": "A Bitfy opera como uma holding",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que é o \"fy\" no nome Bitfy AI?",
+          "sq": [
+            "Qual o significado da sílaba \"fy\"?",
+            "Por que \"fy\" em Bitfy AI?",
+            "O que representa o \"fy\"?"
+          ],
+          "a": "O \"fy\" representa a transformação e a simplificação. A gente quer tornar a tecnologia mais fácil e acessível para todos.",
+          "t": "● Fy : Simboliza transformação e simplificação.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que o \"bit\" representa no nome Bitfy AI?",
+          "sq": [
+            "Qual o significado do \"bit\"?",
+            "Por que usar \"bit\" no nome?",
+            "O que significa \"bit\" em Bitfy AI?"
+          ],
+          "a": "O \"bit\" representa a base da tecnologia e da inovação. É como o tijolinho que constrói tudo o que fazemos.",
+          "t": "● Bit : Representa a essência da tecnologia e inovação.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Qual o domínio da Bitfy AI?",
+          "sq": [
+            "Onde encontrar a Bitfy AI online?",
+            "Qual o site da Bitfy AI?",
+            "Como acessar a Bitfy AI na internet?"
+          ],
+          "a": "Nosso domínio é bitfy.ai.  É curtinho, fácil de lembrar e mostra que a gente é moderno e global.",
+          "t": "A escolha do domínio bitfy.ai reforça a modernidade, simplicidade e posicionamento global da empresa.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Quem é o Pedro Nascimento?",
+          "sq": [
+            "Qual a função de Pedro Nascimento na Bitfy?",
+            "O que Pedro Nascimento faz?",
+            "Qual a história de Pedro Nascimento?"
+          ],
+          "a": "Eu sou um dos fundadores da Bitfy AI.  Comecei explorando a inteligência artificial para aumentar a produtividade e, depois de algumas experiências, juntei forças com o Matheus para criar a Bitfy.",
+          "t": "Pedro Nascimento Com uma trajetória global, passando por países como Inglaterra, Albânia, Canadá e Havaí, Pedro começou explorando a inteligência artificial para aumentar a produtividade.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Quem são os fundadores da Bitfy AI?",
+          "sq": [
+            "Quem criou a Bitfy AI?",
+            "Quem está por trás da Bitfy AI?",
+            "Quantos fundadores a Bitfy AI tem?"
+          ],
+          "a": "A Bitfy AI foi fundada por mim, Pedro Nascimento, e pelo Matheus Meinberg.",
+          "t": "Pedro Nascimento ... Matheus Meinberg ... Pedro e Matheus se conheceram no mercado de automação e, com objetivos alinhados, decidiram unir forças. Seu primeiro lançamento conjunto foi um sucesso, resultando na criação da Bitfy.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que a Bitfy AI busca?",
+          "sq": [
+            "Qual o objetivo da Bitfy AI?",
+            "O que a Bitfy AI quer alcançar?",
+            "Qual a missão da Bitfy AI?"
+          ],
+          "a": "Queremos usar a inteligência artificial para simplificar e transformar a maneira como as pessoas usam a tecnologia.",
+          "t": "O nome Bitfy AI reflete os pilares da empresa: ... ● AI : Enfatiza o foco na inteligência artificial como motor das soluções. A escolha do domínio bitfy.ai reforça a modernidade, simplicidade e posicionamento global da empresa.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que é a Bitfy?",
+          "sq": [
+            "Qual a história da Bitfy?",
+            "Como surgiu a Bitfy?",
+            "Pode me contar sobre a Bitfy?"
+          ],
+          "a": "A Bitfy nasceu da união de dois amigos com muita experiência em automação.  A gente juntou nossos objetivos e criamos essa empresa, que é tipo uma holding, sabe?  Nosso primeiro lançamento foi um sucesso!",
+          "t": "am no mercado de automação e, com objetivos alinhados, decidiram unir forças. Seu primeiro lançamento conjunto foi um sucesso, resultando na criação da Bitfy.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Quais são as áreas de atuação da Bitfy?",
+          "sq": [
+            "Em que setores a Bitfy atua?",
+            "Quais os principais serviços da Bitfy?",
+            "Como a Bitfy opera no mercado?"
+          ],
+          "a": "A gente trabalha com duas coisas principais: ensinando pessoas em nossa comunidade, o Círculo Secreto, e ajudando empresas com automação e AI.  E estamos criando ferramentas novas, tipo um software que as pessoas podem assinar, sabe?",
+          "t": "A Bitfy opera como uma holding, com dois pilares principais de atuação:Comunidade Educacional: O Círculo SecretoConsultoria EmpresarialExpansão para SaaS",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como funciona o Círculo Secreto?",
+          "sq": [
+            "O que é o Círculo Secreto?",
+            "Quais as opções dentro do Círculo Secreto?",
+            "Que tipo de aprendizado o Círculo Secreto oferece?"
+          ],
+          "a": "O Círculo Secreto é nossa comunidade de aprendizado.  Temos o Starter com cursos gravados, o Mentoring com mentorias semanais e conteúdo exclusivo, o Partner para quem quer fazer negócios com a gente, e o Scale, que é uma consultoria para empresas que querem crescer.",
+          "t": "Círculo Secreto: Starter: Acesso à Bitfy Academy, com cursos e treinamentos gravados. Mentoring: Mentorias semanais, networking e conteúdos exclusivos. Partner: Parcerias estratégicas para negócios e revenda de soluções. Scale: Consultoria prática de growth hacking para escalar operações empresariais.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Que tipo de consultoria empresarial a Bitfy oferece?",
+          "sq": [
+            "A Bitfy atende quais empresas?",
+            "Como a Bitfy ajuda empresas?",
+            "No que consiste a consultoria da Bitfy?"
+          ],
+          "a": "A gente ajuda empresas médias e grandes com soluções personalizadas, usando AI e automação low-code. É um jeito especial de fazer as coisas, e nossos clientes chegam até nós por indicação.",
+          "t": "Atendimento a empresas médias e grandes com soluções personalizadas de AI e automação low-code. Modelo exclusivo, com clientes captados por indicação.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que é a expansão para SaaS da Bitfy?",
+          "sq": [
+            "A Bitfy está desenvolvendo software?",
+            "Quais os planos da Bitfy para SaaS?",
+            "O que a Bitfy pretende com o SaaS?"
+          ],
+          "a": "Estamos trabalhando para criar soluções que as pessoas possam assinar, tipo um software na nuvem.  Ainda estamos desenvolvendo, mas em breve teremos novidades!",
+          "t": "Desenvolvimento de soluções escaláveis em modelo SaaS (em andamento).",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Quem é o público-alvo do Círculo Secreto?",
+          "sq": [
+            "Para quem é o Círculo Secreto?",
+            "Quem se beneficia do Círculo Secreto?",
+            "Quem deve participar do Círculo Secreto?"
+          ],
+          "a": "O Círculo Secreto é para quem quer aprender sobre automação, AI e como fazer negócios crescerem. Tem opções para quem está começando e para quem já tem experiência.",
+          "t": "Círculo Secreto",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que é a Bitfy Academy?",
+          "sq": [
+            "Onde encontro os cursos da Bitfy?",
+            "Como acesso a Bitfy Academy?",
+            "Que tipo de conteúdo tem na Bitfy Academy?"
+          ],
+          "a": "A Bitfy Academy é onde você encontra nossos cursos e treinamentos gravados.  É parte do plano Starter do Círculo Secreto.",
+          "t": "Starter : Acesso à Bitfy Academy , com cursos e treinamentos gravados.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que o plano Mentoring oferece?",
+          "sq": [
+            "Quais os benefícios do Mentoring?",
+            "Como funciona o Mentoring?",
+            "O que inclui o plano Mentoring?"
+          ],
+          "a": "No Mentoring, você participa de mentorias semanais, conhece outras pessoas da área e tem acesso a conteúdos exclusivos, que só quem está no Mentoring recebe.",
+          "t": "Mentoring : Mentorias semanais, networking e conteúdos exclusivos.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como posso me tornar um parceiro da Bitfy?",
+          "sq": [
+            "O que é o plano Partner?",
+            "Como funciona a parceria com a Bitfy?",
+            "Quais as vantagens de ser um Partner?"
+          ],
+          "a": "O plano Partner é para quem quer fazer negócios com a gente, revender nossas soluções e criar parcerias estratégicas.",
+          "t": "Partner : Parcerias estratégicas para negócios e revenda de soluções.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como o Scale pode ajudar minha empresa?",
+          "sq": [
+            "O que é o plano Scale?",
+            "Para quem é o Scale?",
+            "Que tipo de consultoria o Scale oferece?"
+          ],
+          "a": "O Scale é uma consultoria prática de growth hacking, que ajuda sua empresa a crescer rápido.  A gente te mostra como fazer!",
+          "t": "Scale : Consultoria prática de growth hacking para escalar operações empresariais.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "O que é automação low-code?",
+          "sq": [
+            "Como funciona a automação low-code?",
+            "Quais as vantagens da automação low-code?",
+            "Por que a Bitfy usa automação low-code?"
+          ],
+          "a": "Automação low-code é um jeito de automatizar tarefas sem precisar escrever muito código. É mais rápido e fácil de usar, e a gente usa para criar soluções personalizadas para nossos clientes empresariais.",
+          "t": "Atendimento a empresas médias e grandes com soluções personalizadas de AI e automação low-code.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Como a Bitfy consegue clientes?",
+          "sq": [
+            "Qual a estratégia de marketing da Bitfy?",
+            "Como a Bitfy atrai clientes?",
+            "De onde vêm os clientes da Bitfy?"
+          ],
+          "a": "Nossos clientes chegam até nós por indicação. É um jeito especial de trabalhar, focado em qualidade e confiança.",
+          "t": "Modelo exclusivo, com clientes captados por indicação.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Quais são os planos futuros da Bitfy?",
+          "sq": [
+            "O que a Bitfy planeja para o futuro?",
+            "Quais os próximos passos da Bitfy?",
+            "Para onde a Bitfy está caminhando?"
+          ],
+          "a": "Estamos investindo pesado em criar um software que as pessoas possam assinar, em modelo SaaS.  É uma forma de escalar nossas soluções e ajudar mais gente com AI e automação.  Fique ligado!",
+          "t": "Expansão para SaaSDesenvolvimento de soluções escaláveis em modelo SaaS (em andamento).",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Por que a Bitfy escolheu o nome \"Círculo Secreto\" para sua comunidade?",
+          "sq": [
+            "Qual o significado do nome \"Círculo Secreto\"?",
+            "De onde veio a ideia do nome \"Círculo Secreto\"?",
+            "O que representa o \"Círculo Secreto\"?"
+          ],
+          "a": "O nome \"Círculo Secreto\" passa a ideia de uma comunidade exclusiva, onde compartilhamos conhecimento e nos ajudamos mutuamente. É como um grupo seleto de pessoas buscando crescimento juntas.",
+          "t": "Comunidade Educacional: O Círculo Secreto",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      },
+      {
+        "json": {
+          "q": "Quem são os fundadores da Bitfy?",
+          "sq": [
+            "Quem criou a Bitfy?",
+            "Qual a história dos criadores da Bitfy?",
+            "Quem está por trás da Bitfy?"
+          ],
+          "a": "A Bitfy foi fundada por dois amigos com bastante experiência no mercado de automação. A gente decidiu juntar forças e conhecimentos para criar algo novo e inovador.",
+          "t": "am no mercado de automação e, com objetivos alinhados, decidiram unir forças. Seu primeiro lançamento conjunto foi um sucesso, resultando na criação da Bitfy.",
+          "tags": [
+            "bitfy",
+            "AI",
+            "tecnológica",
+            "segurança",
+            "Pedro Nascimento"
+          ]
+        }
+      }
+    ]
+  },
+  "versionId": "59d53331-ad8f-4e80-b789-cb27cee7951f",
+  "triggerCount": 0,
+  "tags": [
+    {
+      "createdAt": "2025-02-11T08:34:07.900Z",
+      "updatedAt": "2025-02-11T08:34:07.900Z",
+      "id": "PDGdF7WZ9gSQmP0W",
+      "name": "Anna"
+    }
+  ]
+}
