@@ -1,0 +1,518 @@
+{
+  "createdAt": "2025-03-11T20:17:37.935Z",
+  "updatedAt": "2025-04-12T23:57:14.205Z",
+  "id": "Bcrp6fdBBev8L4BZ",
+  "name": "jobber_sync_jobs_v1",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        -20
+      ],
+      "id": "c95f29ae-ae47-4aa0-91ea-0411ee71ba24",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "incr",
+        "key": "counter"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        -20
+      ],
+      "id": "e9033cf1-989e-457c-b523-6ee2c9e38ab8",
+      "name": "counter_2",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2b3e8ec4-ba57-4716-b420-44b81136d6f1",
+              "leftValue": "={{ $('counter_2').item.json.counter }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "da7dcbb5-9ca9-4926-8e09-286907986e21",
+              "leftValue": "={{ $('pagination 2').item.json.continuePagination }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1620,
+        -20
+      ],
+      "id": "f71ae2df-2439-4d36-9e90-35aa740f9c89",
+      "name": "batch loop"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eff9cc2d-c364-4859-902e-3ceb34481092",
+              "name": "variables.first",
+              "value": "={{ $('pagination 2').item.json.variables.first }}",
+              "type": "number"
+            },
+            {
+              "id": "499c7162-3df3-484c-85c2-d5f72b7bd3ec",
+              "name": "variables.after",
+              "value": "={{ $('pagination 2').item.json.variables.after }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1360,
+        -20
+      ],
+      "id": "ac2689c3-bb13-4175-ba12-e0a2431dab9c",
+      "name": "set loop"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare final data for Supabase insertion\ntry {\n    // In n8n, the input data can be accessed through $input or $json\n    // Using $input as the primary and falling back to alternatives\n    const inputData = $input.all()[0]; // Get the first item from input\n    \n    if (!inputData || !inputData.json) {\n        throw new Error('No input data available');\n    }\n    \n    const data = inputData.json;\n    \n    if (!data.allData || !Array.isArray(data.allData)) {\n        throw new Error('No client data available for Supabase insertion');\n    }\n    \n    // If there was an error in previous steps\n    if (data.error) {\n        throw new Error(`Previous error: ${data.error}`);\n    }\n    \n    // Check if we have completed pagination\n    if (!data.completed) {\n        // Return the inputData unchanged if pagination is not complete\n        return inputData;\n    }\n    \n    // Format data for Supabase batch insert\n    const supabaseItems = data.allData.map((client, index) => {\n        // Generate a unique supabase_id if needed\n        return {\n            ...client,\n            // Convert any complex objects to JSON strings for storage\n            tags: JSON.stringify(client.tags),\n            custom_fields: JSON.stringify(client.custom_fields)\n        };\n    });\n    \n    return {\n        json: {\n            items: supabaseItems,\n            count: supabaseItems.length,\n            success: true\n        }\n    };\n} catch (error) {\n    console.log('Supabase preparation error:', error.message);\n    return {\n        json: {\n            error: error.message,\n            success: false,\n            items: []\n        }\n    };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        -500
+      ],
+      "id": "90f8ed51-186e-40e1-ad42-9ee7ab949e5d",
+      "name": "Set Array"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        960,
+        -20
+      ],
+      "id": "1a0f3270-b00d-4e36-8dcc-1fcc97868914",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "counter",
+        "value": "0"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -20
+      ],
+      "id": "f756f760-4fcf-4b8b-8708-4302a71ffeca",
+      "name": "Init counter",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        -40
+      ],
+      "id": "d0866ade-090f-414f-9e79-803e38838bba",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($first: Int!, $after: String) {\n  jobs(first: $first, after: $after) {\n    nodes {\n      id\n      title\n      jobNumber\n      jobStatus\n      jobType\n      \n      createdAt\n      updatedAt\n      startAt\n      endAt\n      completedAt\n      bookingConfirmationSentAt\n      \n      property {\n        id\n      }\n      \n      instructions\n      total\n      invoicedTotal\n      uninvoicedTotal\n      \n      lineItems {\n        nodes {\n          id\n          name\n          description\n          quantity\n          unitPrice\n        }\n      }\n      \n      billingType\n      \n      jobBalanceTotals {\n        outstandingAmount\n        totalAmount\n      }\n      \n      quote {\n        id\n      }\n      \n      request {\n        id\n      }\n      \n      salesperson {\n        id\n        name {\n          full\n        }\n      }\n      \n      source\n      willClientBeAutomaticallyCharged\n      \n      \n      \n      defaultVisitTitle\n      allowReviewRequest\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 5, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        220,
+        -20
+      ],
+      "id": "c7607eb0-2c88-4c29-ab42-65d5a35bb3ae",
+      "name": "jobber query - jobs",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($first: Int!, $after: String) {\n  invoices(first: $first, after: $after) {\n    nodes {\n      id\n      invoiceNumber\n      invoiceStatus\n      invoiceNet\n      \n      createdAt\n      updatedAt\n      issuedDate\n      dueDate\n      receivedDate\n      dateViewedInClientHub\n      \n      subject\n      message\n      clientHubUri\n      \n      amounts {\n        depositAmount\n        discountAmount\n        invoiceBalance\n        legacyDiscountAmount\n        nonTaxAmount\n        paymentsTotal\n        subtotal\n        taxAmount\n        tipsTotal\n        total\n      }\n      \n      billingAddress {\n        street\n        city\n        province\n        postalCode\n        country\n      }\n      \n      billingIsSameAsPropertyAddress\n      \n      client {\n        id\n        name\n      }\n      \n      jobs {\n        nodes {\n          id\n          title\n        }\n      }\n      \n      lineItems {\n        nodes {\n          id\n          name\n          description\n          quantity\n          unitPrice\n          totalPrice\n          taxable\n          date\n          category\n          createdAt\n          updatedAt\n          linkedProductOrService {\n            id\n            name\n          }\n          \n        }\n      }\n      \n      paymentRecords {\n        nodes {\n          id\n          amount\n        }\n      }\n      \n      properties {\n        nodes {\n          id\n          address {\n            street\n            city\n          }\n        }\n      }\n      \n      salesperson {\n        id\n        name {\n          full\n        }\n      }\n      \n      taxCalculationMethod\n      \n      jobberWebUri\n      allowReviewRequest\n      nextDateToSendReviewSms\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"first\": 4, \"after\": null} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        -540
+      ],
+      "id": "2c0c4323-aa51-4d16-abcd-bf65c902bc46",
+      "name": "jobber query - invoices",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "bYFIrqt2IbgZU5Z1",
+          "name": "JobberAPI_BI Compass APP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "try {\n    // Pegando o primeiro item do array 'items' no contexto do n8n\n    const responseData = items[0].json || items[0];\n    const result = Array.isArray(responseData) ? responseData[0] : responseData;\n\n    if (!result?.data?.clients) {\n        throw new Error('Invalid response structure');\n    }\n\n    const { nodes, pageInfo } = result.data.clients;\n    const existingData = Array.isArray(items[0]?.json?.allData) ? items[0].json.allData : [];\n    const allData = [...existingData, ...nodes];\n\n    return [\n        {\n            json: {\n                allData,\n                data: nodes,\n                variables: {\n                    first: 5,\n                    after: pageInfo.endCursor\n                },\n                continuePagination: pageInfo.hasNextPage,\n                completed: !pageInfo.hasNextPage\n            }\n        }\n    ];\n} catch (error) {\n    console.log('Error:', error.message);\n    return [\n        {\n            json: {\n                error: error.message,\n                continuePagination: false,\n                completed: true,\n                allData: items[0]?.json?.allData || []\n            }\n        }\n    ];\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        -20
+      ],
+      "id": "04a0520e-b065-4824-ad99-5e1a8038679a",
+      "name": "Pagination"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// n8n Code Node: Transform Jobber GraphQL data for Supabase\n// This code processes Jobber client data from a GraphQL node and prepares it for Supabase\n\n// In n8n, the items array is automatically available\n// No need to use $input.all()\n\n// Transform a single client from Jobber format to Supabase format\nfunction transformClientForSupabase(jobberClient) {\n  // Extract primary email and phone if they exist\n  const primaryEmail = jobberClient.emails?.find(e => e.primary)?.address || \n                      (jobberClient.emails?.length > 0 ? jobberClient.emails[0].address : null);\n  \n  const primaryPhone = jobberClient.phones?.find(p => p.primary)?.number || \n                       (jobberClient.phones?.length > 0 ? jobberClient.phones[0].number : null);\n  \n  // Map the client data to Supabase format\n  return {\n    jobber_id: jobberClient.id,\n    first_name: jobberClient.firstName,\n    last_name: jobberClient.lastName,\n    company_name: jobberClient.companyName,\n    email: primaryEmail,\n    phone: primaryPhone,\n    billing_address: jobberClient.billingAddress,\n    is_company: jobberClient.isCompany,\n    is_lead: jobberClient.isLead,\n    created_at: jobberClient.createdAt,\n    updated_at: jobberClient.updatedAt,\n    custom_fields: jobberClient.customFields,\n    emails_json: jobberClient.emails,\n    phones_json: jobberClient.phones,\n    tags_json: jobberClient.tags?.edges || [],\n    synced_at: new Date().toISOString()\n  };\n}\n\n// Process each item passed to the node\nconst returnItems = [];\n\nfor (const item of items) {\n  // Get input data directly from the item\n  const inputData = item.json;\n  \n  // In case there's no data, return the original item\n  if (!inputData || !inputData.data || !inputData.data.clients) {\n    returnItems.push(item);\n    continue;\n  }\n  \n  // Extract clients and pagination info\n  const clients = inputData.data.clients.nodes;\n  const pageInfo = inputData.data.clients.pageInfo;\n  \n  // Transform clients for Supabase\n  const transformedClients = clients.map(client => transformClientForSupabase(client));\n  \n  // Create return data object\n  const returnData = { \n    clients: transformedClients,\n    hasMorePages: pageInfo.hasNextPage,\n    nextCursor: pageInfo.endCursor,\n    processedCount: transformedClients.length\n  };\n  \n  // Add the transformed data to return items\n  returnItems.push({\n    json: returnData\n  });\n}\n\n// Return all processed items\nreturn returnItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        -320
+      ],
+      "id": "3845499c-891d-41b3-b502-b47b2ed7c380",
+      "name": "pagination 2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst allData = inputData[0]?.json?.allData || [];\nreturn allData.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        -20
+      ],
+      "id": "9fc5c53d-b465-43f3-9b12-ddc9eb6689bf",
+      "name": "Set Array1"
+    },
+    {
+      "parameters": {
+        "tableId": "clients",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "first_name",
+              "fieldValue": "={{ $json.firstName }}"
+            },
+            {
+              "fieldId": "last_name",
+              "fieldValue": "={{ $json.lastName }}"
+            },
+            {
+              "fieldId": "company_name",
+              "fieldValue": "={{ $json.companyName }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $json.emails[0].address }}"
+            },
+            {
+              "fieldId": "phone",
+              "fieldValue": "={{ $json.phones[0].number }}"
+            },
+            {
+              "fieldId": "billing_address_street",
+              "fieldValue": "={{ $json.billingAddress.street }}"
+            },
+            {
+              "fieldId": "is_company",
+              "fieldValue": "={{ $json.isCompany }}"
+            },
+            {
+              "fieldId": "is_lead",
+              "fieldValue": "={{ $json.isLead }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.createdAt }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $json.updatedAt }}"
+            },
+            {
+              "fieldId": "referred_by",
+              "fieldValue": "={{ $json.billingAddress.street }}"
+            },
+            {
+              "fieldId": "billing_address_postcode",
+              "fieldValue": "={{ $('Pagination').item.json.allData[0].billingAddress.postalCode }}"
+            },
+            {
+              "fieldId": "billing_address_city",
+              "fieldValue": "={{ $json.billingAddress.city }}"
+            },
+            {
+              "fieldId": "billing_address_country",
+              "fieldValue": "={{ $json.billingAddress.country }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        40,
+        -320
+      ],
+      "id": "502e6d19-deea-4df9-9f74-4c9848ada514",
+      "name": "Supabase1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "jobs",
+        "dataToSend": "autoMapInputData"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        820,
+        -20
+      ],
+      "id": "3ed1afe0-122d-4517-97c4-0434c9ca67ca",
+      "name": "Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Init counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "counter_2": {
+      "main": [
+        [
+          {
+            "node": "set loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "batch loop": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "jobber query - jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set loop": {
+      "main": [
+        [
+          {
+            "node": "batch loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array": {
+      "main": [
+        []
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "counter_2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init counter": {
+      "main": [
+        [
+          {
+            "node": "jobber query - jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing1": {
+      "main": [
+        []
+      ]
+    },
+    "Pagination": {
+      "main": [
+        [
+          {
+            "node": "Set Array1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pagination 2": {
+      "main": [
+        []
+      ]
+    },
+    "Set Array1": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber query - jobs": {
+      "main": [
+        [
+          {
+            "node": "Pagination",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "aca8f4fd-709b-43f9-b54f-6e930c82bad0",
+  "triggerCount": 0,
+  "tags": []
+}
