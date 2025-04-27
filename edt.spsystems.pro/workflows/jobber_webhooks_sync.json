@@ -1,0 +1,5458 @@
+{
+  "createdAt": "2025-03-19T17:23:02.472Z",
+  "updatedAt": "2025-04-12T11:25:03.300Z",
+  "id": "e248KiXkjcuaF0TA",
+  "name": "jobber_webhooks_sync",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_client_update",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -960,
+        0
+      ],
+      "id": "5c055327-1fa0-4d99-bbdc-0e0cd027cd6f",
+      "name": "jobber_client_update",
+      "webhookId": "0a02e618-8228-4dfa-98be-4a0135cf1460",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        0
+      ],
+      "id": "68b61342-60e8-4e05-a1e4-039fe2f5eb98",
+      "name": "set_client_id"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($id: EncodedId!) {\n  client(id: $id) {\n    id\n    firstName\n    lastName\n    companyName\n    emails {\n      address\n      description\n      primary\n    }\n    phones {\n      number\n      description\n      primary        \n    }\n    billingAddress {\n      street\n      city\n      postalCode\n      country\n    }\n    isCompany\n    isLead\n    createdAt\n    updatedAt\n    tags {\n      edges {\n        node {\n          id\n        }\n      }\n    }\n    customFields {\n      ... on CustomFieldDropdown {\n        id\n        valueDropdown\n      }\n      ... on CustomFieldText {\n        id\n        valueText\n      }        \n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"id\": $json.body.data.webHookEvent.itemId} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        0
+      ],
+      "id": "56ebd3c5-8310-49c0-9d7f-227c630d24ea",
+      "name": "jobber_query_client_id",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "G9zDOosPuCEnrvgt",
+          "name": "jobber_oauth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "clients",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "jobber_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.data.client.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "first_name",
+              "fieldValue": "={{ $json.data.client.firstName }}"
+            },
+            {
+              "fieldId": "last_name",
+              "fieldValue": "={{ $json.data.client.lastName }}"
+            },
+            {
+              "fieldId": "company_name",
+              "fieldValue": "={{ $json.data.client.companyName }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $json.data.client.emails[0].address }}"
+            },
+            {
+              "fieldId": "phone",
+              "fieldValue": "={{ $json.data.client.phones[0].number }}"
+            },
+            {
+              "fieldId": "billing_address_street",
+              "fieldValue": "={{ $json.data.client.billingAddress.street }}"
+            },
+            {
+              "fieldId": "is_company",
+              "fieldValue": "={{ $json.data.client.isCompany }}"
+            },
+            {
+              "fieldId": "is_lead",
+              "fieldValue": "={{ $json.data.client.isLead }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.data.client.createdAt }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $json.data.client.updatedAt }}"
+            },
+            {
+              "fieldId": "referred_by",
+              "fieldValue": "={{ $json.data.client.customFields[0].valueText }}"
+            },
+            {
+              "fieldId": "phone_is_primary",
+              "fieldValue": "={{ $json.data.client.phones[0].primary }}"
+            },
+            {
+              "fieldId": "phone_description",
+              "fieldValue": "={{ $json.data.client.phones[0].description }}"
+            },
+            {
+              "fieldId": "email_is_primary",
+              "fieldValue": "={{ $json.data.client.emails[0].primary }}"
+            },
+            {
+              "fieldId": "email_description",
+              "fieldValue": "={{ $json.data.client.emails[0].description }}"
+            },
+            {
+              "fieldId": "billing_address_postcode",
+              "fieldValue": "={{ $json.data.client.billingAddress.postalCode }}"
+            },
+            {
+              "fieldId": "billing_address_city",
+              "fieldValue": "={{ $json.data.client.billingAddress.city }}"
+            },
+            {
+              "fieldId": "billing_address_country",
+              "fieldValue": "={{ $json.data.client.billingAddress.country }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        0
+      ],
+      "id": "6bb3d724-468d-400b-889b-b23f78a9646f",
+      "name": "Supabase_clients",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_client_create",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -960,
+        -260
+      ],
+      "id": "9101f6df-f4e9-4455-b3b4-135c49bb25c4",
+      "name": "jobber_client_create",
+      "webhookId": "79bff78e-0067-4ae8-b08f-8677fec17b54"
+    },
+    {
+      "parameters": {
+        "content": "## Webhooks_clients",
+        "height": 760,
+        "width": 1220,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1040,
+        -340
+      ],
+      "id": "0d0657a8-3e3b-4e3e-805d-2dec64ca72d1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c6bb3646-899c-4f99-819f-9762f5e00a88",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $('jobber_client_create').item.json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        -260
+      ],
+      "id": "d64cb6bb-eeaf-47d8-8034-8acc38344299",
+      "name": "set_client_id1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        260
+      ],
+      "id": "f5b3ce27-d26a-4c72-93b6-7992f2970046",
+      "name": "set_client_id2"
+    },
+    {
+      "parameters": {
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($id: EncodedId!) {\n  client(id: $id) {\n    id\n    firstName\n    lastName\n    companyName\n    emails {\n      address\n      description\n      primary\n    }\n    phones {\n      number\n      description\n      primary        \n    }\n    billingAddress {\n      street\n      city\n      postalCode\n      country\n    }\n    isCompany\n    isLead\n    createdAt\n    updatedAt\n    sourceAttribution {\n      sourceText\n      source {\n        ... on CustomLeadSource {\n          id\n          label\n        }\n      }\n    }\n      tags {\n      edges {\n        node {\n          id\n        }\n      }\n    }\n    customFields {\n      ... on CustomFieldDropdown {\n        id\n        valueDropdown\n      }\n      ... on CustomFieldText {\n        id\n        valueText\n      }        \n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"id\": $json.body.data.webHookEvent.itemId} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('get_refresh_token').item.json.tokens.access_token }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        -260
+      ],
+      "id": "ff6f48f3-6b58-41f0-af9c-7a7f184de8f4",
+      "name": "jobber_query_client_id1"
+    },
+    {
+      "parameters": {
+        "tableId": "clients",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.data.client.id }}"
+            },
+            {
+              "fieldId": "first_name",
+              "fieldValue": "={{ $json.data.client.firstName }}"
+            },
+            {
+              "fieldId": "last_name",
+              "fieldValue": "={{ $json.data.client.lastName }}"
+            },
+            {
+              "fieldId": "company_name",
+              "fieldValue": "={{ $json.data.client.companyName }}"
+            },
+            {
+              "fieldId": "phone",
+              "fieldValue": "={{ $json.data.client.phones[0].number }}"
+            },
+            {
+              "fieldId": "billing_address_street",
+              "fieldValue": "={{ $json.data.client.billingAddress.street }}"
+            },
+            {
+              "fieldId": "is_company",
+              "fieldValue": "={{ $json.data.client.isCompany }}"
+            },
+            {
+              "fieldId": "is_lead",
+              "fieldValue": "={{ $json.data.client.isLead }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.data.client.createdAt }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $json.data.client.updatedAt }}"
+            },
+            {
+              "fieldId": "billing_address_postcode",
+              "fieldValue": "={{ $json.data.client.billingAddress.postalCode }}"
+            },
+            {
+              "fieldId": "billing_address_city",
+              "fieldValue": "={{ $json.data.client.billingAddress.city }}"
+            },
+            {
+              "fieldId": "billing_address_country",
+              "fieldValue": "={{ $json.data.client.billingAddress.country }}"
+            },
+            {
+              "fieldId": "phone_is_primary",
+              "fieldValue": "={{ $json.data.client.phones[0].primary }}"
+            },
+            {
+              "fieldId": "phone_description",
+              "fieldValue": "={{ $json.data.client.phones[0].description }}"
+            },
+            {
+              "fieldId": "email_is_primary",
+              "fieldValue": "={{ $json.data.client.emails[0].primary }}"
+            },
+            {
+              "fieldId": "email_description",
+              "fieldValue": "={{ $json.data.client.emails[0].description }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $json.data.client.emails[0].address }}"
+            },
+            {
+              "fieldId": "referred_by",
+              "fieldValue": "={{ $json.data.client.customFields[0].valueText }}"
+            },
+            {
+              "fieldId": "lead_source",
+              "fieldValue": "={{ $json.data.client.sourceAttribution.sourceText }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        -260
+      ],
+      "id": "2c2f63d2-8b99-4fef-b84e-754f62cd314d",
+      "name": "Supabase_clients1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "clients",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "jobber_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.data.webHookEvent.itemId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        260
+      ],
+      "id": "65c7d6ce-a363-44a0-a9c7-533b8c1b8b9a",
+      "name": "Supabase_clients2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Webhooks_properties",
+        "height": 760,
+        "width": 1220,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1040,
+        440
+      ],
+      "id": "79a6d134-73f8-4385-9ac9-703b2db2297e",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $('jobber_property_create').item.json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -520,
+        520
+      ],
+      "id": "e0b31ee3-64f6-4a1e-9f57-89754ca2a292",
+      "name": "set_property_id"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        780
+      ],
+      "id": "ce30d9ce-ec5e-4723-84af-c3b3853cb68e",
+      "name": "set_property_id1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        1040
+      ],
+      "id": "73fd9d4e-9a01-4e66-974d-01b2da94bead",
+      "name": "set_property_id2"
+    },
+    {
+      "parameters": {
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($id: EncodedId!) {\n  property(id: $id) {\n    id\n    address {\n      street\n      city\n      postalCode\n      country\n    }\n    client {\n      id\n    }\n    isBillingAddress\n    customFields {\n      ... on CustomFieldDropdown {\n        id\n        valueDropdown\n      }\n      ... on CustomFieldText {\n        id\n        valueText\n      }\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"id\": $json.body.data.webHookEvent.itemId} }}",
+        "operationName": "=",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer  {{ $('get_refresh_token3').item.json.tokens.access_token }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        520
+      ],
+      "id": "8099a583-c0ae-4043-a59e-b761e586948a",
+      "name": "jobber_query_property_id"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($id: EncodedId!) {\n  property(id: $id) {\n    id\n    address {\n      street\n      city\n      postalCode\n      country\n    }\n    client {\n      id\n    }\n    isBillingAddress\n    customFields {\n      ... on CustomFieldDropdown {\n        id\n        valueDropdown\n      }\n      ... on CustomFieldText {\n        id\n        valueText\n      }\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"id\": $json.body.data.webHookEvent.itemId} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        780
+      ],
+      "id": "90791b61-2219-45fd-a4c7-ab89bb8ad93e",
+      "name": "jobber_query_property_id1",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "G9zDOosPuCEnrvgt",
+          "name": "jobber_oauth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "properties",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "jobber_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.data.webHookEvent.itemId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        1040
+      ],
+      "id": "74e9a254-9d39-4f53-a727-6fbccebc0c3a",
+      "name": "Supabase_properties2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "properties",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.data.property.id }}"
+            },
+            {
+              "fieldId": "client_jobber_id",
+              "fieldValue": "={{ $json.data.property.client.id }}"
+            },
+            {
+              "fieldId": "is_billing_address",
+              "fieldValue": "={{ $json.data.property.isBillingAddress }}"
+            },
+            {
+              "fieldId": "service_street",
+              "fieldValue": "={{ $json.data.property.address.street }}"
+            },
+            {
+              "fieldId": "service_city",
+              "fieldValue": "={{ $json.data.property.address.city }}"
+            },
+            {
+              "fieldId": "service_postcode",
+              "fieldValue": "={{ $json.data.property.address.postalCode }}"
+            },
+            {
+              "fieldId": "service_country",
+              "fieldValue": "={{ $json.data.property.address.country }}"
+            },
+            {
+              "fieldId": "nb_of_bedrooms",
+              "fieldValue": "={{ $json.data.property.customFields[0].valueDropdown }}"
+            },
+            {
+              "fieldId": "nb_of_bathrooms",
+              "fieldValue": "={{ $json.data.property.customFields[1].valueDropdown }}"
+            },
+            {
+              "fieldId": "visit_slot",
+              "fieldValue": "={{ $json.data.property.customFields[6].valueDropdown }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        520
+      ],
+      "id": "92bc830d-79b3-4d2e-89eb-16ab23ddf490",
+      "name": "Supabase_properties3",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "properties",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "jobber_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.data.property.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.data.property.id }}"
+            },
+            {
+              "fieldId": "client_jobber_id",
+              "fieldValue": "={{ $json.data.property.client.id }}"
+            },
+            {
+              "fieldId": "is_billing_address",
+              "fieldValue": "={{ $json.data.property.isBillingAddress }}"
+            },
+            {
+              "fieldId": "service_street",
+              "fieldValue": "={{ $json.data.property.address.street }}"
+            },
+            {
+              "fieldId": "service_city",
+              "fieldValue": "={{ $json.data.property.address.city }}"
+            },
+            {
+              "fieldId": "service_postcode",
+              "fieldValue": "={{ $json.data.property.address.postalCode }}"
+            },
+            {
+              "fieldId": "service_country",
+              "fieldValue": "={{ $json.data.property.address.country }}"
+            },
+            {
+              "fieldId": "nb_of_bedrooms",
+              "fieldValue": "={{ $json.data.property.customFields[0].valueDropdown }}"
+            },
+            {
+              "fieldId": "nb_of_bathrooms",
+              "fieldValue": "={{ $json.data.property.customFields[1].valueDropdown }}"
+            },
+            {
+              "fieldId": "visit_slot",
+              "fieldValue": "={{ $json.data.property.customFields[6].valueDropdown }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        780
+      ],
+      "id": "37e65f86-1160-406e-bf86-37ac39716717",
+      "name": "Supabase_properties4",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_client_delete",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -960,
+        260
+      ],
+      "id": "d52dcd0e-4e84-433a-b783-202540a540d7",
+      "name": "jobber_client_delete",
+      "webhookId": "b342de15-10f9-4ebc-94ee-208537cd3711",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_property_update",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        780
+      ],
+      "id": "9d1b9172-f486-4fb3-89f6-f0c1c341ccca",
+      "name": "jobber_property_update",
+      "webhookId": "0a02e618-8228-4dfa-98be-4a0135cf1460",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_property_create",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -960,
+        520
+      ],
+      "id": "009fed12-06a2-48f5-aa1c-f0702993f30e",
+      "name": "jobber_property_create",
+      "webhookId": "79bff78e-0067-4ae8-b08f-8677fec17b54"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_property_delete",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        1040
+      ],
+      "id": "e85d0894-b703-485b-b26b-17f2958c4610",
+      "name": "jobber_property_delete",
+      "webhookId": "b342de15-10f9-4ebc-94ee-208537cd3711",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## Webhooks_requests",
+        "height": 760,
+        "width": 1040,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        1220
+      ],
+      "id": "472597b8-d8da-43e4-9704-08f0b7502887",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_request_create",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        1300
+      ],
+      "id": "89d05883-2212-42b2-a578-cef38981fee6",
+      "name": "jobber_request_create",
+      "webhookId": "79bff78e-0067-4ae8-b08f-8677fec17b54",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_request_update",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        1560
+      ],
+      "id": "1ec1fce6-57b4-4b3e-bbdf-73054d7dae8e",
+      "name": "jobber_request_update",
+      "webhookId": "0a02e618-8228-4dfa-98be-4a0135cf1460",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_request_delete",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        1820
+      ],
+      "id": "6ac0e69f-cc2e-4613-8519-cb48d7215e2b",
+      "name": "jobber_request_delete",
+      "webhookId": "b342de15-10f9-4ebc-94ee-208537cd3711",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        1300
+      ],
+      "id": "ccd88c81-fe40-42cb-9ae7-23b031509e6a",
+      "name": "set_request_id"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        1560
+      ],
+      "id": "ed267613-9299-4729-bf04-d8d185f9a96d",
+      "name": "set_request_id1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        1820
+      ],
+      "id": "cba6a99d-0fe8-4e05-80f9-4be6b092aadc",
+      "name": "set_request_id2"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($id: EncodedId!) {\n  request(id: $id) {\n\n      id\n      title\n      client {\n        id\n      }\n      requestStatus\n      source\n      createdAt\n      assessment {\n        id\n        title\n        allDay\n        startAt\n        endAt\n        assignedUsers {\n          nodes {\n            id\n          }\n        }\n      }\n    }\n  }\n",
+        "variables": "={{ $json.variables || {\"id\": $json.body.data.webHookEvent.itemId} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        1300
+      ],
+      "id": "ec0e6462-03d5-4003-b5b9-7d60dd248cb5",
+      "name": "jobber_query_request_id",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "G9zDOosPuCEnrvgt",
+          "name": "jobber_oauth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($id: EncodedId!) {\n  request(id: $id) {\n\n      id\n      title\n      client {\n        id\n      }\n      requestStatus\n      source\n      createdAt\n      assessment {\n        id\n        title\n        allDay\n        startAt\n        endAt\n        assignedUsers {\n          nodes {\n            id\n          }\n        }\n      }\n    }\n  }",
+        "variables": "={{ $json.variables || {\"id\": $json.body.data.webHookEvent.itemId} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        1560
+      ],
+      "id": "eecfde98-5442-4232-a39f-7cdb6ae7212f",
+      "name": "jobber_query_request_id1",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "G9zDOosPuCEnrvgt",
+          "name": "jobber_oauth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "requests",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "jobber_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.data.webHookEvent.itemId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        1820
+      ],
+      "id": "38f56745-9302-419b-9689-1434a783bfb1",
+      "name": "Supabase_requests2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "requests",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.data.request.id }}"
+            },
+            {
+              "fieldId": "client_jobber_id",
+              "fieldValue": "={{ $json.data.request.client.id }}"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $json.data.request.title }}"
+            },
+            {
+              "fieldId": "request_status",
+              "fieldValue": "={{ $json.data.request.requestStatus }}"
+            },
+            {
+              "fieldId": "source",
+              "fieldValue": "={{ $json.data.request.source }}"
+            },
+            {
+              "fieldId": "assessment_json",
+              "fieldValue": "={{ $json.data.request.assessment }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.data.request.createdAt }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        1300
+      ],
+      "id": "3630bdba-7c1b-4bbe-8005-a02472b874b9",
+      "name": "Supabase_requests3",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "requests",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "jobber_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.data.request.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.data.request.id }}"
+            },
+            {
+              "fieldId": "client_jobber_id",
+              "fieldValue": "={{ $json.data.request.client.id }}"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $json.data.request.title }}"
+            },
+            {
+              "fieldId": "request_status",
+              "fieldValue": "={{ $json.data.request.requestStatus }}"
+            },
+            {
+              "fieldId": "source",
+              "fieldValue": "={{ $json.data.request.source }}"
+            },
+            {
+              "fieldId": "assessment_json",
+              "fieldValue": "={{ $json.data.request.assessment }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.data.request.createdAt }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        1560
+      ],
+      "id": "f923527c-e8b9-4aeb-9aa7-57e696ca4950",
+      "name": "Supabase_requests",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Webhooks_quotes",
+        "height": 760,
+        "width": 2240,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        2000
+      ],
+      "id": "f4b3c31f-d13c-4f73-87c3-45074f13537b",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_quote_create",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        2080
+      ],
+      "id": "23a28418-69d2-4aa6-a59f-f8e907d3f463",
+      "name": "jobber_quote_create",
+      "webhookId": "79bff78e-0067-4ae8-b08f-8677fec17b54",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_quote_update",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        2340
+      ],
+      "id": "f0ee88c3-9fc7-4171-acc0-04ffc48c12d6",
+      "name": "jobber_quote_update",
+      "webhookId": "0a02e618-8228-4dfa-98be-4a0135cf1460",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_quote_delete",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        2600
+      ],
+      "id": "ceba111b-2043-4490-bae7-dcb4a182d6a6",
+      "name": "jobber_quote_delete",
+      "webhookId": "b342de15-10f9-4ebc-94ee-208537cd3711",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        2080
+      ],
+      "id": "b469b4c2-e717-4d51-846e-4e7c19c5bcb4",
+      "name": "set_quote_id"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        2340
+      ],
+      "id": "02382efa-66f2-46b6-ad21-963e8e856e04",
+      "name": "set_quote_id1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        2600
+      ],
+      "id": "4d47f8ad-37dc-42a1-ac7d-fc9cd43c9ab2",
+      "name": "set_quote_id2"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($id: EncodedId!) {\n  quote(id: $id) {\n    id\n    title\n    quoteNumber\n    quoteStatus\n    message\n    amounts {\n      subtotal\n      total\n    }\n          \n    lineItems {\n      nodes {\n        id\n        name\n        quantity\n        unitPrice\n        totalPrice\n      }\n    }\n    \n    property {\n      id\n    }\n    \n    request {\n      id\n      title\n    }\n    \n    salesperson {\n      id\n    }\n    \n    taxDetails {\n      totalTaxAmount\n      totalTaxRate {\n        id\n        name\n        # Removed 'rate' field as it doesn't exist on TaxRateBase\n      }\n    }\n    \n    unallocatedDepositRecords {\n      nodes {\n        id\n      }\n    }\n    \n    createdAt\n    updatedAt\n    transitionedAt\n  }\n}",
+        "variables": "={{ $json.variables || {\"id\": $json.body.data.webHookEvent.itemId} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        2080
+      ],
+      "id": "6ec1d209-4e7e-41c8-98e5-6eee0b10507d",
+      "name": "jobber_query_quote_id",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "G9zDOosPuCEnrvgt",
+          "name": "jobber_oauth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($id: EncodedId!) {\n  quote(id: $id) {\n    id\n    title\n    quoteNumber\n    quoteStatus\n    message\n    amounts {\n      subtotal\n      total\n    }\n          \n    lineItems {\n      nodes {\n        id\n        name\n        quantity\n        unitPrice\n        totalPrice\n      }\n    }\n    \n    property {\n      id\n    }\n    \n    request {\n      id\n      title\n    }\n    \n    salesperson {\n      id\n    }\n    \n    taxDetails {\n      totalTaxAmount\n      totalTaxRate {\n        id\n        name\n        # Removed 'rate' field as it doesn't exist on TaxRateBase\n      }\n    }\n    \n    unallocatedDepositRecords {\n      nodes {\n        id\n      }\n    }\n    \n    createdAt\n    updatedAt\n    transitionedAt\n  }\n}",
+        "variables": "={{ $json.variables || {\"id\": $json.body.data.webHookEvent.itemId} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        2340
+      ],
+      "id": "9212e19a-1f36-48f5-8bcc-40dc264d6160",
+      "name": "jobber_query_quote_id1",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "G9zDOosPuCEnrvgt",
+          "name": "jobber_oauth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "quotes",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "jobber_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.quote_jobber_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        480,
+        2600
+      ],
+      "id": "38296c1e-4c78-4b15-8a59-789b4fed2ce6",
+      "name": "Supabase_quotes2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "quotes",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.data.quote.id }}"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $json.data.quote.title }}"
+            },
+            {
+              "fieldId": "quote_number",
+              "fieldValue": "={{ $json.data.quote.quoteNumber }}"
+            },
+            {
+              "fieldId": "quote_status",
+              "fieldValue": "={{ $json.data.quote.quoteStatus }}"
+            },
+            {
+              "fieldId": "message",
+              "fieldValue": "={{ $json.data.quote.message }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.data.quote.createdAt }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $json.data.quote.updatedAt }}"
+            },
+            {
+              "fieldId": "transitioned_at",
+              "fieldValue": "={{ $json.data.quote.transitionedAt }}"
+            },
+            {
+              "fieldId": "subtotal_amount",
+              "fieldValue": "={{ $json.data.quote.amounts.subtotal }}"
+            },
+            {
+              "fieldId": "total_amount",
+              "fieldValue": "={{ $json.data.quote.amounts.total }}"
+            },
+            {
+              "fieldId": "line_items",
+              "fieldValue": "={{ $json.data.quote.lineItems.nodes }}"
+            },
+            {
+              "fieldId": "property_jobber_id",
+              "fieldValue": "={{ $json.data.quote.property.id }}"
+            },
+            {
+              "fieldId": "salesperson_jobber_id",
+              "fieldValue": "={{ $json.data.quote.salesperson.id }}"
+            },
+            {
+              "fieldId": "request_title",
+              "fieldValue": "={{ $json.data.quote.request.title }}"
+            },
+            {
+              "fieldId": "request_jobber_id",
+              "fieldValue": "={{ $json.data.quote.request.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        2080
+      ],
+      "id": "70b3efa1-bc9e-4f7f-b21a-da7a5ef0d0de",
+      "name": "Supabase_quotes",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "quotes",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "jobber_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.data.quote.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.data.quote.id }}"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $json.data.quote.title }}"
+            },
+            {
+              "fieldId": "quote_number",
+              "fieldValue": "={{ $json.data.quote.quoteNumber }}"
+            },
+            {
+              "fieldId": "quote_status",
+              "fieldValue": "={{ $json.data.quote.quoteStatus }}"
+            },
+            {
+              "fieldId": "message",
+              "fieldValue": "={{ $json.data.quote.message }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.data.quote.createdAt }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $json.data.quote.updatedAt }}"
+            },
+            {
+              "fieldId": "transitioned_at",
+              "fieldValue": "={{ $json.data.quote.transitionedAt }}"
+            },
+            {
+              "fieldId": "subtotal_amount",
+              "fieldValue": "={{ $json.data.quote.amounts.subtotal }}"
+            },
+            {
+              "fieldId": "total_amount",
+              "fieldValue": "={{ $json.data.quote.amounts.total }}"
+            },
+            {
+              "fieldId": "line_items",
+              "fieldValue": "={{ $json.data.quote.lineItems.nodes }}"
+            },
+            {
+              "fieldId": "property_jobber_id",
+              "fieldValue": "={{ $json.data.quote.property.id }}"
+            },
+            {
+              "fieldId": "salesperson_jobber_id",
+              "fieldValue": "={{ $json.data.quote.salesperson.id }}"
+            },
+            {
+              "fieldId": "request_title",
+              "fieldValue": "={{ $json.data.quote.request.title }}"
+            },
+            {
+              "fieldId": "request_jobber_id",
+              "fieldValue": "={{ $json.data.quote.request.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        2340
+      ],
+      "id": "e57ea42c-1ae8-4c8f-b0b8-015a17c77ad2",
+      "name": "Supabase_quotes1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Webhooks_jobs",
+        "height": 760,
+        "width": 2240,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        2820
+      ],
+      "id": "ef6d2233-0ea4-4af4-938c-898ad580cef2",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_job_create",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        2860
+      ],
+      "id": "a9a95519-641c-43d5-90fb-ece87ed6e30c",
+      "name": "jobber_job_create",
+      "webhookId": "79bff78e-0067-4ae8-b08f-8677fec17b54",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_job_update",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        3120
+      ],
+      "id": "d41a89db-7753-4e77-8f9b-ebda0cba1ef8",
+      "name": "jobber_job_update",
+      "webhookId": "0a02e618-8228-4dfa-98be-4a0135cf1460",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_job_delete",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        3380
+      ],
+      "id": "e0a6d0da-30ff-426e-8797-8c368e51d4fc",
+      "name": "jobber_job_delete",
+      "webhookId": "b342de15-10f9-4ebc-94ee-208537cd3711",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        2860
+      ],
+      "id": "cb348926-50e1-4bdd-9295-3a5913e092c9",
+      "name": "set_job_id"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        3120
+      ],
+      "id": "d41b5cd9-2d88-4e3b-8a52-06a3bd672074",
+      "name": "set_job_id1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        3380
+      ],
+      "id": "fd95a49a-8047-4ebb-b794-9a05d115c446",
+      "name": "set_job_id2"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($id: EncodedId!) {\n  job(id: $id) {\n    id\n    title\n    jobNumber\n    jobStatus\n    jobType\n    \n    createdAt\n    updatedAt\n    startAt\n    endAt\n    completedAt\n    bookingConfirmationSentAt\n    \n    property {\n      id\n    }\n    quote {\n      id\n    }\n    request {\n      id\n    }\n    \n    instructions\n    total\n    invoicedTotal\n    uninvoicedTotal\n    \n    lineItems {\n      nodes {\n        id\n        name\n        quantity\n        unitPrice\n        totalPrice\n      }\n    }\n    \n    visitSchedule {\n      assignedTo {\n        edges {\n          node {\n            id\n            name {\n              full\n            }\n          }\n        }\n      }\n      endDate\n      endTime\n      startDate\n      startTime\n      recurrenceSchedule {\n        calendarRule\n        friendly\n      }\n    }\n    \n    billingType\n    \n    jobBalanceTotals {\n      outstandingAmount\n      totalAmount\n    }\n    \n    salesperson {\n      id\n      name {\n        full\n      }\n    }\n    \n    source\n    willClientBeAutomaticallyCharged\n    \n    defaultVisitTitle\n    allowReviewRequest\n  }\n}",
+        "variables": "={{ $json.variables || {\"id\": $json.body.data.webHookEvent.itemId} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        2860
+      ],
+      "id": "9629a80c-6fe0-4289-b57e-84c7e4de339f",
+      "name": "jobber_query_job_id",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "G9zDOosPuCEnrvgt",
+          "name": "jobber_oauth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($id: EncodedId!) {\n  job(id: $id) {\n    id\n    title\n    jobNumber\n    jobStatus\n    jobType\n    \n    createdAt\n    updatedAt\n    startAt\n    endAt\n    completedAt\n    bookingConfirmationSentAt\n    \n    property {\n      id\n    }\n    quote {\n      id\n    }\n    request {\n      id\n    }\n    \n    instructions\n    total\n    invoicedTotal\n    uninvoicedTotal\n    \n    lineItems {\n      nodes {\n        id\n        name\n        quantity\n        unitPrice\n        totalPrice\n      }\n    }\n    \n    visitSchedule {\n      assignedTo {\n        edges {\n          node {\n            id\n            name {\n              full\n            }\n          }\n        }\n      }\n      endDate\n      endTime\n      startDate\n      startTime\n      recurrenceSchedule {\n        calendarRule\n        friendly\n      }\n    }\n    \n    billingType\n    \n    jobBalanceTotals {\n      outstandingAmount\n      totalAmount\n    }\n    \n    salesperson {\n      id\n      name {\n        full\n      }\n    }\n    \n    source\n    willClientBeAutomaticallyCharged\n    \n    defaultVisitTitle\n    allowReviewRequest\n  }\n}",
+        "variables": "={{ $json.variables || {\"id\": $json.body.data.webHookEvent.itemId} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        3120
+      ],
+      "id": "a0dbca0e-5ac7-4dd9-a8e7-d42cdbcdc1ad",
+      "name": "jobber_query_job_id1",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "G9zDOosPuCEnrvgt",
+          "name": "jobber_oauth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "jobs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.id }}"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.title }}"
+            },
+            {
+              "fieldId": "job_number",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.jobNumber }}"
+            },
+            {
+              "fieldId": "job_status",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.jobStatus }}"
+            },
+            {
+              "fieldId": "job_type",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.jobType }}"
+            },
+            {
+              "fieldId": "property_jobber_id",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.property.id }}"
+            },
+            {
+              "fieldId": "instructions",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.instructions }}"
+            },
+            {
+              "fieldId": "booking_confirmation_sent_at",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.bookingConfirmationSentAt }}"
+            },
+            {
+              "fieldId": "client_auto_charged",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.willClientBeAutomaticallyCharged }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.createdAt }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.updatedAt }}"
+            },
+            {
+              "fieldId": "end_at",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.endAt }}"
+            },
+            {
+              "fieldId": "start_at",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.startAt }}"
+            },
+            {
+              "fieldId": "quote_jobber_id",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.quote?.id || null }}"
+            },
+            {
+              "fieldId": "request_jobber_id",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.request?.id || null }}"
+            },
+            {
+              "fieldId": "source",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.source }}"
+            },
+            {
+              "fieldId": "line_items",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.lineItems.nodes }}"
+            },
+            {
+              "fieldId": "total",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.total }}"
+            },
+            {
+              "fieldId": "invoiced_total",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.invoicedTotal }}"
+            },
+            {
+              "fieldId": "uninvoiced_total",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.uninvoicedTotal }}"
+            },
+            {
+              "fieldId": "balance_outstanding_amount",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.jobBalanceTotals.outstandingAmount }}"
+            },
+            {
+              "fieldId": "balance_total_amount",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.jobBalanceTotals.totalAmount }}"
+            },
+            {
+              "fieldId": "assigned_to",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.visitSchedule.assignedTo.edges }}"
+            },
+            {
+              "fieldId": "start_time",
+              "fieldValue": "={{ $json.items[0].json.data.job.job_start_time }}"
+            },
+            {
+              "fieldId": "end_time",
+              "fieldValue": "={{ $json.items[0].json.data.job.job_end_time }}"
+            },
+            {
+              "fieldId": "recurrence_schedule",
+              "fieldValue": "={{ $('jobber_query_job_id').item.json.data.job.visitSchedule.recurrenceSchedule?.friendly || null }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        480,
+        2860
+      ],
+      "id": "5b480f19-7685-45c9-8495-0beee5548a0d",
+      "name": "Supabase_jobs",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "jobs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "jobber_id",
+              "condition": "eq",
+              "keyValue": "={{ $('jobber_query_job_id1').item.json.data.job.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.id }}"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.title }}"
+            },
+            {
+              "fieldId": "job_number",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.jobNumber }}"
+            },
+            {
+              "fieldId": "job_status",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.jobStatus }}"
+            },
+            {
+              "fieldId": "job_type",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.jobType }}"
+            },
+            {
+              "fieldId": "property_jobber_id",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.property.id }}"
+            },
+            {
+              "fieldId": "instructions",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.instructions }}"
+            },
+            {
+              "fieldId": "booking_confirmation_sent_at",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.bookingConfirmationSentAt }}"
+            },
+            {
+              "fieldId": "client_auto_charged",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.willClientBeAutomaticallyCharged }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.createdAt }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.updatedAt }}"
+            },
+            {
+              "fieldId": "end_at",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.endAt }}"
+            },
+            {
+              "fieldId": "start_at",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.startAt }}"
+            },
+            {
+              "fieldId": "quote_jobber_id",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.quote?.id || null }}"
+            },
+            {
+              "fieldId": "request_jobber_id",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.request?.id || null }}"
+            },
+            {
+              "fieldId": "source",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.source }}"
+            },
+            {
+              "fieldId": "line_items",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.lineItems.nodes }}"
+            },
+            {
+              "fieldId": "total",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.total }}"
+            },
+            {
+              "fieldId": "invoiced_total",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.invoicedTotal }}"
+            },
+            {
+              "fieldId": "uninvoiced_total",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.uninvoicedTotal }}"
+            },
+            {
+              "fieldId": "balance_outstanding_amount",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.jobBalanceTotals.outstandingAmount }}"
+            },
+            {
+              "fieldId": "balance_total_amount",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.jobBalanceTotals.totalAmount }}"
+            },
+            {
+              "fieldId": "start_time",
+              "fieldValue": "={{ $json.items[0].json.data.job.start_time }}"
+            },
+            {
+              "fieldId": "end_time",
+              "fieldValue": "={{ $json.items[0].json.data.job.end_time }}"
+            },
+            {
+              "fieldId": "assigned_to",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.visitSchedule.assignedTo.edges }}"
+            },
+            {
+              "fieldId": "recurrence_schedule",
+              "fieldValue": "={{ $('jobber_query_job_id1').item.json.data.job.visitSchedule.recurrenceSchedule?.friendly || null }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        140,
+        3120
+      ],
+      "id": "a9dd8d4b-1165-4fdf-83e8-7ba4e6164268",
+      "name": "Supabase_jobs1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "jobs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "jobber_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.job_jobber_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        480,
+        3380
+      ],
+      "id": "638ca275-6166-4762-9bb2-d650530488d3",
+      "name": "Supabase_jobs2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Webhooks_visits",
+        "height": 1420,
+        "width": 3240,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        3600
+      ],
+      "id": "efa45e7c-ffb5-4007-a121-2f1b9f682faa",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Webhooks_invoices",
+        "height": 760,
+        "width": 2320,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        5060
+      ],
+      "id": "d64bcc2c-f8eb-4ffe-afc9-c9a1472c15ee",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        5200
+      ],
+      "id": "19d0a0a8-234b-49e7-973b-643a33a5b771",
+      "name": "set_invoice_id"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        5420
+      ],
+      "id": "e18bf54e-7c1c-4400-9ab8-a0a1cceb77f6",
+      "name": "set_invoice_id1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e4b2ed3-450c-4c53-82bc-773364e85ad6",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        5640
+      ],
+      "id": "3283e56f-3870-42b2-8210-9297bf6c9187",
+      "name": "set_invoice_id2"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_invoice_create",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -740,
+        5200
+      ],
+      "id": "d338102f-8410-412f-b1c8-d76fd6375c8a",
+      "name": "jobber_invoice_create",
+      "webhookId": "79bff78e-0067-4ae8-b08f-8677fec17b54",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_invoice_update",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -740,
+        5420
+      ],
+      "id": "f3cfdb50-4849-4c39-a199-1489263c9c92",
+      "name": "jobber_invoice_update",
+      "webhookId": "0a02e618-8228-4dfa-98be-4a0135cf1460",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_invoice_delete",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -740,
+        5640
+      ],
+      "id": "b4a0094d-fbcd-4449-bf74-966f7c6934dc",
+      "name": "jobber_invoice_delete",
+      "webhookId": "b342de15-10f9-4ebc-94ee-208537cd3711",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($id: EncodedId!) {\n  invoice(id: $id) {\n    id\n    invoiceNumber\n    invoiceStatus\n    invoiceNet\n    \n    createdAt\n    updatedAt\n    issuedDate\n    dueDate\n    receivedDate\n    \n    subject\n    \n    amounts {\n      depositAmount\n      discountAmount\n      invoiceBalance\n      legacyDiscountAmount\n      nonTaxAmount\n      paymentsTotal\n      subtotal\n      taxAmount\n      tipsTotal\n      total\n    }\n    \n    billingAddress {\n      street\n      city\n      province\n      postalCode\n      country\n    }\n    \n    client {\n      id\n    }\n    jobs {\n      nodes {\n        id\n      }\n    }\n    \n    lineItems {\n      nodes {\n        id\n        name\n        quantity\n        unitPrice\n        totalPrice\n        taxable\n        date\n        category\n        createdAt\n        updatedAt\n      }\n    }\n    \n    paymentRecords {\n      nodes {\n        id\n        amount\n      }\n    }\n    \n    properties {\n      nodes {\n        id\n        address {\n          street\n          city\n        }\n      }\n    }\n    \n    salesperson {\n      id\n      name {\n        full\n      }\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"id\": $json.body.data.webHookEvent.itemId} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        5200
+      ],
+      "id": "60d367de-8bb4-4552-a5ea-1dd68fda22e8",
+      "name": "jobber_query_invoice_id",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "G9zDOosPuCEnrvgt",
+          "name": "jobber_oauth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($id: EncodedId!) {\n  invoice(id: $id) {\n    id\n    invoiceNumber\n    invoiceStatus\n    invoiceNet\n    \n    createdAt\n    updatedAt\n    issuedDate\n    dueDate\n    receivedDate\n    \n    subject\n    \n    amounts {\n      depositAmount\n      discountAmount\n      invoiceBalance\n      legacyDiscountAmount\n      nonTaxAmount\n      paymentsTotal\n      subtotal\n      taxAmount\n      tipsTotal\n      total\n    }\n    \n    billingAddress {\n      street\n      city\n      province\n      postalCode\n      country\n    }\n    \n    client {\n      id\n    }\n    jobs {\n      nodes {\n        id\n      }\n    }\n    \n    lineItems {\n      nodes {\n        id\n        name\n        quantity\n        unitPrice\n        totalPrice\n        taxable\n        date\n        category\n        createdAt\n        updatedAt\n      }\n    }\n    \n    paymentRecords {\n      nodes {\n        id\n        amount\n      }\n    }\n    \n    properties {\n      nodes {\n        id\n        address {\n          street\n          city\n        }\n      }\n    }\n    \n    salesperson {\n      id\n      name {\n        full\n      }\n    }\n  }\n}",
+        "variables": "={{ $json.variables || {\"id\": $json.body.data.webHookEvent.itemId} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        5420
+      ],
+      "id": "1a58d1ed-fe5a-4057-a066-21f08d7a22ca",
+      "name": "jobber_query_invoice_id1",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "G9zDOosPuCEnrvgt",
+          "name": "jobber_oauth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "invoices",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.data.invoice.id }}"
+            },
+            {
+              "fieldId": "invoice_number",
+              "fieldValue": "={{ $json.data.invoice.invoiceNumber }}"
+            },
+            {
+              "fieldId": "invoice_status",
+              "fieldValue": "={{ $json.data.invoice.invoiceStatus }}"
+            },
+            {
+              "fieldId": "invoice_net",
+              "fieldValue": "={{ $json.data.invoice.invoiceNet }}"
+            },
+            {
+              "fieldId": "subject",
+              "fieldValue": "={{ $json.data.invoice.subject }}"
+            },
+            {
+              "fieldId": "amounts_json",
+              "fieldValue": "={{ $json.data.invoice.amounts }}"
+            },
+            {
+              "fieldId": "clients_jobber_id",
+              "fieldValue": "={{ $json.data.invoice.client.id }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.data.invoice.createdAt }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $json.data.invoice.updatedAt }}"
+            },
+            {
+              "fieldId": "issued_date",
+              "fieldValue": "={{ $json.data.invoice.issuedDate }}"
+            },
+            {
+              "fieldId": "due_date",
+              "fieldValue": "={{ $json.data.invoice.dueDate }}"
+            },
+            {
+              "fieldId": "received_date",
+              "fieldValue": "={{ $json.data.invoice.receivedDate }}"
+            },
+            {
+              "fieldId": "jobs_jobber_id",
+              "fieldValue": "={{ $json.data.invoice.jobs.nodes[0].id }}"
+            },
+            {
+              "fieldId": "line_items",
+              "fieldValue": "={{ $json.data.invoice.lineItems.nodes }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        5200
+      ],
+      "id": "549f11d0-712e-4393-bad3-3b008e0a7494",
+      "name": "Supabase_invoices",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "invoices",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "jobber_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.data.invoice.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.data.invoice.id }}"
+            },
+            {
+              "fieldId": "invoice_number",
+              "fieldValue": "={{ $json.data.invoice.invoiceNumber }}"
+            },
+            {
+              "fieldId": "invoice_status",
+              "fieldValue": "={{ $json.data.invoice.invoiceStatus }}"
+            },
+            {
+              "fieldId": "invoice_net",
+              "fieldValue": "={{ $json.data.invoice.invoiceNet }}"
+            },
+            {
+              "fieldId": "subject",
+              "fieldValue": "={{ $json.data.invoice.subject }}"
+            },
+            {
+              "fieldId": "amounts_json",
+              "fieldValue": "={{ $json.data.invoice.amounts }}"
+            },
+            {
+              "fieldId": "clients_jobber_id",
+              "fieldValue": "={{ $json.data.invoice.client.id }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.data.invoice.createdAt }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $json.data.invoice.updatedAt }}"
+            },
+            {
+              "fieldId": "issued_date",
+              "fieldValue": "={{ $json.data.invoice.issuedDate }}"
+            },
+            {
+              "fieldId": "due_date",
+              "fieldValue": "={{ $json.data.invoice.dueDate }}"
+            },
+            {
+              "fieldId": "received_date",
+              "fieldValue": "={{ $json.data.invoice.receivedDate }}"
+            },
+            {
+              "fieldId": "jobs_jobber_id",
+              "fieldValue": "={{ $json.data.invoice.jobs.nodes[0].id }}"
+            },
+            {
+              "fieldId": "line_items",
+              "fieldValue": "={{ $json.data.invoice.lineItems.nodes }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        5420
+      ],
+      "id": "fb2dccfb-3e95-47f2-ba47-cd1a37c43f71",
+      "name": "Supabase_invoices1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "invoices",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "jobber_id",
+              "condition": "eq",
+              "keyValue": "={{ $('jobber_invoice_delete').item.json.body.data.webHookEvent.itemId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        5640
+      ],
+      "id": "da62b2bf-3c58-4f91-a102-47228f27a2d7",
+      "name": "Supabase_invoices2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "invoices",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.data.invoice.id }}"
+            },
+            {
+              "fieldId": "invoice_number",
+              "fieldValue": "={{ $json.data.invoice.invoiceNumber }}"
+            },
+            {
+              "fieldId": "invoice_status",
+              "fieldValue": "={{ $json.data.invoice.invoiceStatus }}"
+            },
+            {
+              "fieldId": "invoice_net",
+              "fieldValue": "={{ $json.data.invoice.invoiceNet }}"
+            },
+            {
+              "fieldId": "subject",
+              "fieldValue": "={{ $json.data.invoice.subject }}"
+            },
+            {
+              "fieldId": "amounts_json",
+              "fieldValue": "={{ $json.data.invoice.amounts }}"
+            },
+            {
+              "fieldId": "clients_jobber_id",
+              "fieldValue": "={{ $json.data.invoice.client.id }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.data.invoice.createdAt }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $json.data.invoice.updatedAt }}"
+            },
+            {
+              "fieldId": "issued_date",
+              "fieldValue": "={{ $json.data.invoice.issuedDate }}"
+            },
+            {
+              "fieldId": "due_date",
+              "fieldValue": "={{ $json.data.invoice.dueDate }}"
+            },
+            {
+              "fieldId": "received_date",
+              "fieldValue": "={{ $json.data.invoice.receivedDate }}"
+            },
+            {
+              "fieldId": "jobs_jobber_id",
+              "fieldValue": "={{ $json.data.invoice.jobs.nodes[0].id }}"
+            },
+            {
+              "fieldId": "line_items",
+              "fieldValue": "={{ $json.data.invoice.lineItems.nodes }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        560,
+        5200
+      ],
+      "id": "899b361c-fe10-4ee4-8d33-d0b813d316a5",
+      "name": "Supabase_invoices_line_items",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        360,
+        5200
+      ],
+      "id": "1110fe2c-3502-4ece-b153-e998b8abc219",
+      "name": "invoice_line_items_split",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        140,
+        5200
+      ],
+      "id": "ac23ff4d-9558-476f-9d5f-d004f5aa867b",
+      "name": "Wait",
+      "webhookId": "38da2ac5-d7db-4a8b-9948-911b9a2a80cd",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        3120
+      ],
+      "id": "c142a596-0432-4894-970d-a1035bfbf631",
+      "name": "Wait1",
+      "webhookId": "38da2ac5-d7db-4a8b-9948-911b9a2a80cd",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        260,
+        2080
+      ],
+      "id": "8fe955cb-9190-417e-8236-a2febf2aeaa7",
+      "name": "Wait2",
+      "webhookId": "38da2ac5-d7db-4a8b-9948-911b9a2a80cd",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the input items from previous node\nconst items = $input.all();\nconst inputData = items[0].json;\n\n// Get the quote's jobber_id (this is the foreign key for the line items)\nconst quotes_jobber_id = inputData.jobber_id || inputData.id;\n\n// Log for debugging\nconsole.log('Input data keys:', Object.keys(inputData));\nconsole.log('Quotes jobber_id:', quotes_jobber_id);\n\n// Access the line_items array directly as it's already in the expected format\nlet lineItems = [];\n\nif (inputData.line_items && Array.isArray(inputData.line_items)) {\n  // If line_items is already an array\n  lineItems = inputData.line_items;\n  console.log('Found line_items array with', lineItems.length, 'items');\n} else {\n  console.log('No line_items array found or it\\'s not an array');\n}\n\n// If no line items found, return an empty item to avoid workflow errors\nif (lineItems.length === 0) {\n  console.log('No line items to process, returning empty');\n  return [{ json: { empty: true } }];\n}\n\n// Map each line item to the structure needed for the quotes_line_items table\nconst lineItemsForInsertion = lineItems.map(item => {\n  console.log('Processing line item:', item);\n  return {\n    json: {\n      quotes_jobber_id: quotes_jobber_id,\n      line_item_id: item.id,\n      name: item.name,\n      quantity: item.quantity,\n      unit_price: item.unitPrice,\n      total_price: item.totalPrice\n    }\n  };\n});\n\nconsole.log('Prepared', lineItemsForInsertion.length, 'line items for insertion');\n\n// Return the array of line items for batch insertion\nreturn lineItemsForInsertion;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        2080
+      ],
+      "id": "41cc4544-5fe4-49d1-9394-785e2a6b1ac9",
+      "name": "quote_line_items_split",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get job data from the query response\nconst jobData = $node[\"jobber_query_job_id\"].json.data.job;\nconst jobs_jobber_id = jobData.id;\n\n// Extract line items with error handling\nlet lineItems = [];\nif (jobData && jobData.lineItems && jobData.lineItems.nodes) {\n  lineItems = jobData.lineItems.nodes;\n}\n\nconsole.log('Found line items:', lineItems.length);\n\n// If no line items, return empty to avoid workflow errors\nif (lineItems.length === 0) {\n  console.log('No line items found, returning empty');\n  return [{ json: { empty: true } }];\n}\n\n// Map each line item for insertion\nconst lineItemsForInsertion = lineItems.map(item => ({\n  json: {\n    jobs_jobber_id: jobs_jobber_id,\n    line_item_id: item.id,\n    name: item.name,\n    quantity: item.quantity,\n    unit_price: item.unitPrice,\n    total_price: item.totalPrice\n  }\n}));\n\nconsole.log('Prepared', lineItemsForInsertion.length, 'line items for insertion');\n\n// Return the array of line items for batch insertion\nreturn lineItemsForInsertion;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        920,
+        2860
+      ],
+      "id": "23b256f8-eaed-496e-b529-75bbc7782c3c",
+      "name": "job_line_items_split",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        260,
+        2340
+      ],
+      "id": "49aa31e1-3269-445a-a96d-65ef94a40058",
+      "name": "Wait3",
+      "webhookId": "38da2ac5-d7db-4a8b-9948-911b9a2a80cd",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// First, let's add some debugging to see what data is available\nconsole.log('Available nodes:', Object.keys($node));\n\n// Get quote data from the query response\nconst quoteData = $node[\"jobber_query_quote_id1\"].json.data.quote;\nconsole.log('Quote data retrieved:', !!quoteData);\n\n// Log the full structure to debug\nif (quoteData) {\n  console.log('Quote ID:', quoteData.id);\n  console.log('Line items exist:', !!quoteData.lineItems);\n  if (quoteData.lineItems) {\n    console.log('Nodes exist:', !!quoteData.lineItems.nodes);\n    if (quoteData.lineItems.nodes) {\n      console.log('Number of line items:', quoteData.lineItems.nodes.length);\n    }\n  }\n}\n\nconst quotes_jobber_id = quoteData?.id;\n\n// Extract line items with better error handling\nlet lineItems = [];\nif (quoteData && quoteData.lineItems && quoteData.lineItems.nodes) {\n  lineItems = quoteData.lineItems.nodes;\n}\n\nconsole.log('Extracted line items count:', lineItems.length);\n\n// If no line items, return empty to avoid workflow errors\nif (lineItems.length === 0) {\n  console.log('No line items found, returning empty');\n  return [{ json: { empty: true } }];\n}\n\n// Map each line item for insertion\nconst lineItemsForInsertion = lineItems.map(item => ({\n  json: {\n    quotes_jobber_id: quotes_jobber_id,\n    line_item_id: item.id,\n    name: item.name,\n    quantity: item.quantity,\n    unit_price: item.unitPrice,\n    total_price: item.totalPrice\n  }\n}));\n\nconsole.log('Prepared', lineItemsForInsertion.length, 'line items for insertion');\n\n// Return the array of line items for batch insertion\nreturn lineItemsForInsertion;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        920,
+        2340
+      ],
+      "id": "add7c170-476a-4ca1-9e17-5e571a4d87e4",
+      "name": "quote_line_items_split1",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        2340
+      ],
+      "id": "e41dc9c2-2f72-4a20-8036-fef66de5b3a9",
+      "name": "Wait4",
+      "webhookId": "38da2ac5-d7db-4a8b-9948-911b9a2a80cd",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "quotes_line_items",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "quote_jobber_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.jobber_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        480,
+        2340
+      ],
+      "id": "a9b58066-66cf-4c4e-a52c-715d7306b594",
+      "name": "Supabase_quotes_delete_line_items",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        260,
+        2600
+      ],
+      "id": "476063d4-e7ee-4485-9be2-3183d1685238",
+      "name": "Wait5",
+      "webhookId": "2f4ce64a-9d1c-489e-a019-c9937684e846"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "quotes_line_items",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "quote_jobber_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.data.webHookEvent.itemId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        2600
+      ],
+      "id": "e3b45f4a-33c1-484b-8624-08a8fe51231d",
+      "name": "Supabase_quotes_delete_line_items1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        2860
+      ],
+      "id": "f93e5c7b-83d8-486b-b806-dd9057a74bd2",
+      "name": "Wait6",
+      "webhookId": "38da2ac5-d7db-4a8b-9948-911b9a2a80cd",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        3380
+      ],
+      "id": "cb0704e7-120b-4a62-a968-853952750a0d",
+      "name": "Wait7",
+      "webhookId": "38da2ac5-d7db-4a8b-9948-911b9a2a80cd",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        3120
+      ],
+      "id": "5849a0e3-3976-4205-a88e-7206324511c0",
+      "name": "Wait8",
+      "webhookId": "38da2ac5-d7db-4a8b-9948-911b9a2a80cd",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get job data from the query response\nconst jobData = $node[\"jobber_query_job_id1\"].json.data.job;\nconst jobs_jobber_id = jobData.id;\n\n// Extract line items with error handling\nlet lineItems = [];\nif (jobData && jobData.lineItems && jobData.lineItems.nodes) {\n  lineItems = jobData.lineItems.nodes;\n}\n\nconsole.log('Found line items:', lineItems.length);\n\n// If no line items, return empty to avoid workflow errors\nif (lineItems.length === 0) {\n  console.log('No line items found, returning empty');\n  return [{ json: { empty: true } }];\n}\n\n// Map each line item for insertion\nconst lineItemsForInsertion = lineItems.map(item => ({\n  json: {\n    jobs_jobber_id: jobs_jobber_id,\n    line_item_id: item.id,\n    name: item.name,\n    quantity: item.quantity,\n    unit_price: item.unitPrice,\n    total_price: item.totalPrice\n  }\n}));\n\nconsole.log('Prepared', lineItemsForInsertion.length, 'line items for insertion');\n\n// Return the array of line items for batch insertion\nreturn lineItemsForInsertion;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        920,
+        3120
+      ],
+      "id": "415dccc1-537d-4086-9942-e1d1404f2d50",
+      "name": "job_line_items_split1",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "jobs_line_items",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "job_jobber_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.jobber_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        480,
+        3120
+      ],
+      "id": "25d54dcb-5d35-481f-a2c2-3fd7ca661e1d",
+      "name": "Supabase_jobs_delete_line_items",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "jobs_line_items",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "job_jobber_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.data.webHookEvent.itemId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        140,
+        3380
+      ],
+      "id": "6d577e8b-4b87-4b4d-89cd-1b468834a240",
+      "name": "Supabase_jobs_delete_line_items1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "quotes_line_items",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "quote_jobber_id",
+              "fieldValue": "={{ $json.quotes_jobber_id }}"
+            },
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.line_item_id }}"
+            },
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $json.name }}"
+            },
+            {
+              "fieldId": "quantity",
+              "fieldValue": "={{ $json.name }}"
+            },
+            {
+              "fieldId": "quantity",
+              "fieldValue": "={{ $json.quantity }}"
+            },
+            {
+              "fieldId": "unit_price",
+              "fieldValue": "={{ $json.unit_price }}"
+            },
+            {
+              "fieldId": "total_price",
+              "fieldValue": "={{ $json.total_price }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        700,
+        2080
+      ],
+      "id": "c31ef0ef-f79e-40c4-8c6f-65c16085aff5",
+      "name": "Supabase_quotes_create_line_items",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "quotes_line_items",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "quote_jobber_id",
+              "fieldValue": "={{ $json.quotes_jobber_id }}"
+            },
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.line_item_id }}"
+            },
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $json.name }}"
+            },
+            {
+              "fieldId": "quantity",
+              "fieldValue": "={{ $json.name }}"
+            },
+            {
+              "fieldId": "quantity",
+              "fieldValue": "={{ $json.quantity }}"
+            },
+            {
+              "fieldId": "unit_price",
+              "fieldValue": "={{ $json.unit_price }}"
+            },
+            {
+              "fieldId": "total_price",
+              "fieldValue": "={{ $json.total_price }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        2340
+      ],
+      "id": "6c57e684-1ef0-49d2-9147-16a98f6e0fb7",
+      "name": "Supabase_quotes_update_line_items",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "jobs_line_items",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "job_jobber_id",
+              "fieldValue": "={{ $json.jobs_jobber_id }}"
+            },
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.line_item_id }}"
+            },
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $json.name }}"
+            },
+            {
+              "fieldId": "quantity",
+              "fieldValue": "={{ $json.quantity }}"
+            },
+            {
+              "fieldId": "unit_price",
+              "fieldValue": "={{ $json.unit_price }}"
+            },
+            {
+              "fieldId": "total_price",
+              "fieldValue": "={{ $json.total_price }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        2860
+      ],
+      "id": "89d84cb7-3024-4e03-98bd-23ab903426ed",
+      "name": "Supabase_jobs_create_line_items",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "jobs_line_items",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "job_jobber_id",
+              "fieldValue": "={{ $json.jobs_jobber_id }}"
+            },
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.line_item_id }}"
+            },
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $json.name }}"
+            },
+            {
+              "fieldId": "quantity",
+              "fieldValue": "={{ $json.quantity }}"
+            },
+            {
+              "fieldId": "unit_price",
+              "fieldValue": "={{ $json.unit_price }}"
+            },
+            {
+              "fieldId": "total_price",
+              "fieldValue": "={{ $json.total_price }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        3120
+      ],
+      "id": "01ab0f9d-6f0c-49ae-a9a2-bcf72f12fff1",
+      "name": "Supabase_jobs_update_line_items",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## I'm a note \nJOB CLOSED\nVISIT COMPLETED\nQUOTE SENT\nQUOTE APPROVED",
+        "height": 360,
+        "width": 420
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1320,
+        3640
+      ],
+      "id": "d1171c3a-34e6-4df8-bfb8-501a0d70f1e7",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract only the time portion (HH:MM:SS) from startTime and endTime fields\nconst items = [];\nfor (const item of $input.all()) {\n  // Create a direct copy of the input item\n  const newItem = item;\n  \n  // Extract job timestamps if they exist\n  if (newItem.json && newItem.json.data && newItem.json.data.job) {\n    const job = newItem.json.data.job;\n    \n    // Check if visitSchedule exists and contains startTime and endTime\n    if (job.visitSchedule) {\n      // Extract just the time portion (HH:MM:SS) from the ISO string\n      const startTimeIso = job.visitSchedule.startTime;\n      const endTimeIso = job.visitSchedule.endTime;\n      \n      // Use regex to extract just the time portion (HH:MM:SS)\n      const startTimeMatch = startTimeIso ? startTimeIso.match(/T(\\d{2}:\\d{2}:\\d{2})/) : null;\n      const endTimeMatch = endTimeIso ? endTimeIso.match(/T(\\d{2}:\\d{2}:\\d{2})/) : null;\n      \n      // Add these time strings directly to the job object\n      if (startTimeMatch && startTimeMatch[1]) {\n        newItem.json.data.job.start_time = startTimeMatch[1];\n      }\n      \n      if (endTimeMatch && endTimeMatch[1]) {\n        newItem.json.data.job.end_time = endTimeMatch[1];\n      }\n    }\n    \n    // Also extract times from job's main startAt and endAt if needed\n    const jobStartAtIso = job.startAt;\n    const jobEndAtIso = job.endAt;\n    \n    const jobStartTimeMatch = jobStartAtIso ? jobStartAtIso.match(/T(\\d{2}:\\d{2}:\\d{2})/) : null;\n    const jobEndTimeMatch = jobEndAtIso ? jobEndAtIso.match(/T(\\d{2}:\\d{2}:\\d{2})/) : null;\n    \n    // Add these time strings as additional properties if you need them\n    if (jobStartTimeMatch && jobStartTimeMatch[1]) {\n      newItem.json.data.job.job_start_time = jobStartTimeMatch[1];\n    }\n    \n    if (jobEndTimeMatch && jobEndTimeMatch[1]) {\n      newItem.json.data.job.job_end_time = jobEndTimeMatch[1];\n    }\n  }\n  \n  items.push(newItem);\n}\nreturn {items};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -60,
+        2860
+      ],
+      "id": "7a3c7000-9819-4dbf-9ccc-828ac5fba38f",
+      "name": "Code_correct_time_format"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract only the time portion (HH:MM:SS) from startTime and endTime fields\nconst items = [];\nfor (const item of $input.all()) {\n  // Create a direct copy of the input item\n  const newItem = item;\n  \n  // Extract job timestamps if they exist\n  if (newItem.json && newItem.json.data && newItem.json.data.job) {\n    const job = newItem.json.data.job;\n    \n    // Check if visitSchedule exists and contains startTime and endTime\n    if (job.visitSchedule) {\n      // Extract just the time portion (HH:MM:SS) from the ISO string\n      const startTimeIso = job.visitSchedule.startTime;\n      const endTimeIso = job.visitSchedule.endTime;\n      \n      // Use regex to extract just the time portion (HH:MM:SS)\n      const startTimeMatch = startTimeIso ? startTimeIso.match(/T(\\d{2}:\\d{2}:\\d{2})/) : null;\n      const endTimeMatch = endTimeIso ? endTimeIso.match(/T(\\d{2}:\\d{2}:\\d{2})/) : null;\n      \n      // Add these time strings directly to the job object\n      if (startTimeMatch && startTimeMatch[1]) {\n        newItem.json.data.job.start_time = startTimeMatch[1];\n      }\n      \n      if (endTimeMatch && endTimeMatch[1]) {\n        newItem.json.data.job.end_time = endTimeMatch[1];\n      }\n    }\n    \n    // Also extract times from job's main startAt and endAt if needed\n    const jobStartAtIso = job.startAt;\n    const jobEndAtIso = job.endAt;\n    \n    const jobStartTimeMatch = jobStartAtIso ? jobStartAtIso.match(/T(\\d{2}:\\d{2}:\\d{2})/) : null;\n    const jobEndTimeMatch = jobEndAtIso ? jobEndAtIso.match(/T(\\d{2}:\\d{2}:\\d{2})/) : null;\n    \n    // Add these time strings as additional properties if you need them\n    if (jobStartTimeMatch && jobStartTimeMatch[1]) {\n      newItem.json.data.job.job_start_time = jobStartTimeMatch[1];\n    }\n    \n    if (jobEndTimeMatch && jobEndTimeMatch[1]) {\n      newItem.json.data.job.job_end_time = jobEndTimeMatch[1];\n    }\n  }\n  \n  items.push(newItem);\n}\nreturn {items};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -60,
+        3120
+      ],
+      "id": "3f773732-887b-405a-831c-605769bc0631",
+      "name": "Code_correct_time_format1"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Get the current input item\nconst inputData = $input.item;\n\n// Access the data through the json property\nif (inputData.json && inputData.json.data && inputData.json.data.job) {\n  const job = inputData.json.data.job;\n  const visits = job.visits.nodes || [];\n  const pageInfo = job.visits.pageInfo || { hasNextPage: false, endCursor: null };\n  \n  return {\n    jobId: job.id,\n    jobNumber: job.jobNumber,\n    visits: visits,\n    pagination: {\n      hasNextPage: pageInfo.hasNextPage,\n      endCursor: pageInfo.endCursor\n    }\n  };\n} else {\n  // If we still can't find the right structure, return debugging info\n  return {\n    error: \"Could not find expected data structure\",\n    dataStructure: typeof inputData === 'object' ? Object.keys(inputData) : typeof inputData,\n    visits: [],\n    pagination: {\n      hasNextPage: false,\n      endCursor: null\n    }\n  };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        140,
+        3820
+      ],
+      "id": "94811f12-d7d6-40f7-a965-e4e1450b9dc6",
+      "name": "pagination1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c46fd289-004c-4e54-a291-9a60210563e2",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        3820
+      ],
+      "id": "dbf9bdd4-c81e-4890-85a6-823c56ace918",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jobber_visit_create",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -740,
+        3780
+      ],
+      "id": "732e34e5-41b9-4b64-9099-75eda7cddc7e",
+      "name": "jobber_visit_create3",
+      "webhookId": "79bff78e-0067-4ae8-b08f-8677fec17b54",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($id: EncodedId!) {\n  visit(id: $id) {\n    id\n    job {\n      id\n    }\n  }\n}\n",
+        "variables": "={{ $json.variables || {\"id\": $json.body.data.webHookEvent.itemId} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        3820
+      ],
+      "id": "9812092f-f0f3-4a8c-9175-64556751d305",
+      "name": "jobber_query_visit_id5",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "G9zDOosPuCEnrvgt",
+          "name": "jobber_oauth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query($jobId: EncodedId!, $first: Int!, $after: String) {\n  job(id: $jobId) {\n    id\n    jobNumber\n    visits(first: $first, after: $after) {\n      nodes {\n        id\n        client {\n          id\n        }\n        property {\n          id\n        }\n        job {\n          id\n        }\n        invoice {\n          id\n        }\n        title              \n        isDefaultTitle     \n        instructions       \n        allDay             \n        arrivalWindow {    \n          id \n          duration\n        }\n        startAt            \n        endAt              \n        duration           \n        visitStatus        \n        createdAt\n        completedAt        \n        assignedUsers {    \n          edges {\n            node {\n              id\n              name {\n                \n                first \n                last\n              }\n            }\n          }\n        }\n        isComplete         \n        isLastScheduledVisit \n        timeSheetEntries {   \n          edges {\n            node {\n              id          \n              startAt\n              endAt\n            }\n          }\n        }\n        lineItems {        \n          edges {\n            node {\n              id\n              name\n              quantity\n              unitPrice\n              totalPrice                      \n            }\n          }\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}",
+        "variables": "={{ {\n  \"jobId\": $node[\"jobber_query_visit_id5\"].json.data.visit.job.id,\n  \"first\": 3,\n  \"after\": $input.item.json.endCursor || null\n} }}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        3820
+      ],
+      "id": "b67c2ca8-e5cb-4abd-82c3-19a92824d78d",
+      "name": "jobber_query_visit_id6",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "G9zDOosPuCEnrvgt",
+          "name": "jobber_oauth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "visits",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "job_jobber_id",
+              "fieldValue": "={{ $json.jobId }}"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $json.title }}"
+            },
+            {
+              "fieldId": "is_default_title",
+              "fieldValue": "={{ $json.isDefaultTitle }}"
+            },
+            {
+              "fieldId": "all_day",
+              "fieldValue": "={{ $json.allDay }}"
+            },
+            {
+              "fieldId": "start_at",
+              "fieldValue": "={{ $json.startAt }}"
+            },
+            {
+              "fieldId": "end_at",
+              "fieldValue": "={{ $json.endAt }}"
+            },
+            {
+              "fieldId": "duration",
+              "fieldValue": "={{ $json.duration }}"
+            },
+            {
+              "fieldId": "visit_status",
+              "fieldValue": "={{ $json.visitStatus }}"
+            },
+            {
+              "fieldId": "completed_at",
+              "fieldValue": "={{ $json.completedAt }}"
+            },
+            {
+              "fieldId": "is_complete",
+              "fieldValue": "={{ $json.isComplete }}"
+            },
+            {
+              "fieldId": "is_last_scheduled_visit",
+              "fieldValue": "={{ $json.isLastScheduledVisit }}"
+            },
+            {
+              "fieldId": "property_jobber_id",
+              "fieldValue": "={{ $json.property.id }}"
+            },
+            {
+              "fieldId": "invoice_jobber_id",
+              "fieldValue": "={{ $json.invoice }}"
+            },
+            {
+              "fieldId": "client_jobber_id",
+              "fieldValue": "={{ $json.client.id }}"
+            },
+            {
+              "fieldId": "assigned_users",
+              "fieldValue": "={{ $json.assignedUsers.edges }}"
+            },
+            {
+              "fieldId": "line_items",
+              "fieldValue": "={{ $json.lineItems.edges }}"
+            },
+            {
+              "fieldId": "time_sheet_entries_json",
+              "fieldValue": "={{ $json.timeSheetEntries.edges }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.createdAt }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        560,
+        3820
+      ],
+      "id": "7a7f122c-108b-4267-9ddc-37f502259332",
+      "name": "Supabase_visits7",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst visits = inputData[0]?.json?.visits || [];\nconst jobId = inputData[0]?.json?.jobId;\nconst jobNumber = inputData[0]?.json?.jobNumber;\n\nreturn visits.map(visit => ({\n  json: {\n    ...visit,\n    jobId: jobId,\n    jobNumber: jobNumber\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        340,
+        3820
+      ],
+      "id": "8a63a33b-e273-4a12-a6ca-761547cff771",
+      "name": "pagination2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get pagination info\nconst hasNextPage = $node[\"pagination1\"].json.pagination.hasNextPage;\n\n// Return different outputs based on pagination status\nif (hasNextPage) {\n  return [{ json: { continue: true, endCursor: $node[\"pagination1\"].json.pagination.endCursor } }];\n} else {\n  return [{ json: { continue: false } }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        3820
+      ],
+      "id": "c71c63f1-560c-46cd-a142-b203c26eedc6",
+      "name": "pagination3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "da7dcbb5-9ca9-4926-8e09-286907986e21",
+              "leftValue": "={{ $node[\"jobber_query_visit_id6\"].json.data.job.visits.pageInfo.hasNextPage }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1160,
+        3820
+      ],
+      "id": "97399f8e-706e-48e3-a812-04ac482b7055",
+      "name": "batch loop11"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        480,
+        4140
+      ],
+      "id": "ac5f66b1-62a3-4cb3-959c-e96aa982c1d7",
+      "name": "Loop Over Items4"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        4140
+      ],
+      "id": "5c627654-11ed-46f6-86ee-c864e3b14744"
+    },
+    {
+      "parameters": {
+        "content": ""
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        260,
+        -40
+      ],
+      "id": "8d543ed4-0b21-4176-a99b-91a8c9cde894",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": ""
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        260,
+        760
+      ],
+      "id": "78194214-ad9c-4d49-aa62-e7ac75c8467d",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": ""
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        260,
+        980
+      ],
+      "id": "a9a06e91-34db-4621-af29-6b065dbce43b",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "## OK"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        260,
+        520
+      ],
+      "id": "e796ddfe-ed1d-493a-bc37-737bc0bf845a",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": ""
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        260,
+        220
+      ],
+      "id": "3520df75-59f2-42b7-b150-a73a36b91df5",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "## OK"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        260,
+        -280
+      ],
+      "id": "b2439726-505c-4a82-93c0-e9233cb7260e",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "## OK"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        260,
+        1280
+      ],
+      "id": "23f50e6d-698c-443e-8c4d-c60e3d3463bc",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "content": "## OK"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        260,
+        1520
+      ],
+      "id": "f65b0df3-7a29-4b3a-a86e-ca6e4a9eeb47",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "content": "## OK"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        260,
+        1780
+      ],
+      "id": "5ca8111e-0144-4ae1-9d03-9407342b2175",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "## OK"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        2080
+      ],
+      "id": "6b521caf-c655-4d44-aca0-73bbbcf61368",
+      "name": "Sticky Note17"
+    },
+    {
+      "parameters": {
+        "content": "## OK"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        2320
+      ],
+      "id": "0e9eb07b-88f1-4853-bfe2-116993c8dbae",
+      "name": "Sticky Note18"
+    },
+    {
+      "parameters": {
+        "content": "## OK"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        2560
+      ],
+      "id": "9fc72ed1-8d6c-4b11-9625-fe87ef3633ea",
+      "name": "Sticky Note19"
+    },
+    {
+      "parameters": {
+        "content": "## OK"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        2860
+      ],
+      "id": "1c56a18e-7a9e-49e1-bbdb-c08fde7c1f2e",
+      "name": "Sticky Note20"
+    },
+    {
+      "parameters": {
+        "content": "## OK"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        3100
+      ],
+      "id": "04f40e7d-fcb7-4732-9d5b-375d9c244d1c",
+      "name": "Sticky Note21"
+    },
+    {
+      "parameters": {
+        "content": "## OK"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        3360
+      ],
+      "id": "47f91502-3a48-4f8b-babc-4eb7f7f8afc8",
+      "name": "Sticky Note22"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "aux_buffer",
+        "messageData": "={{ JSON.stringify($node[\"pagination2\"]) }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        760,
+        3820
+      ],
+      "id": "afcb70cb-6fe5-4dca-825f-cfb697935c0a",
+      "name": "Redis",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "aux_buffer"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -740,
+        4040
+      ],
+      "id": "22933307-2669-4513-9ff8-e1f32d0a0983",
+      "name": "Redis1",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "aux_buffer",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        4120
+      ],
+      "id": "38cfce60-ee6c-47f7-b499-06ed3f6fd2e0",
+      "name": "Redis2",
+      "credentials": {
+        "redis": {
+          "id": "Yj8Yu3a3AZgluvcL",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8538acdc-918a-4c79-8a73-6f0833504072",
+              "leftValue": "={{ $json.assignedUsers.edges }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        920,
+        4220
+      ],
+      "id": "4fc51bfb-5cff-4e0c-911a-b86244a9d104",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst data = inputData[0]?.json || {};\nreturn data.assignedUsers.edges.map(user => ({\n    json: {\n      jobber_id: user.node.id,\n      visit_jobber_id: data.id,\n      firstname: user.node.name.first,\n      lastname: user.node.name.last,\n      full_name: `${user.node.name.first} ${user.node.name.last}`\n    }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1240,
+        4280
+      ],
+      "id": "3dfe2189-3642-44df-bc2b-a69072847df8",
+      "name": "Set Array10",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "tableId": "visits_assigned_users",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "visit_jobber_id",
+              "fieldValue": "={{ $json.visit_jobber_id }}"
+            },
+            {
+              "fieldId": "first_name",
+              "fieldValue": "={{ $json.firstname }}"
+            },
+            {
+              "fieldId": "last_name",
+              "fieldValue": "={{ $json.lastname }}"
+            },
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.jobber_id }}"
+            },
+            {
+              "fieldId": "full_name",
+              "fieldValue": "={{ $json.full_name }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        4280
+      ],
+      "id": "bf105cb6-3690-46a1-bc10-51c18f849a48",
+      "name": "Supabase_visits2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1640,
+        4280
+      ],
+      "id": "56a7c58e-2ba7-4265-ab1d-1f0be2857ccb",
+      "name": "Limit10"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\nconst data = inputData[0]?.json || {};\nreturn (data.lineItems?.edges || []).map(edge => ({ \n  json: { \n    visit_id: data.id, \n    id: edge.node.id, \n    name: edge.node.name, \n    quantity: edge.node.quantity, \n    totalPrice: edge.node.totalPrice \n  } \n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1240,
+        4660
+      ],
+      "id": "fbf3445b-1886-427e-b814-939afb49cfb0",
+      "name": "Set Array11",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        480,
+        4500
+      ],
+      "id": "30bca083-9c30-4d83-b615-9e3d29586167",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8538acdc-918a-4c79-8a73-6f0833504072",
+              "leftValue": "={{ $json.lineItems.edges }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "7e188070-54ee-481d-ae52-4d3f811e3839",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        940,
+        4600
+      ],
+      "id": "9fa6a34c-220a-4a97-876f-a437f1e8b1c8",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        4500
+      ],
+      "id": "6d3e727f-1f66-43a3-bddc-771140723f0e",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "tableId": "visits_line_items",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "visit_jobber_id",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "item_name",
+              "fieldValue": "={{ $json.name }}"
+            },
+            {
+              "fieldId": "jobber_id",
+              "fieldValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        4660
+      ],
+      "id": "7d30ae4f-b836-4eae-a37f-02497c67c38d",
+      "name": "Supabase_visits3",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1640,
+        4660
+      ],
+      "id": "9fa2baa8-f9c1-4a16-81e8-2eb0dfcd9ae5",
+      "name": "Limit"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        2180,
+        4320
+      ],
+      "id": "8a702014-44a3-49df-849c-0a2d29d3924c",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.all();\n\nlet resultArray = [];\n\ninputData.forEach(item => {\n  if (item.json && item.json.propertyName) {\n    item.json.propertyName.forEach(innerItem => {\n      let parsedItem = JSON.parse(innerItem);\n      resultArray.push({ json: parsedItem.data });\n    });\n  }\n});\n\nreturn resultArray;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        180,
+        4140
+      ],
+      "id": "22c74f9d-cc23-43fa-b775-9d017ff805f5",
+      "name": "Set Array9"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1100,
+        4460
+      ],
+      "id": "67d7b99c-12f2-4d91-99d5-37a2fe2a315d",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "app_disconnect",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -740,
+        6220
+      ],
+      "id": "7cb27275-c5b4-4f80-a5bf-f7667f23dfe5",
+      "name": "app_disconnect",
+      "webhookId": "0762f2a8-179c-447c-beb6-daef79309444",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "app_connect",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -740,
+        6020
+      ],
+      "id": "8b13f7bf-6843-4053-95d0-31f38d4b9021",
+      "name": "app_connect",
+      "webhookId": "0762f2a8-179c-447c-beb6-daef79309444",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "requestFormat": "json",
+        "query": "=query {\n  account {\n    id\n    name\n    createdAt\n    phone\n    signupName\n    industry\n  }\n}",
+        "variables": "=",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        6020
+      ],
+      "id": "02b47d53-3e87-4620-b13f-d487c88e66a3",
+      "name": "jobber_query_invoice_id2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d4acb0dd-4805-40d7-84c7-c760b8bb1cbb",
+              "name": "body.data.webHookEvent.topic",
+              "value": "={{ $json.body.data.webHookEvent.topic }}",
+              "type": "string"
+            },
+            {
+              "id": "1becb594-7869-4620-a5ed-54608940f055",
+              "name": "body.data.webHookEvent.appId",
+              "value": "={{ $json.body.data.webHookEvent.appId }}",
+              "type": "string"
+            },
+            {
+              "id": "9c7e5b2d-1f3c-4276-a7bd-b442591be217",
+              "name": "body.data.webHookEvent.accountId",
+              "value": "={{ $json.body.data.webHookEvent.accountId }}",
+              "type": "string"
+            },
+            {
+              "id": "ba8b1117-73c5-420e-be96-3b33760a4788",
+              "name": "body.data.webHookEvent.itemId",
+              "value": "={{ $json.body.data.webHookEvent.itemId }}",
+              "type": "string"
+            },
+            {
+              "id": "11718a42-e210-4f05-ad4e-00c87727e18e",
+              "name": "body.data.webHookEvent.occurredAt",
+              "value": "={{ $json.body.data.webHookEvent.occurredAt }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -520,
+        6020
+      ],
+      "id": "72c60554-c0e2-400f-ac57-78d9e25c9d35",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "endpoint": "https://api.getjobber.com/api/graphql",
+        "query": "query {\n  account {\n    id\n    name\n    createdAt\n    phone\n    signupName\n    industry\n  }\n}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer  {{ $json.access_token }}"
+            },
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.graphql",
+      "typeVersion": 1.1,
+      "position": [
+        40,
+        6020
+      ],
+      "id": "7d0cb3d9-3418-4717-a4d7-f816a262662a",
+      "name": "GraphQL"
+    },
+    {
+      "parameters": {
+        "tableId": "jobber_account_connections",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "account_id",
+              "fieldValue": "={{ $json.data.account.id }}"
+            },
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $json.data.account.name }}"
+            },
+            {
+              "fieldId": "phone",
+              "fieldValue": "={{ $json.data.account.phone }}"
+            },
+            {
+              "fieldId": "sign_up_name",
+              "fieldValue": "={{ $json.data.account.signupName }}"
+            },
+            {
+              "fieldId": "industry",
+              "fieldValue": "={{ $json.data.account.industry }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.data.account.createdAt }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        280,
+        6020
+      ],
+      "id": "391b47d4-8d0a-4aad-86ed-52534f56d613",
+      "name": "Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jZpaPsNpFVX4nSYw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://whk.spsystems.pro/webhook/refresh_token_endpoint",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer "
+            },
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -720,
+        -260
+      ],
+      "id": "cdf7e68a-82a7-4e05-b6c4-ea178ab22a67",
+      "name": "get_refresh_token"
+    },
+    {
+      "parameters": {
+        "url": "https://whk.spsystems.pro/webhook/refresh_token_endpoint",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer "
+            },
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -720,
+        0
+      ],
+      "id": "16d295b1-87b5-48a7-b63e-f77d4b9e04f6",
+      "name": "get_refresh_token1"
+    },
+    {
+      "parameters": {
+        "url": "https://whk.spsystems.pro/webhook/refresh_token_endpoint",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer "
+            },
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -720,
+        260
+      ],
+      "id": "06b48b73-5614-440a-88c6-25a895406853",
+      "name": "get_refresh_token2"
+    },
+    {
+      "parameters": {
+        "url": "https://whk.spsystems.pro/webhook/refresh_token_endpoint",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer "
+            },
+            {
+              "name": "X-JOBBER-GRAPHQL-VERSION",
+              "value": "2025-01-20"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -720,
+        520
+      ],
+      "id": "71c208a6-2803-4de8-bc85-df9d016067c1",
+      "name": "get_refresh_token3"
+    }
+  ],
+  "connections": {
+    "jobber_client_update": {
+      "main": [
+        []
+      ]
+    },
+    "set_client_id": {
+      "main": [
+        [
+          {
+            "node": "jobber_query_client_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_query_client_id": {
+      "main": [
+        [
+          {
+            "node": "Supabase_clients",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_client_create": {
+      "main": [
+        [
+          {
+            "node": "get_refresh_token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_client_id1": {
+      "main": [
+        [
+          {
+            "node": "jobber_query_client_id1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_query_client_id1": {
+      "main": [
+        [
+          {
+            "node": "Supabase_clients1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_client_id2": {
+      "main": [
+        [
+          {
+            "node": "Supabase_clients2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_property_id": {
+      "main": [
+        [
+          {
+            "node": "jobber_query_property_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_property_id1": {
+      "main": [
+        [
+          {
+            "node": "jobber_query_property_id1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_property_id2": {
+      "main": [
+        [
+          {
+            "node": "Supabase_properties2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_query_property_id": {
+      "main": [
+        [
+          {
+            "node": "Supabase_properties3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_query_property_id1": {
+      "main": [
+        [
+          {
+            "node": "Supabase_properties4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_client_delete": {
+      "main": [
+        []
+      ]
+    },
+    "jobber_property_update": {
+      "main": [
+        [
+          {
+            "node": "set_property_id1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_property_create": {
+      "main": [
+        [
+          {
+            "node": "get_refresh_token3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_property_delete": {
+      "main": [
+        [
+          {
+            "node": "set_property_id2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_request_create": {
+      "main": [
+        [
+          {
+            "node": "set_request_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_request_update": {
+      "main": [
+        [
+          {
+            "node": "set_request_id1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_request_delete": {
+      "main": [
+        [
+          {
+            "node": "set_request_id2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_request_id": {
+      "main": [
+        [
+          {
+            "node": "jobber_query_request_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_request_id1": {
+      "main": [
+        [
+          {
+            "node": "jobber_query_request_id1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_request_id2": {
+      "main": [
+        [
+          {
+            "node": "Supabase_requests2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_query_request_id": {
+      "main": [
+        [
+          {
+            "node": "Supabase_requests3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_query_request_id1": {
+      "main": [
+        [
+          {
+            "node": "Supabase_requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_quote_create": {
+      "main": [
+        [
+          {
+            "node": "set_quote_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_quote_update": {
+      "main": [
+        [
+          {
+            "node": "set_quote_id1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_quote_delete": {
+      "main": [
+        [
+          {
+            "node": "set_quote_id2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_quote_id": {
+      "main": [
+        [
+          {
+            "node": "jobber_query_quote_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_quote_id1": {
+      "main": [
+        [
+          {
+            "node": "jobber_query_quote_id1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_quote_id2": {
+      "main": [
+        [
+          {
+            "node": "Supabase_quotes_delete_line_items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_query_quote_id": {
+      "main": [
+        [
+          {
+            "node": "Supabase_quotes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_query_quote_id1": {
+      "main": [
+        [
+          {
+            "node": "Supabase_quotes1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_job_create": {
+      "main": [
+        [
+          {
+            "node": "set_job_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_job_update": {
+      "main": [
+        [
+          {
+            "node": "set_job_id1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_job_delete": {
+      "main": [
+        [
+          {
+            "node": "set_job_id2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_job_id": {
+      "main": [
+        [
+          {
+            "node": "jobber_query_job_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_job_id1": {
+      "main": [
+        [
+          {
+            "node": "jobber_query_job_id1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_job_id2": {
+      "main": [
+        [
+          {
+            "node": "Supabase_jobs_delete_line_items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_query_job_id": {
+      "main": [
+        [
+          {
+            "node": "Code_correct_time_format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_query_job_id1": {
+      "main": [
+        [
+          {
+            "node": "Code_correct_time_format1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_invoice_id": {
+      "main": [
+        [
+          {
+            "node": "jobber_query_invoice_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_invoice_id1": {
+      "main": [
+        [
+          {
+            "node": "jobber_query_invoice_id1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_invoice_id2": {
+      "main": [
+        [
+          {
+            "node": "Supabase_invoices2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_invoice_create": {
+      "main": [
+        [
+          {
+            "node": "set_invoice_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_invoice_update": {
+      "main": [
+        [
+          {
+            "node": "set_invoice_id1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_invoice_delete": {
+      "main": [
+        [
+          {
+            "node": "set_invoice_id2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_query_invoice_id": {
+      "main": [
+        [
+          {
+            "node": "Supabase_invoices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_query_invoice_id1": {
+      "main": [
+        [
+          {
+            "node": "Supabase_invoices1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "invoice_line_items_split": {
+      "main": [
+        [
+          {
+            "node": "Supabase_invoices_line_items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "invoice_line_items_split",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_invoices": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Supabase_jobs_delete_line_items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "quote_line_items_split",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "quote_line_items_split": {
+      "main": [
+        [
+          {
+            "node": "Supabase_quotes_create_line_items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "job_line_items_split": {
+      "main": [
+        [
+          {
+            "node": "Supabase_jobs_create_line_items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_quotes": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "Supabase_quotes_delete_line_items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "quote_line_items_split1": {
+      "main": [
+        [
+          {
+            "node": "Supabase_quotes_update_line_items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_quotes1": {
+      "main": [
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait4": {
+      "main": [
+        [
+          {
+            "node": "quote_line_items_split1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_quotes_delete_line_items": {
+      "main": [
+        [
+          {
+            "node": "Wait4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_quotes2": {
+      "main": [
+        []
+      ]
+    },
+    "Wait5": {
+      "main": [
+        [
+          {
+            "node": "Supabase_quotes2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_quotes_delete_line_items1": {
+      "main": [
+        [
+          {
+            "node": "Wait5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_jobs": {
+      "main": [
+        [
+          {
+            "node": "Wait6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait6": {
+      "main": [
+        [
+          {
+            "node": "job_line_items_split",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait8": {
+      "main": [
+        [
+          {
+            "node": "job_line_items_split1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "job_line_items_split1": {
+      "main": [
+        [
+          {
+            "node": "Supabase_jobs_update_line_items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_jobs1": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_jobs_delete_line_items": {
+      "main": [
+        [
+          {
+            "node": "Wait8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_jobs2": {
+      "main": [
+        []
+      ]
+    },
+    "Wait7": {
+      "main": [
+        [
+          {
+            "node": "Supabase_jobs2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_jobs_delete_line_items1": {
+      "main": [
+        [
+          {
+            "node": "Wait7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code_correct_time_format": {
+      "main": [
+        [
+          {
+            "node": "Supabase_jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code_correct_time_format1": {
+      "main": [
+        [
+          {
+            "node": "Supabase_jobs1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pagination1": {
+      "main": [
+        [
+          {
+            "node": "pagination2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "jobber_query_visit_id5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_visit_create3": {
+      "main": [
+        [
+          {
+            "node": "Redis1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_query_visit_id5": {
+      "main": [
+        [
+          {
+            "node": "jobber_query_visit_id6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jobber_query_visit_id6": {
+      "main": [
+        [
+          {
+            "node": "pagination1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_visits7": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pagination2": {
+      "main": [
+        [
+          {
+            "node": "Supabase_visits7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pagination3": {
+      "main": [
+        [
+          {
+            "node": "batch loop11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "batch loop11": {
+      "main": [
+        [
+          {
+            "node": "jobber_query_visit_id6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redis2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items4": {
+      "main": [
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "pagination3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis2": {
+      "main": [
+        [
+          {
+            "node": "Set Array9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Set Array10",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array10": {
+      "main": [
+        [
+          {
+            "node": "Supabase_visits2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_visits2": {
+      "main": [
+        [
+          {
+            "node": "Limit10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit10": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Set Array11",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Array11": {
+      "main": [
+        [
+          {
+            "node": "Supabase_visits3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase_visits3": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Set Array9": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        []
+      ]
+    },
+    "app_connect": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "jobber_query_invoice_id2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GraphQL": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_refresh_token": {
+      "main": [
+        [
+          {
+            "node": "set_client_id1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_refresh_token3": {
+      "main": [
+        [
+          {
+            "node": "set_property_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "jobber_visit_create3": [
+      {
+        "json": {
+          "headers": {
+            "host": "edt.spsystems.pro",
+            "user-agent": "Ruby",
+            "content-length": "241",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, compress, deflate, br",
+            "baggage": "sentry-environment=production,sentry-public_key=518d4657d2fa43fba5a6b1adf5641e27,sentry-trace_id=48bd49c622184271886765b7aa4eb7c4",
+            "content-type": "application/json",
+            "idempotency-key": "evt_1iziAAbCx5If4sboIG",
+            "sentry-trace": "48bd49c622184271886765b7aa4eb7c4-901615b3fa365eec",
+            "tracestate": "dd=s:-1",
+            "x-datadog-parent-id": "1558906902934214070",
+            "x-datadog-sampling-priority": "-1",
+            "x-datadog-tags": "_dd.p.tid=67f3dc5300000000",
+            "x-datadog-trace-id": "3125550376700495225",
+            "x-forwarded-for": "35.196.71.29",
+            "x-forwarded-host": "edt.spsystems.pro",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "886090c495d1",
+            "x-hookdeck-attempt-count": "5",
+            "x-hookdeck-attempt-trigger": "AUTOMATIC",
+            "x-hookdeck-connection-name": "n8n_jobber_visit_create",
+            "x-hookdeck-destination-name": "n8n_jobber_visit_create",
+            "x-hookdeck-event-url": "https://dashboard.hookdeck.com/events/evt_1iziAAbCx5If4sboIG",
+            "x-hookdeck-eventid": "evt_1iziAAbCx5If4sboIG",
+            "x-hookdeck-original-ip": "18.235.158.83",
+            "x-hookdeck-requestid": "req_xUoURvkqmRXqyG3LH4Rg",
+            "x-hookdeck-signature": "68JXgdxW83XdWB4A5+DcXnBRXT3ef3BaQYT9gl7DSU0=",
+            "x-hookdeck-source-name": "jobber_visit_create",
+            "x-hookdeck-verified": "true",
+            "x-hookdeck-will-retry-after": "480",
+            "x-jobber-hmac-sha256": "ekq/YDRL/5M2KIi956+hDtews4BtmO7bOCSzP4qxKCw=",
+            "x-real-ip": "35.196.71.29"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "data": {
+              "webHookEvent": {
+                "topic": "VISIT_CREATE",
+                "appId": "2e77c35b-27af-4563-ad9a-91110761a53c",
+                "accountId": "Z2lkOi8vSm9iYmVyL0FjY291bnQvNjQ0ODU5",
+                "itemId": "Z2lkOi8vSm9iYmVyL1Zpc2l0LzE3MDEwMDA2MjY=",
+                "occurredAt": "2025-04-07T07:08:19-07:00"
+              }
+            }
+          },
+          "webhookUrl": "https://whk.spsystems.pro/webhook/jobber_visit_create",
+          "executionMode": "production"
+        }
+      }
+    ],
+    "app_connect": [
+      {
+        "json": {
+          "headers": {
+            "host": "edt.spsystems.pro",
+            "user-agent": "Ruby",
+            "content-length": "203",
+            "accept": "*/*",
+            "accept-encoding": "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+            "content-type": "application/json",
+            "traceparent": "00-67f4e6aa000000000c4c328090ba1b77-0f1629afd8838300-00",
+            "tracestate": "dd=s:-1",
+            "x-datadog-parent-id": "1087102195285066496",
+            "x-datadog-sampling-priority": "-1",
+            "x-datadog-tags": "_dd.p.tid=67f4e6aa00000000",
+            "x-datadog-trace-id": "886138754450463607",
+            "x-forwarded-for": "54.161.161.102",
+            "x-forwarded-host": "edt.spsystems.pro",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "886090c495d1",
+            "x-jobber-hmac-sha256": "rWnzOXsJ95ePZGHLDYCzXxQf+imTYiRVeIXMklr4OGg=",
+            "x-real-ip": "54.161.161.102"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "data": {
+              "webHookEvent": {
+                "topic": "APP_CONNECT",
+                "appId": "2e77c35b-27af-4563-ad9a-91110761a53c",
+                "accountId": "Z2lkOi8vSm9iYmVyL0FjY291bnQvNjQ0ODU5",
+                "itemId": "NjQzNjAw",
+                "occurredAt": "2025-04-08T09:04:35Z"
+              }
+            }
+          },
+          "webhookUrl": "https://whk.spsystems.pro/webhook/app_connect",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "versionId": "d2d6d16c-2dd7-4c10-b101-16b0b13f18f9",
+  "triggerCount": 2,
+  "tags": []
+}
