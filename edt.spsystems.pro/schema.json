@@ -2405,6 +2405,10 @@
               "value": "nousresearch/hermes-2-pro-llama-3-8b"
             },
             {
+              "text": "Mistral: Mistral 7B Instruct v0.3",
+              "value": "mistralai/mistral-7b-instruct-v0.3"
+            },
+            {
               "text": "Microsoft: Phi-3 Mini 128K Instruct",
               "value": "microsoft/phi-3-mini-128k-instruct"
             },
@@ -2915,16 +2919,16 @@
               "value": "eleven_multilingual_v1"
             },
             {
-              "text": "Eleven English v2",
-              "value": "eleven_english_sts_v2"
-            },
-            {
               "text": "Eleven Multilingual v2",
               "value": "eleven_multilingual_sts_v2"
             },
             {
               "text": "Eleven English v1",
               "value": "eleven_monolingual_v1"
+            },
+            {
+              "text": "Eleven English v2",
+              "value": "eleven_english_sts_v2"
             }
           ]
         },
