@@ -1501,6 +1501,10 @@
               "value": "qwen/qwen3-30b-a3b-04-28:free"
             },
             {
+              "text": "Qwen: Qwen3 30B A3B",
+              "value": "qwen/qwen3-30b-a3b-04-28"
+            },
+            {
               "text": "Qwen: Qwen3 8B (free)",
               "value": "qwen/qwen3-8b:free"
             },
@@ -2939,12 +2943,12 @@
               "value": "eleven_multilingual_sts_v2"
             },
             {
-              "text": "Eleven English v1",
-              "value": "eleven_monolingual_v1"
-            },
-            {
               "text": "Eleven English v2",
               "value": "eleven_english_sts_v2"
+            },
+            {
+              "text": "Eleven English v1",
+              "value": "eleven_monolingual_v1"
             },
             {
               "text": "Eleven Multilingual v1",
