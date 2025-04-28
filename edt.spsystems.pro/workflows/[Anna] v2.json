@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-04-26T20:38:17.301Z",
-  "updatedAt": "2025-04-28T12:38:18.299Z",
+  "updatedAt": "2025-04-28T13:02:01.979Z",
   "id": "LQ19C52Nja6cCqe5",
   "name": "[Anna] v2",
   "active": true,
@@ -956,8 +956,7 @@
       ],
       "id": "9409bd76-0209-4faf-b1c6-8366498d25f4",
       "name": "Vector Trigger",
-      "webhookId": "31a23ccc-c8b7-4a93-980c-783c0490d567",
-      "disabled": true
+      "webhookId": "31a23ccc-c8b7-4a93-980c-783c0490d567"
     },
     {
       "parameters": {
@@ -2127,7 +2126,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "e9a121c0-f0d7-4242-9c93-2f77878bd0b7",
-  "triggerCount": 6,
+  "versionId": "7d42d834-21c3-4295-b72d-061c1d133dc6",
+  "triggerCount": 7,
   "tags": []
 }
