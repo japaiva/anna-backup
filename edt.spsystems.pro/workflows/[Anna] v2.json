@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-04-26T20:38:17.301Z",
-  "updatedAt": "2025-04-28T13:53:13.695Z",
+  "updatedAt": "2025-04-28T17:21:27.352Z",
   "id": "LQ19C52Nja6cCqe5",
   "name": "[Anna] v2",
   "active": true,
@@ -1491,6 +1491,54 @@
       ],
       "id": "6a06dfcc-eb35-41cb-b35b-313783de7027",
       "name": "Clickup"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -940,
+        2460
+      ],
+      "id": "828e3074-8af6-4072-8085-b0e91dc613f6",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "3raLgi1Pp00Yk6mH",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        920,
+        1580
+      ],
+      "id": "fbae12cb-887e-4604-ad27-2fb16a50746e",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "3raLgi1Pp00Yk6mH",
+          "name": "OpenAi account"
+        }
+      }
     }
   ],
   "connections": {
@@ -1705,13 +1753,7 @@
     },
     "OpenRouter": {
       "ai_languageModel": [
-        [
-          {
-            "node": "Main Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Get Vars": {
@@ -1991,13 +2033,7 @@
     },
     "OpenRouter ": {
       "ai_languageModel": [
-        [
-          {
-            "node": "RAG Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Mapping": {
@@ -2120,13 +2156,37 @@
           }
         ]
       ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "RAG Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Main Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {},
   "staticData": null,
-  "meta": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
   "pinData": {},
-  "versionId": "6a5df699-7e53-49b6-ba63-affc91a44e7e",
+  "versionId": "27ed7272-4928-46b1-a72c-eeb95c0d9be1",
   "triggerCount": 7,
   "tags": []
 }
