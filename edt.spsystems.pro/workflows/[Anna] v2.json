@@ -1,9 +1,9 @@
 {
   "createdAt": "2025-04-26T20:38:17.301Z",
-  "updatedAt": "2025-04-29T09:52:19.965Z",
+  "updatedAt": "2025-04-29T09:58:11.531Z",
   "id": "LQ19C52Nja6cCqe5",
   "name": "[Anna] v2",
-  "active": false,
+  "active": true,
   "nodes": [
     {
       "parameters": {
