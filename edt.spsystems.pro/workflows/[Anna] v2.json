@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-04-26T20:38:17.301Z",
-  "updatedAt": "2025-04-29T10:34:45.984Z",
+  "updatedAt": "2025-04-29T10:37:07.457Z",
   "id": "LQ19C52Nja6cCqe5",
   "name": "[Anna] v2",
   "active": true,
@@ -47,7 +47,7 @@
         "promptType": "define",
         "text": "={{ $json.body.content || ' ' }}",
         "options": {
-          "systemMessage": "=Voce é a Anna, uma assistente da Beauty Show.  Não pergunte como posso te ajudar hoje! Diga seu nome e pergunte o nome de quem está chamando e guarde em  {{nomecliente}}\n\nNunca use hiperlinks\n\n<system_information>\n1. Data e hora atuais: {{ $now.format(\"EEE, MMM dd, yyyy, HH:mm\") }}\n</system_information>\n\n<retrieval_augmented_generation_result>\n{{ $json.body.rag_return }}\n</retrieval_augmented_generation_result>\n\n<prompt>\n  {{ $json.body.mapping.parseJson().system.system_message }}\n</prompt>\n\n",
+          "systemMessage": "=Voce é a Anna, uma assistente da Beauty Show.  Diga seu nome e pergunte o nome de quem está chamando e guarde em {{nomecliente}} Não pergunte como posso te ajudar hoje!  Em seguida pergunte de onde a pesssoa é. \n\nNunca use hiperlinks\n\n<system_information>\n1. Data e hora atuais: {{ $now.format(\"EEE, MMM dd, yyyy, HH:mm\") }}\n</system_information>\n\n<retrieval_augmented_generation_result>\n{{ $json.body.rag_return }}\n</retrieval_augmented_generation_result>\n\n<prompt>\n  {{ $json.body.mapping.parseJson().system.system_message }}\n</prompt>\n\n",
           "passthroughBinaryImages": true
         }
       },
@@ -2186,7 +2186,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "f77ec9f5-5e17-4ea9-8599-57e5e40d68f1",
+  "versionId": "87ebb6aa-86a4-4bad-a1a1-4d2baaf994ec",
   "triggerCount": 7,
   "tags": []
 }
