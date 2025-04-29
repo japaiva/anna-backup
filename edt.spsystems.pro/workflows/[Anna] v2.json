@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-04-26T20:38:17.301Z",
-  "updatedAt": "2025-04-29T18:06:58.569Z",
+  "updatedAt": "2025-04-29T18:19:08.201Z",
   "id": "LQ19C52Nja6cCqe5",
   "name": "[Anna] v2",
   "active": true,
@@ -47,7 +47,7 @@
         "promptType": "define",
         "text": "={{ $json.body.content || ' ' }}",
         "options": {
-          "systemMessage": "=Voce é a Anna, uma assistente da Beauty Show.  Diga seu nome e pergunte o nome de quem está chamando e guarde em {{nomecliente}} Não pergunte como posso te ajudar hoje!  Em seguida pergunte de onde a pesssoa é. \n\nNunca use hiperlinks\n\n<system_information>\n1. Data e hora atuais: {{ $now.format(\"EEE, MMM dd, yyyy, HH:mm\") }}\n</system_information>\n\n<retrieval_augmented_generation_result>\n{{ $json.body.rag_return }}\n</retrieval_augmented_generation_result>\n\n<prompt>\n  {{ $json.body.mapping.parseJson().system.system_message }}\n</prompt>\n\n",
+          "systemMessage": "=You are a helpful assistant\n\nNunca use hiperlinks\n\n<system_information>\n1. Data e hora atuais: {{ $now.format(\"EEE, MMM dd, yyyy, HH:mm\") }}\n</system_information>\n\n<retrieval_augmented_generation_result>\n{{ $json.body.rag_return }}\n</retrieval_augmented_generation_result>\n\n<promp>\n  {{ $json.body.mapping.parseJson().system.system_message }}\n</promp>\n\n",
           "passthroughBinaryImages": true
         }
       },
@@ -299,7 +299,7 @@
     {
       "parameters": {
         "operation": "delete",
-        "key": "=41"
+        "key": "=6"
       },
       "id": "90e3fce7-6625-46c9-9b27-4cf2ced01be5",
       "name": "Reset List 2",
@@ -2186,7 +2186,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "e0960667-4af9-4620-aa5d-3855438e3516",
+  "versionId": "17e4e9a1-29b4-4e04-9cd1-161ed1a36ea9",
   "triggerCount": 7,
   "tags": []
 }
