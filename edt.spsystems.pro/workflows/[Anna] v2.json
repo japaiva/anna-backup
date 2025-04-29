@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-04-26T20:38:17.301Z",
-  "updatedAt": "2025-04-29T18:19:08.201Z",
+  "updatedAt": "2025-04-29T19:48:01.624Z",
   "id": "LQ19C52Nja6cCqe5",
   "name": "[Anna] v2",
   "active": true,
@@ -47,7 +47,7 @@
         "promptType": "define",
         "text": "={{ $json.body.content || ' ' }}",
         "options": {
-          "systemMessage": "=You are a helpful assistant\n\nNunca use hiperlinks\n\n<system_information>\n1. Data e hora atuais: {{ $now.format(\"EEE, MMM dd, yyyy, HH:mm\") }}\n</system_information>\n\n<retrieval_augmented_generation_result>\n{{ $json.body.rag_return }}\n</retrieval_augmented_generation_result>\n\n<promp>\n  {{ $json.body.mapping.parseJson().system.system_message }}\n</promp>\n\n",
+          "systemMessage": "=Voce é uma assistente prestativa, a Anna da Beauty Show.\nCaso nao saiba, pergunte no inicio o nome do cliente em seguida de onde ele é.\nSeja educada, peça sempre por favor.\n\n\nNunca use hiperlinks\n\n<system_information>\n1. Data e hora atuais: {{ $now.format(\"EEE, MMM dd, yyyy, HH:mm\") }}\n</system_information>\n\n<retrieval_augmented_generation_result>\n{{ $json.body.rag_return }}\n</retrieval_augmented_generation_result>\n\n<promp>\n  {{ $json.body.mapping.parseJson().system.system_message }}\n</promp>\n\n",
           "passthroughBinaryImages": true
         }
       },
@@ -2186,7 +2186,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "17e4e9a1-29b4-4e04-9cd1-161ed1a36ea9",
+  "versionId": "37d4f3d2-b969-42e3-8fc1-456a7506d23c",
   "triggerCount": 7,
   "tags": []
 }
