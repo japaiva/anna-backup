@@ -1665,6 +1665,10 @@
               "value": "nvidia/llama-3.3-nemotron-super-49b-v1:free"
             },
             {
+              "text": "NVIDIA: Llama 3.3 Nemotron Super 49B v1",
+              "value": "nvidia/llama-3.3-nemotron-super-49b-v1"
+            },
+            {
               "text": "NVIDIA: Llama 3.1 Nemotron Ultra 253B v1 (free)",
               "value": "nvidia/llama-3.1-nemotron-ultra-253b-v1:free"
             },
