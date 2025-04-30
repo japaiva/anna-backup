@@ -1621,6 +1621,10 @@
               "value": "shisa-ai/shisa-v2-llama3.3-70b:free"
             },
             {
+              "text": "Qwen: Qwen2.5 Coder 7B Instruct",
+              "value": "qwen/qwen2.5-coder-7b-instruct"
+            },
+            {
               "text": "OpenAI: GPT-4.1",
               "value": "openai/gpt-4.1"
             },
@@ -2991,20 +2995,20 @@
               "value": "eleven_flash_v2"
             },
             {
-              "text": "Eleven English v1",
-              "value": "eleven_monolingual_v1"
-            },
-            {
-              "text": "Eleven Multilingual v1",
-              "value": "eleven_multilingual_v1"
-            },
-            {
               "text": "Eleven Multilingual v2",
               "value": "eleven_multilingual_sts_v2"
             },
             {
               "text": "Eleven English v2",
               "value": "eleven_english_sts_v2"
+            },
+            {
+              "text": "Eleven Multilingual v1",
+              "value": "eleven_multilingual_v1"
+            },
+            {
+              "text": "Eleven English v1",
+              "value": "eleven_monolingual_v1"
             }
           ]
         },
