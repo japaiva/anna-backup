@@ -2593,6 +2593,10 @@
               "value": "mistralai/mistral-large"
             },
             {
+              "text": "Google: Gemma 7B",
+              "value": "google/gemma-7b-it"
+            },
+            {
               "text": "OpenAI: GPT-3.5 Turbo (older v0613)",
               "value": "openai/gpt-3.5-turbo-0613"
             },
@@ -2979,20 +2983,20 @@
               "value": "eleven_flash_v2"
             },
             {
-              "text": "Eleven Multilingual v1",
-              "value": "eleven_multilingual_v1"
-            },
-            {
-              "text": "Eleven English v2",
-              "value": "eleven_english_sts_v2"
-            },
-            {
               "text": "Eleven English v1",
               "value": "eleven_monolingual_v1"
             },
             {
               "text": "Eleven Multilingual v2",
               "value": "eleven_multilingual_sts_v2"
+            },
+            {
+              "text": "Eleven English v2",
+              "value": "eleven_english_sts_v2"
+            },
+            {
+              "text": "Eleven Multilingual v1",
+              "value": "eleven_multilingual_v1"
             }
           ]
         },
