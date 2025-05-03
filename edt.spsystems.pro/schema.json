@@ -1793,10 +1793,6 @@
               "value": "open-r1/olympiccoder-32b:free"
             },
             {
-              "text": "SteelSkull: L3.3 Electra R1 70B",
-              "value": "steelskull/l3.3-electra-r1-70b"
-            },
-            {
               "text": "Google: Gemma 3 1B (free)",
               "value": "google/gemma-3-1b-it:free"
             },
@@ -1851,10 +1847,6 @@
             {
               "text": "TheDrummer: Anubis Pro 105B V1",
               "value": "thedrummer/anubis-pro-105b-v1"
-            },
-            {
-              "text": "LatitudeGames: Wayfarer Large 70B Llama 3.3",
-              "value": "latitudegames/wayfarer-large-70b-llama-3.3"
             },
             {
               "text": "TheDrummer: Skyfall 36B V2",
