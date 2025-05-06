@@ -1634,7 +1634,7 @@
             },
             {
               "text": "Google: Gemini 2.5 Pro Preview",
-              "value": "google/gemini-2.5-pro-preview-03-25"
+              "value": "google/gemini-2.5-pro-preview"
             },
             {
               "text": "THUDM: GLM Z1 32B (free)",
@@ -3027,12 +3027,12 @@
               "value": "eleven_monolingual_v1"
             },
             {
-              "text": "Eleven Multilingual v2",
-              "value": "eleven_multilingual_sts_v2"
-            },
-            {
               "text": "Eleven Multilingual v1",
               "value": "eleven_multilingual_v1"
+            },
+            {
+              "text": "Eleven Multilingual v2",
+              "value": "eleven_multilingual_sts_v2"
             },
             {
               "text": "Eleven English v2",
