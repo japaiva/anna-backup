@@ -2373,10 +2373,6 @@
               "value": "google/gemini-flash-1.5-8b-exp"
             },
             {
-              "text": "AI21: Jamba 1.5 Mini",
-              "value": "ai21/jamba-1-5-mini"
-            },
-            {
               "text": "Microsoft: Phi-3.5 Mini 128K Instruct",
               "value": "microsoft/phi-3.5-mini-128k-instruct"
             },
@@ -3019,20 +3015,20 @@
               "value": "eleven_flash_v2"
             },
             {
-              "text": "Eleven Multilingual v1",
-              "value": "eleven_multilingual_v1"
-            },
-            {
               "text": "Eleven English v2",
               "value": "eleven_english_sts_v2"
             },
             {
-              "text": "Eleven English v1",
-              "value": "eleven_monolingual_v1"
+              "text": "Eleven Multilingual v1",
+              "value": "eleven_multilingual_v1"
             },
             {
               "text": "Eleven Multilingual v2",
               "value": "eleven_multilingual_sts_v2"
+            },
+            {
+              "text": "Eleven English v1",
+              "value": "eleven_monolingual_v1"
             }
           ]
         },
