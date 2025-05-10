@@ -2325,6 +2325,10 @@
               "value": "qwen/qwen-2.5-72b-instruct"
             },
             {
+              "text": "Qwen: Qwen2.5-VL 72B Instruct",
+              "value": "qwen/qwen-2.5-vl-72b-instruct"
+            },
+            {
               "text": "NeverSleep: Lumimaid v0.2 8B",
               "value": "neversleep/llama-3.1-lumimaid-8b"
             },
@@ -3011,20 +3015,20 @@
               "value": "eleven_flash_v2"
             },
             {
-              "text": "Eleven Multilingual v1",
-              "value": "eleven_multilingual_v1"
-            },
-            {
-              "text": "Eleven English v2",
-              "value": "eleven_english_sts_v2"
-            },
-            {
               "text": "Eleven English v1",
               "value": "eleven_monolingual_v1"
             },
             {
               "text": "Eleven Multilingual v2",
               "value": "eleven_multilingual_sts_v2"
+            },
+            {
+              "text": "Eleven Multilingual v1",
+              "value": "eleven_multilingual_v1"
+            },
+            {
+              "text": "Eleven English v2",
+              "value": "eleven_english_sts_v2"
             }
           ]
         },
