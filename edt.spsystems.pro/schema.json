@@ -2149,16 +2149,8 @@
               "value": "amazon/nova-pro-v1"
             },
             {
-              "text": "Qwen: QwQ 32B Preview (free)",
-              "value": "qwen/qwq-32b-preview:free"
-            },
-            {
               "text": "Qwen: QwQ 32B Preview",
               "value": "qwen/qwq-32b-preview"
-            },
-            {
-              "text": "Google: LearnLM 1.5 Pro Experimental (free)",
-              "value": "google/learnlm-1.5-pro-experimental:free"
             },
             {
               "text": "EVA Qwen2.5 72B",
@@ -3015,12 +3007,12 @@
               "value": "eleven_monolingual_v1"
             },
             {
-              "text": "Eleven Multilingual v1",
-              "value": "eleven_multilingual_v1"
-            },
-            {
               "text": "Eleven Multilingual v2",
               "value": "eleven_multilingual_sts_v2"
+            },
+            {
+              "text": "Eleven Multilingual v1",
+              "value": "eleven_multilingual_v1"
             }
           ]
         },
