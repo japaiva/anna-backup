@@ -1497,6 +1497,10 @@
           "allowOther": false,
           "choices": [
             {
+              "text": "Meta: Llama 3.3 8B Instruct (free)",
+              "value": "meta-llama/llama-3.3-8b-instruct:free"
+            },
+            {
               "text": "Nous: DeepHermes 3 Mistral 24B Preview (free)",
               "value": "nousresearch/deephermes-3-mistral-24b-preview:free"
             },
