@@ -2999,6 +2999,10 @@
               "value": "eleven_flash_v2"
             },
             {
+              "text": "Eleven English v2",
+              "value": "eleven_english_sts_v2"
+            },
+            {
               "text": "Eleven Multilingual v1",
               "value": "eleven_multilingual_v1"
             },
@@ -3009,10 +3013,6 @@
             {
               "text": "Eleven Multilingual v2",
               "value": "eleven_multilingual_sts_v2"
-            },
-            {
-              "text": "Eleven English v2",
-              "value": "eleven_english_sts_v2"
             }
           ]
         },
