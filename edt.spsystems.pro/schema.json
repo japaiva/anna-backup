@@ -2473,10 +2473,6 @@
               "value": "01-ai/yi-large"
             },
             {
-              "text": "AI21: Jamba Instruct",
-              "value": "ai21/jamba-instruct"
-            },
-            {
               "text": "Anthropic: Claude 3.5 Sonnet (2024-06-20) (self-moderated)",
               "value": "anthropic/claude-3.5-sonnet-20240620:beta"
             },
@@ -3003,20 +2999,20 @@
               "value": "eleven_flash_v2"
             },
             {
-              "text": "Eleven Multilingual v2",
-              "value": "eleven_multilingual_sts_v2"
-            },
-            {
               "text": "Eleven English v1",
               "value": "eleven_monolingual_v1"
             },
             {
-              "text": "Eleven English v2",
-              "value": "eleven_english_sts_v2"
+              "text": "Eleven Multilingual v2",
+              "value": "eleven_multilingual_sts_v2"
             },
             {
               "text": "Eleven Multilingual v1",
               "value": "eleven_multilingual_v1"
+            },
+            {
+              "text": "Eleven English v2",
+              "value": "eleven_english_sts_v2"
             }
           ]
         },
