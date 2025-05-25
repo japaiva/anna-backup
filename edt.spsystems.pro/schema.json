@@ -2205,7 +2205,7 @@
               "value": "eva-unit-01/eva-qwen-2.5-32b"
             },
             {
-              "text": "Unslopnemo 12B",
+              "text": "TheDrummer: UnslopNemo 12B",
               "value": "thedrummer/unslopnemo-12b"
             },
             {
@@ -2281,7 +2281,7 @@
               "value": "anthracite-org/magnum-v2-72b"
             },
             {
-              "text": "Rocinante 12B",
+              "text": "TheDrummer: Rocinante 12B",
               "value": "thedrummer/rocinante-12b"
             },
             {
@@ -2999,10 +2999,6 @@
               "value": "eleven_flash_v2"
             },
             {
-              "text": "Eleven English v1",
-              "value": "eleven_monolingual_v1"
-            },
-            {
               "text": "Eleven Multilingual v1",
               "value": "eleven_multilingual_v1"
             },
@@ -3013,6 +3009,10 @@
             {
               "text": "Eleven Multilingual v2",
               "value": "eleven_multilingual_sts_v2"
+            },
+            {
+              "text": "Eleven English v1",
+              "value": "eleven_monolingual_v1"
             }
           ]
         },
