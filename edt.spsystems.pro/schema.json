@@ -1953,10 +1953,6 @@
               "value": "anthropic/claude-3.7-sonnet"
             },
             {
-              "text": "Anthropic: Claude 3.7 Sonnet (thinking)",
-              "value": "anthropic/claude-3.7-sonnet:thinking"
-            },
-            {
               "text": "Anthropic: Claude 3.7 Sonnet (self-moderated)",
               "value": "anthropic/claude-3.7-sonnet:beta"
             },
