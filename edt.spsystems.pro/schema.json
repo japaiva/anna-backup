@@ -1497,6 +1497,10 @@
           "allowOther": false,
           "choices": [
             {
+              "text": "Google: Gemma 2 2B",
+              "value": "google/gemma-2b-it"
+            },
+            {
               "text": "DeepSeek: R1 0528 (free)",
               "value": "deepseek/deepseek-r1-0528:free"
             },
