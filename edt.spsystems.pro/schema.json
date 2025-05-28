@@ -1497,6 +1497,10 @@
           "allowOther": false,
           "choices": [
             {
+              "text": "DeepSeek: R1 0528 (free)",
+              "value": "deepseek/deepseek-r1-0528:free"
+            },
+            {
               "text": "DeepSeek: R1 0528",
               "value": "deepseek/deepseek-r1-0528"
             },
@@ -2991,12 +2995,12 @@
               "value": "eleven_flash_v2"
             },
             {
-              "text": "Eleven Multilingual v1",
-              "value": "eleven_multilingual_v1"
-            },
-            {
               "text": "Eleven English v2",
               "value": "eleven_english_sts_v2"
+            },
+            {
+              "text": "Eleven Multilingual v1",
+              "value": "eleven_multilingual_v1"
             },
             {
               "text": "Eleven Multilingual v2",
