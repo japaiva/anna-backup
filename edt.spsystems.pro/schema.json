@@ -2461,10 +2461,6 @@
               "value": "mistralai/mistral-nemo"
             },
             {
-              "text": "Mistral: Codestral Mamba",
-              "value": "mistralai/codestral-mamba"
-            },
-            {
               "text": "OpenAI: GPT-4o-mini (2024-07-18)",
               "value": "openai/gpt-4o-mini-2024-07-18"
             },
@@ -3007,6 +3003,10 @@
               "value": "eleven_flash_v2"
             },
             {
+              "text": "Eleven English v1",
+              "value": "eleven_monolingual_v1"
+            },
+            {
               "text": "Eleven English v2",
               "value": "eleven_english_sts_v2"
             },
@@ -3017,10 +3017,6 @@
             {
               "text": "Eleven Multilingual v2",
               "value": "eleven_multilingual_sts_v2"
-            },
-            {
-              "text": "Eleven English v1",
-              "value": "eleven_monolingual_v1"
             }
           ]
         },
