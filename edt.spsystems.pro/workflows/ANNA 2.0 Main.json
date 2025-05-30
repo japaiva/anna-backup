@@ -4,6 +4,7 @@
   "id": "h8etxSXulQnJdVdL",
   "name": "ANNA 2.0 Main",
   "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
