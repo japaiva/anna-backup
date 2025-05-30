@@ -4,6 +4,7 @@
   "id": "FkIDv53LMFL8Zomi",
   "name": "jobber_visits_sync  v9 OAuth2 API",
   "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
