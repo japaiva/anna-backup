@@ -4,6 +4,7 @@
   "id": "GmwTJFzgoUXIdc90",
   "name": "Integração Chatwoot",
   "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
