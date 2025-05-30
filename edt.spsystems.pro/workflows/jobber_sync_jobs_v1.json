@@ -4,6 +4,7 @@
   "id": "Bcrp6fdBBev8L4BZ",
   "name": "jobber_sync_jobs_v1",
   "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
