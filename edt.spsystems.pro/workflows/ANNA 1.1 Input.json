@@ -4,6 +4,7 @@
   "id": "J91RqSoW11b07bal",
   "name": "ANNA 1.1 Input",
   "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
