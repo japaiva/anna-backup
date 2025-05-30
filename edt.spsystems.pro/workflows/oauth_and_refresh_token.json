@@ -4,6 +4,7 @@
   "id": "S4nXaKRsWaLAJyK7",
   "name": "oauth_and_refresh_token",
   "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
