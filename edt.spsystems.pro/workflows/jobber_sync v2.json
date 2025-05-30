@@ -4,6 +4,7 @@
   "id": "Rtt4hmRsTow63VQA",
   "name": "jobber_sync v2",
   "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
