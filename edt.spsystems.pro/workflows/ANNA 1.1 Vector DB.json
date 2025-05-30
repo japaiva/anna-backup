@@ -4,6 +4,7 @@
   "id": "IlNuVaH69CuSnKfr",
   "name": "ANNA 1.1 Vector DB",
   "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
