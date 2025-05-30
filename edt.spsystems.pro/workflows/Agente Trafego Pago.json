@@ -4,6 +4,7 @@
   "id": "c0RjSakTToY00xoA",
   "name": "Agente Trafego Pago",
   "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
