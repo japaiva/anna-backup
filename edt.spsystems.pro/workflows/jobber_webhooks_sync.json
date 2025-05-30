@@ -4,6 +4,7 @@
   "id": "e248KiXkjcuaF0TA",
   "name": "jobber_webhooks_sync",
   "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
