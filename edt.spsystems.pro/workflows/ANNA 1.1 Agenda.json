@@ -4,6 +4,7 @@
   "id": "5FtfvelIJXa51oye",
   "name": "ANNA 1.1 Agenda",
   "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
