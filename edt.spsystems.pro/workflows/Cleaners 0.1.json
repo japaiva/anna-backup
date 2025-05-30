@@ -4,6 +4,7 @@
   "id": "DH03WkZoYrx9GUQU",
   "name": "Cleaners 0.1",
   "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
