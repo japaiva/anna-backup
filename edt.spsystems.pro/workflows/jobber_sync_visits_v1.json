@@ -4,6 +4,7 @@
   "id": "HQqdPEqtLURqg4GN",
   "name": "jobber_sync_visits_v1",
   "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
