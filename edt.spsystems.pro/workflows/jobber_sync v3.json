@@ -4,6 +4,7 @@
   "id": "eNEBrtryVBHsJPIp",
   "name": "jobber_sync v3",
   "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
