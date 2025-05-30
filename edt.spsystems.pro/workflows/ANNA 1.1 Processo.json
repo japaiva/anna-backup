@@ -4,6 +4,7 @@
   "id": "T2c8NpoSKSRIw76J",
   "name": "ANNA 1.1 Processo",
   "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
