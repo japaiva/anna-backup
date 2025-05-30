@@ -4,6 +4,7 @@
   "id": "tougjfavSC2ieAN4",
   "name": "jobber_visits_sync  v8",
   "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
