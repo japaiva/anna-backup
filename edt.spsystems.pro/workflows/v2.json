@@ -1,10 +1,10 @@
 {
   "createdAt": "2025-05-30T17:30:04.275Z",
-  "updatedAt": "2025-05-30T17:30:04.275Z",
+  "updatedAt": "2025-05-31T10:52:31.114Z",
   "id": "eRXv6qrZOWtVjs2d",
   "name": "v2",
   "active": false,
-  "isArchived": false,
+  "isArchived": true,
   "nodes": [
     {
       "parameters": {
@@ -2905,7 +2905,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "3ca449cf-75b8-419d-aa0f-1beb8b246e6d",
+  "versionId": "ac7c2ce5-0666-427e-8835-7808220b0806",
   "triggerCount": 0,
   "tags": [
     {
