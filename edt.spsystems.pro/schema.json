@@ -2745,14 +2745,6 @@
               "value": "openai/gpt-3.5-turbo-16k"
             },
             {
-              "text": "OpenAI: GPT-4 32k",
-              "value": "openai/gpt-4-32k"
-            },
-            {
-              "text": "OpenAI: GPT-4 32k (older v0314)",
-              "value": "openai/gpt-4-32k-0314"
-            },
-            {
               "text": "Mancer: Weaver (alpha)",
               "value": "mancer/weaver"
             },
@@ -3019,10 +3011,6 @@
               "value": "eleven_flash_v2"
             },
             {
-              "text": "Eleven English v2",
-              "value": "eleven_english_sts_v2"
-            },
-            {
               "text": "Eleven Multilingual v2",
               "value": "eleven_multilingual_sts_v2"
             },
@@ -3033,6 +3021,10 @@
             {
               "text": "Eleven Multilingual v1",
               "value": "eleven_multilingual_v1"
+            },
+            {
+              "text": "Eleven English v2",
+              "value": "eleven_english_sts_v2"
             }
           ]
         },
