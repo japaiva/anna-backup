@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-04-26T20:38:17.301Z",
-  "updatedAt": "2025-06-09T21:22:14.447Z",
+  "updatedAt": "2025-06-09T21:32:50.506Z",
   "id": "LQ19C52Nja6cCqe5",
   "name": "[Anna] v2",
   "active": true,
@@ -1544,7 +1544,7 @@
     {
       "parameters": {
         "description": "Ferramenta para transferir conversas para atendimento humano especializado. Use quando: cliente pedir para falar com gerente/supervisor, demonstrar insatisfação grave ou reclamação, relatar problemas com compras anteriores, solicitar reembolso/estorno, ou quando a questão fugir do escopo do Beauty Show. Envia mensagem ao cliente, cria nota interna para o agente e altera status da conversa.",
-        "jsCode": "const axios = require('axios');\n\ntry {\n  // Obter dados do mapping\n  const mapping = JSON.parse($('Core Input').item.json.body.mapping);\n  const { chatwoot, system } = mapping;\n  \n  // URLs do Chatwoot\n  const baseUrl = `http://${system.chatwoot_service}:3000/api/v1/accounts/${chatwoot.account_id}/conversations/${chatwoot.conversation_id}`;\n  const messagesUrl = `${baseUrl}/messages`;\n  const statusUrl = `${baseUrl}/toggle_status`;\n  \n  const headers = {\n    'api_access_token': chatwoot.bot_token,\n    'Content-Type': 'application/json'\n  };\n  \n  // 1. Enviar mensagem ao cliente\n  await axios.post(messagesUrl, {\n    content: \"Perfeito! Vou transferir você para um de nossos atendentes especializados. Um momento, por favor! 😊\",\n    message_type: \"outgoing\"\n  }, { headers });\n  \n  // 2. Enviar nota interna\n  const noteContent = `📋 TRANSBORDO AUTOMÁTICO - Anna (IA)\n\n🔹 Motivo: ${query.reason}\n🔹 Resumo: ${query.summary || 'Cliente necessita atendimento humano especializado'}\n🔹 Cliente: ${chatwoot.user_name}\n🔹 Data/Hora: ${new Date().toLocaleString('pt-BR', {timeZone: 'America/Sao_Paulo'})}\n\nConversa transferida automaticamente pela IA.`;\n\n  await axios.post(messagesUrl, {\n    content: noteContent,\n    message_type: \"outgoing\",\n    private: true\n  }, { headers });\n  \n  // 3. Aguardar um pouco\n  await new Promise(resolve => setTimeout(resolve, 1000));\n  \n  // 4. Mudar status para \"open\"\n  await axios.post(statusUrl, {\n    status: \"open\"\n  }, { headers });\n  \n  return JSON.stringify({\n    success: true,\n    message: \"Conversa transferida com sucesso para atendimento humano\"\n  });\n  \n} catch (error) {\n  return JSON.stringify({\n    success: false,\n    error: `Erro no transbordo: ${error.message}`\n  });\n}",
+        "jsCode": "const axios = require('axios');\n\ntry {\n  // Obter dados do mapping\n  const mapping = JSON.parse($('Core Input').item.json.body.mapping);\n  const { chatwoot, system } = mapping;\n  \n  // URLs do Chatwoot (usando a mesma URL do Chatwoot Output)\n  const chatwootUrl = `https://chat.spsystems.pro/api/v1/accounts/${chatwoot.account_id}/conversations/${chatwoot.conversation_id}`;\n  const statusUrl = `${chatwootUrl}/toggle_status`;\n  const messagesUrl = `${chatwootUrl}/messages`;\n  \n  const headers = {\n    'api_access_token': chatwoot.bot_token,\n    'Content-Type': 'application/json'\n  };\n  \n  // 1. Enviar nota interna primeiro\n  const noteContent = `📋 TRANSBORDO AUTOMÁTICO - Anna (IA)\n\n🔹 Motivo: ${query.reason}\n🔹 Resumo: ${query.summary || 'Cliente necessita atendimento humano especializado'}\n🔹 Cliente: ${chatwoot.user_name}\n🔹 Data/Hora: ${new Date().toLocaleString('pt-BR', {timeZone: 'America/Sao_Paulo'})}\n\nConversa transferida automaticamente pela IA.`;\n\n  await axios.post(messagesUrl, {\n    content: noteContent,\n    message_type: \"outgoing\",\n    private: true\n  }, { headers });\n  \n  // 2. Aguardar um pouco\n  await new Promise(resolve => setTimeout(resolve, 1000));\n  \n  // 3. Mudar status para \"open\"\n  await axios.post(statusUrl, {\n    status: \"open\"\n  }, { headers });\n  \n  // 4. Retornar mensagem para o cliente (que será enviada pelo fluxo normal)\n  return JSON.stringify({\n    success: true,\n    message: \"Perfeito! Transferi você para um de nossos atendentes especializados que te ajudará em breve! 😊\"\n  });\n  \n} catch (error) {\n  return JSON.stringify({\n    success: false,\n    error: `Erro no transbordo: ${error.message}`\n  });\n}",
         "specifyInputSchema": true,
         "schemaType": "manual"
       },
@@ -2214,7 +2214,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "d4d98963-f414-41cd-b2be-51bca6b9809f",
+  "versionId": "cd75ae42-e9a8-46cb-b4c9-299ddb43bbc2",
   "triggerCount": 7,
   "tags": []
 }
