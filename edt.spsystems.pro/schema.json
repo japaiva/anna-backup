@@ -1837,10 +1837,6 @@
               "value": "scb10x/llama3.1-typhoon2-70b-instruct"
             },
             {
-              "text": "Qwen: Qwen2.5 VL 3B Instruct (free)",
-              "value": "qwen/qwen2.5-vl-3b-instruct:free"
-            },
-            {
               "text": "Google: Gemini 2.5 Pro Experimental",
               "value": "google/gemini-2.5-pro-exp-03-25"
             },
@@ -1967,10 +1963,6 @@
             {
               "text": "Qwen: QwQ 32B",
               "value": "qwen/qwq-32b"
-            },
-            {
-              "text": "Moonshot AI: Moonlight 16B A3B Instruct (free)",
-              "value": "moonshotai/moonlight-16b-a3b-instruct:free"
             },
             {
               "text": "Nous: DeepHermes 3 Llama 3 8B Preview (free)",
@@ -3019,16 +3011,16 @@
               "value": "eleven_flash_v2"
             },
             {
+              "text": "Eleven English v1",
+              "value": "eleven_monolingual_v1"
+            },
+            {
               "text": "Eleven English v2",
               "value": "eleven_english_sts_v2"
             },
             {
               "text": "Eleven Multilingual v2",
               "value": "eleven_multilingual_sts_v2"
-            },
-            {
-              "text": "Eleven English v1",
-              "value": "eleven_monolingual_v1"
             },
             {
               "text": "Eleven Multilingual v1",
