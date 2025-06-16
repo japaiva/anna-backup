@@ -2765,10 +2765,6 @@
               "value": "gryphe/mythomax-l2-13b"
             },
             {
-              "text": "Meta: Llama 2 70B Chat",
-              "value": "meta-llama/llama-2-70b-chat"
-            },
-            {
               "text": "OpenAI: GPT-3.5 Turbo",
               "value": "openai/gpt-3.5-turbo"
             },
@@ -3011,16 +3007,16 @@
               "value": "eleven_flash_v2"
             },
             {
+              "text": "Eleven English v1",
+              "value": "eleven_monolingual_v1"
+            },
+            {
               "text": "Eleven English v2",
               "value": "eleven_english_sts_v2"
             },
             {
               "text": "Eleven Multilingual v2",
               "value": "eleven_multilingual_sts_v2"
-            },
-            {
-              "text": "Eleven English v1",
-              "value": "eleven_monolingual_v1"
             },
             {
               "text": "Eleven Multilingual v1",
