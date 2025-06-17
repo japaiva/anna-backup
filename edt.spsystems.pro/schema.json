@@ -1497,6 +1497,10 @@
           "allowOther": false,
           "choices": [
             {
+              "text": "Google: Gemini 2.5 Flash Lite Preview 06-17",
+              "value": "google/gemini-2.5-flash-lite-preview-06-17"
+            },
+            {
               "text": "Google: Gemini 2.5 Flash",
               "value": "google/gemini-2.5-flash"
             },
@@ -3007,20 +3011,20 @@
               "value": "eleven_flash_v2"
             },
             {
-              "text": "Eleven English v2",
-              "value": "eleven_english_sts_v2"
+              "text": "Eleven Multilingual v1",
+              "value": "eleven_multilingual_v1"
             },
             {
               "text": "Eleven English v1",
               "value": "eleven_monolingual_v1"
             },
             {
-              "text": "Eleven Multilingual v2",
-              "value": "eleven_multilingual_sts_v2"
+              "text": "Eleven English v2",
+              "value": "eleven_english_sts_v2"
             },
             {
-              "text": "Eleven Multilingual v1",
-              "value": "eleven_multilingual_v1"
+              "text": "Eleven Multilingual v2",
+              "value": "eleven_multilingual_sts_v2"
             }
           ]
         },
