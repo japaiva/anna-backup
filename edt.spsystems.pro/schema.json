@@ -1957,10 +1957,6 @@
               "value": "perplexity/sonar-deep-research"
             },
             {
-              "text": "DeepSeek: DeepSeek R1 Zero (free)",
-              "value": "deepseek/deepseek-r1-zero:free"
-            },
-            {
               "text": "Qwen: QwQ 32B (free)",
               "value": "qwen/qwq-32b:free"
             },
@@ -2431,10 +2427,6 @@
             {
               "text": "OpenAI: GPT-4o (2024-08-06)",
               "value": "openai/gpt-4o-2024-08-06"
-            },
-            {
-              "text": "Meta: Llama 3.1 405B (base) (free)",
-              "value": "meta-llama/llama-3.1-405b:free"
             },
             {
               "text": "Meta: Llama 3.1 405B (base)",
@@ -3011,16 +3003,16 @@
               "value": "eleven_multilingual_sts_v2"
             },
             {
-              "text": "Eleven Multilingual v1",
-              "value": "eleven_multilingual_v1"
-            },
-            {
               "text": "Eleven English v1",
               "value": "eleven_monolingual_v1"
             },
             {
               "text": "Eleven English v2",
               "value": "eleven_english_sts_v2"
+            },
+            {
+              "text": "Eleven Multilingual v1",
+              "value": "eleven_multilingual_v1"
             }
           ]
         },
