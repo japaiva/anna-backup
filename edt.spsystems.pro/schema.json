@@ -1617,10 +1617,6 @@
               "value": "meta-llama/llama-3.3-8b-instruct:free"
             },
             {
-              "text": "Nous: DeepHermes 3 Mistral 24B Preview (free)",
-              "value": "nousresearch/deephermes-3-mistral-24b-preview:free"
-            },
-            {
               "text": "Mistral: Mistral Medium 3",
               "value": "mistralai/mistral-medium-3"
             },
@@ -1727,10 +1723,6 @@
             {
               "text": "Qwen: Qwen3 235B A22B",
               "value": "qwen/qwen3-235b-a22b"
-            },
-            {
-              "text": "TNG: DeepSeek R1T Chimera (free)",
-              "value": "tngtech/deepseek-r1t-chimera:free"
             },
             {
               "text": "THUDM: GLM Z1 Rumination 32B ",
@@ -1899,14 +1891,6 @@
             {
               "text": "Mistral: Mistral Small 3.1 24B",
               "value": "mistralai/mistral-small-3.1-24b-instruct"
-            },
-            {
-              "text": "OlympicCoder 32B (free)",
-              "value": "open-r1/olympiccoder-32b:free"
-            },
-            {
-              "text": "Google: Gemma 3 1B (free)",
-              "value": "google/gemma-3-1b-it:free"
             },
             {
               "text": "Google: Gemma 3 4B (free)",
@@ -2411,10 +2395,6 @@
             {
               "text": "Cohere: Command R (08-2024)",
               "value": "cohere/command-r-08-2024"
-            },
-            {
-              "text": "Qwen: Qwen2.5-VL 7B Instruct (free)",
-              "value": "qwen/qwen-2.5-vl-7b-instruct:free"
             },
             {
               "text": "Qwen: Qwen2.5-VL 7B Instruct",
@@ -3023,12 +3003,12 @@
               "value": "eleven_flash_v2"
             },
             {
-              "text": "Eleven Multilingual v1",
-              "value": "eleven_multilingual_v1"
-            },
-            {
               "text": "Eleven Multilingual v2",
               "value": "eleven_multilingual_sts_v2"
+            },
+            {
+              "text": "Eleven Multilingual v1",
+              "value": "eleven_multilingual_v1"
             },
             {
               "text": "Eleven English v2",
