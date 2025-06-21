@@ -1729,6 +1729,10 @@
               "value": "qwen/qwen3-235b-a22b"
             },
             {
+              "text": "TNG: DeepSeek R1T Chimera (free)",
+              "value": "tngtech/deepseek-r1t-chimera:free"
+            },
+            {
               "text": "THUDM: GLM Z1 Rumination 32B ",
               "value": "thudm/glm-z1-rumination-32b"
             },
@@ -3007,10 +3011,6 @@
               "value": "eleven_flash_v2"
             },
             {
-              "text": "Eleven Multilingual v2",
-              "value": "eleven_multilingual_sts_v2"
-            },
-            {
               "text": "Eleven English v1",
               "value": "eleven_monolingual_v1"
             },
@@ -3021,6 +3021,10 @@
             {
               "text": "Eleven Multilingual v1",
               "value": "eleven_multilingual_v1"
+            },
+            {
+              "text": "Eleven Multilingual v2",
+              "value": "eleven_multilingual_sts_v2"
             }
           ]
         },
