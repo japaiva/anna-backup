@@ -1501,12 +1501,12 @@
               "value": "mistralai/mistral-small-3.2-24b-instruct:free"
             },
             {
-              "text": "MiniMax: MiniMax M1",
-              "value": "minimax/minimax-m1"
-            },
-            {
               "text": "MiniMax: MiniMax M1 (extended)",
               "value": "minimax/minimax-m1:extended"
+            },
+            {
+              "text": "MiniMax: MiniMax M1",
+              "value": "minimax/minimax-m1"
             },
             {
               "text": "Google: Gemini 2.5 Flash Lite Preview 06-17",
@@ -3011,16 +3011,16 @@
               "value": "eleven_flash_v2"
             },
             {
-              "text": "Eleven Multilingual v1",
-              "value": "eleven_multilingual_v1"
-            },
-            {
               "text": "Eleven English v1",
               "value": "eleven_monolingual_v1"
             },
             {
               "text": "Eleven Multilingual v2",
               "value": "eleven_multilingual_sts_v2"
+            },
+            {
+              "text": "Eleven Multilingual v1",
+              "value": "eleven_multilingual_v1"
             },
             {
               "text": "Eleven English v2",
