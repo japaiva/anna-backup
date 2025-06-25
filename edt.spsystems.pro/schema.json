@@ -2657,10 +2657,6 @@
               "value": "nousresearch/nous-hermes-2-mixtral-8x7b-dpo"
             },
             {
-              "text": "Mistral Medium",
-              "value": "mistralai/mistral-medium"
-            },
-            {
               "text": "Mistral Small",
               "value": "mistralai/mistral-small"
             },
@@ -2983,20 +2979,20 @@
               "value": "eleven_flash_v2"
             },
             {
-              "text": "Eleven Multilingual v1",
-              "value": "eleven_multilingual_v1"
+              "text": "Eleven Multilingual v2",
+              "value": "eleven_multilingual_sts_v2"
             },
             {
               "text": "Eleven English v2",
               "value": "eleven_english_sts_v2"
             },
             {
-              "text": "Eleven Multilingual v2",
-              "value": "eleven_multilingual_sts_v2"
-            },
-            {
               "text": "Eleven English v1",
               "value": "eleven_monolingual_v1"
+            },
+            {
+              "text": "Eleven Multilingual v1",
+              "value": "eleven_multilingual_v1"
             }
           ]
         },
