@@ -1497,6 +1497,10 @@
           "allowOther": false,
           "choices": [
             {
+              "text": "Baidu: ERNIE 4.5 300B A47B ",
+              "value": "baidu/ernie-4.5-300b-a47b"
+            },
+            {
               "text": "TheDrummer: Anubis 70B V1.1",
               "value": "thedrummer/anubis-70b-v1.1"
             },
@@ -2995,20 +2999,20 @@
               "value": "eleven_flash_v2"
             },
             {
-              "text": "Eleven English v1",
-              "value": "eleven_monolingual_v1"
+              "text": "Eleven Multilingual v1",
+              "value": "eleven_multilingual_v1"
             },
             {
-              "text": "Eleven Multilingual v2",
-              "value": "eleven_multilingual_sts_v2"
+              "text": "Eleven English v1",
+              "value": "eleven_monolingual_v1"
             },
             {
               "text": "Eleven English v2",
               "value": "eleven_english_sts_v2"
             },
             {
-              "text": "Eleven Multilingual v1",
-              "value": "eleven_multilingual_v1"
+              "text": "Eleven Multilingual v2",
+              "value": "eleven_multilingual_sts_v2"
             }
           ]
         },
